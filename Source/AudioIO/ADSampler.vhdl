@@ -26,7 +26,18 @@ entity ADSampler is
 end entity ; -- ADSampler
 
 architecture arch of ADSampler is
-	type state_type is (config, sample);
+	-- Address to the value of the first port A/D converter
+	constant address_input : std_logic_vector(6 downto 0) := x"10";
+
+	-- Address to the flag register
+	constant address_flags : std_logic_vector(6 downto 0) := x"3F";
+
+	-- ADdress to config registers
+	constant address_config0 : std_logic_vector(6 downto 0) := x"40";
+	constant address_config1 : std_logic_vector(6 downto 0) := x"41";
+	constant address_config2 : std_logic_vector(6 downto 0) := x"42";
+
+	type state_type is (config_flags, config_r0, config_r1, config_r2, sample);
 
 	type reg_type is record
 		state : state_type;
@@ -52,9 +63,18 @@ begin
 	begin
 		v := r;
 
-		if(v.state = config) then
-			v.state := sample;
-		end if;
+		case r.state is
+			when config_flags =>
+				-- Config flags register;
+			when config_r0 =>
+				-- Config register 0
+			when config_r1 =>
+				-- Config register 1;
+			when config_r2 =>
+				-- Config register 2;
+			when others =>
+				-- Don't care
+		end case;
 
 		rin <= v;
 	end process ; -- comb_proc
