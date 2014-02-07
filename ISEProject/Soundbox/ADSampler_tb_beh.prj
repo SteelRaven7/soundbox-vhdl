@@ -1,0 +1,2 @@
+vhdl work "Source/AudioIO/ADSampler.vhdl"
+vhdl work "Source/AudioIO/ADSampler_tb.vhd"

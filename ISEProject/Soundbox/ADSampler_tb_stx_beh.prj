@@ -1,0 +1,2 @@
+vhdl isim_temp "Source/AudioIO/ADSampler.vhdl"
+vhdl isim_temp "Source/AudioIO/ADSampler_tb.vhd"

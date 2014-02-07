@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="C:/SoundboxProject/Source/soundbox-vhdl/ISEProject/Soundbox/ADSampler_tb_isim_beh.wdb" id="1" type="auto">
+         <top_modules>
+            <top_module name="adsampler_tb" />
+            <top_module name="numeric_std" />
+            <top_module name="std_logic_1164" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <WVObjectSize size="17" />
+   <wvobject fp_name="/adsampler_tb/drp_output" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">drp_output[15:0]</obj_property>
+      <obj_property name="ObjectShortName">drp_output[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/adsampler_tb/drp_dataready" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">drp_dataready</obj_property>
+      <obj_property name="ObjectShortName">drp_dataready</obj_property>
+   </wvobject>
+   <wvobject fp_name="/adsampler_tb/clk" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/adsampler_tb/reset" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">reset</obj_property>
+      <obj_property name="ObjectShortName">reset</obj_property>
+   </wvobject>
+   <wvobject fp_name="/adsampler_tb/drp_input" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">drp_input[15:0]</obj_property>
+      <obj_property name="ObjectShortName">drp_input[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/adsampler_tb/drp_address" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">drp_address[6:0]</obj_property>
+      <obj_property name="ObjectShortName">drp_address[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/adsampler_tb/drp_enable" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">drp_enable</obj_property>
+      <obj_property name="ObjectShortName">drp_enable</obj_property>
+   </wvobject>
+   <wvobject fp_name="/adsampler_tb/drp_writeenable" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">drp_writeenable</obj_property>
+      <obj_property name="ObjectShortName">drp_writeenable</obj_property>
+   </wvobject>
+   <wvobject fp_name="/adsampler_tb/drp_clk" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">drp_clk</obj_property>
+      <obj_property name="ObjectShortName">drp_clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/adsampler_tb/xadc_reset" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">xadc_reset</obj_property>
+      <obj_property name="ObjectShortName">xadc_reset</obj_property>
+   </wvobject>
+   <wvobject fp_name="/adsampler_tb/xadc_convst" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">xadc_convst</obj_property>
+      <obj_property name="ObjectShortName">xadc_convst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/adsampler_tb/xadc_convstclk" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">xadc_convstclk</obj_property>
+      <obj_property name="ObjectShortName">xadc_convstclk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/adsampler_tb/drp_clk_period" type="other" db_ref_id="1">
+      <obj_property name="ElementShortName">drp_clk_period</obj_property>
+      <obj_property name="ObjectShortName">drp_clk_period</obj_property>
+   </wvobject>
+   <wvobject fp_name="/adsampler_tb/xadc_convstclk_period" type="other" db_ref_id="1">
+      <obj_property name="ElementShortName">xadc_convstclk_period</obj_property>
+      <obj_property name="ObjectShortName">xadc_convstclk_period</obj_property>
+   </wvobject>
+   <wvobject fp_name="/adsampler_tb/clk_period" type="other" db_ref_id="1">
+      <obj_property name="ElementShortName">clk_period</obj_property>
+      <obj_property name="ObjectShortName">clk_period</obj_property>
+   </wvobject>
+   <wvobject fp_name="/adsampler_tb/uut/r" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r</obj_property>
+      <obj_property name="ObjectShortName">r</obj_property>
+   </wvobject>
+   <wvobject fp_name="/adsampler_tb/uut/rin" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">rin</obj_property>
+      <obj_property name="ObjectShortName">rin</obj_property>
+   </wvobject>
+</wave_config>

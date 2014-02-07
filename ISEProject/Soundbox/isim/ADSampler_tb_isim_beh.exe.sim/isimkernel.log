@@ -1,0 +1,29 @@
+Command line:
+   ADSampler_tb_isim_beh.exe
+     -simmode  gui
+     -simrunnum  0
+     -socket  64953
+
+Fri Feb 07 11:43:21 2014
+
+
+ Elaboration Time: 0.078125 sec
+
+ Current Memory Usage: 345.67 Meg
+
+ Total Signals          : 26
+ Total Nets             : 50
+ Total Signal Drivers   : 14
+ Total Blocks           : 4
+ Total Primitive Blocks : 3
+ Total Processes        : 7
+ Total Traceable Variables  : 16
+ Total Scalar Nets and Variables : 536
+Total Line Count : 25
+
+ Total Simulation Time: 0.375 sec
+
+ Current Memory Usage: 660.259 Meg
+
+Fri Feb 07 11:44:45 2014
+
