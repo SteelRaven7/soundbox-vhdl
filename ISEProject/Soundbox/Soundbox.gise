@@ -39,7 +39,7 @@
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
     </transform>
-    <transform xil_pn:end_ts="1391769792" xil_pn:in_ck="-6920708226140735515" xil_pn:name="TRAN_copyAbstractToPostAbstractSimulation" xil_pn:start_ts="1391769792">
+    <transform xil_pn:end_ts="1391772130" xil_pn:in_ck="-6920708226140735515" xil_pn:name="TRAN_copyAbstractToPostAbstractSimulation" xil_pn:start_ts="1391772130">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
       <outfile xil_pn:name="Source/AudioIO/ADSampler.vhdl"/>
@@ -57,24 +57,23 @@
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
     </transform>
-    <transform xil_pn:end_ts="1391769792" xil_pn:in_ck="-6920708226140735515" xil_pn:name="TRAN_copyPostAbstractToPreSimulation" xil_pn:start_ts="1391769792">
+    <transform xil_pn:end_ts="1391772130" xil_pn:in_ck="-6920708226140735515" xil_pn:name="TRAN_copyPostAbstractToPreSimulation" xil_pn:start_ts="1391772130">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
       <outfile xil_pn:name="Source/AudioIO/ADSampler.vhdl"/>
       <outfile xil_pn:name="Source/AudioIO/ADSampler_tb.vhd"/>
     </transform>
-    <transform xil_pn:end_ts="1391769799" xil_pn:in_ck="-6920708226140735515" xil_pn:name="TRAN_ISimulateBehavioralModelRunFuse" xil_pn:prop_ck="2163512083510023097" xil_pn:start_ts="1391769792">
+    <transform xil_pn:end_ts="1391772136" xil_pn:in_ck="-6920708226140735515" xil_pn:name="TRAN_ISimulateBehavioralModelRunFuse" xil_pn:prop_ck="2163512083510023097" xil_pn:start_ts="1391772130">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
-      <status xil_pn:value="OutOfDateForOutputs"/>
-      <status xil_pn:value="OutputChanged"/>
       <outfile xil_pn:name="ADSampler_tb_beh.prj"/>
       <outfile xil_pn:name="ADSampler_tb_isim_beh.exe"/>
       <outfile xil_pn:name="fuse.log"/>
       <outfile xil_pn:name="isim"/>
+      <outfile xil_pn:name="isim.log"/>
       <outfile xil_pn:name="xilinxsim.ini"/>
     </transform>
-    <transform xil_pn:end_ts="1391769989" xil_pn:in_ck="-6733388872829597059" xil_pn:name="TRAN_ISimulateBehavioralModel" xil_pn:prop_ck="-7364433653697079706" xil_pn:start_ts="1391769988">
+    <transform xil_pn:end_ts="1391772136" xil_pn:in_ck="-6733388872829597059" xil_pn:name="TRAN_ISimulateBehavioralModel" xil_pn:prop_ck="-7364433653697079706" xil_pn:start_ts="1391772136">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
       <outfile xil_pn:name="ADSampler_tb_isim_beh.wdb"/>

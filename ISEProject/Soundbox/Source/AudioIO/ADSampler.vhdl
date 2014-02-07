@@ -36,6 +36,7 @@ architecture arch of ADSampler is
 begin
 	-- Tie to global clock according to XADC spec.
 	XADC_convst <= clk;
+	DRP_input <= (others => '0');
 
 	clk_proc : process( clk, reset )
 	begin

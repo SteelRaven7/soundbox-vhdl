@@ -1,4 +1,4 @@
-Running: fuse.exe -relaunch -intstyle "ise" -incremental -lib "secureip" -o "C:/SoundboxProject/Source/soundbox-vhdl/ISEProject/Soundbox/ADSampler_tb_isim_beh.exe" -prj "C:/SoundboxProject/Source/soundbox-vhdl/ISEProject/Soundbox/ADSampler_tb_beh.prj" "ADSampler_tb" 
+Running: fuse.exe -relaunch -intstyle "ise" -incremental -lib "secureip" -o "C:/SoundboxProject/Source/soundbox-vhdl/ISEProject/Soundbox/ADSampler_tb_isim_beh.exe" -prj "C:/SoundboxProject/Source/soundbox-vhdl/ISEProject/Soundbox/ADSampler_tb_beh.prj" "work.ADSampler_tb" 
 ISim P.20131013 (signature 0x8ef4fb42)
 Number of CPUs detected in this system: 4
 Turning on mult-threading, number of parallel sub-compilation jobs: 8 
@@ -7,12 +7,13 @@ Parsing VHDL file "C:/SoundboxProject/Source/soundbox-vhdl/ISEProject/Soundbox/S
 Parsing VHDL file "C:/SoundboxProject/Source/soundbox-vhdl/ISEProject/Soundbox/Source/AudioIO/ADSampler_tb.vhd" into library work
 Starting static elaboration
 Completed static elaboration
-Fuse Memory Usage: 95720 KB
-Fuse CPU Usage: 374 ms
+Fuse Memory Usage: 98640 KB
+Fuse CPU Usage: 358 ms
 Compiling package standard
 Compiling package std_logic_1164
 Compiling package numeric_std
 Compiling architecture arch of entity ADSampler [adsampler_default]
 Compiling architecture behavior of entity adsampler_tb
 Time Resolution for simulation is 1ps.
+Waiting for 1 sub-compilation(s) to finish...
 ERROR:Simulator:861 - Failed to link the design
