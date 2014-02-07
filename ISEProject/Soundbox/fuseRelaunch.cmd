@@ -1,1 +1,1 @@
--intstyle "ise" -incremental -lib "secureip" -o "C:/SoundboxProject/Source/soundbox-vhdl/ISEProject/Soundbox/ADSampler_tb_isim_beh.exe" -prj "C:/SoundboxProject/Source/soundbox-vhdl/ISEProject/Soundbox/ADSampler_tb_beh.prj" "work.ADSampler_tb" 
+-intstyle "ise" -incremental -lib "secureip" -o "C:/SoundboxProject/Source/soundbox-vhdl/ISEProject/Soundbox/ClockDivider_tb_isim_beh.exe" -prj "C:/SoundboxProject/Source/soundbox-vhdl/ISEProject/Soundbox/ClockDivider_tb_beh.prj" "work.ClockDivider_tb" 
