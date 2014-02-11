@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<symbol version="7" name="XADC">
+    <symboltype>BLOCK</symboltype>
+    <timestamp>2014-2-11T11:53:25</timestamp>
+    <pin polarity="Input" x="0" y="80" name="di_in[15:0]" />
+    <pin polarity="Input" x="0" y="112" name="daddr_in[6:0]" />
+    <pin polarity="Input" x="0" y="144" name="den_in" />
+    <pin polarity="Input" x="0" y="176" name="dwe_in" />
+    <pin polarity="Input" x="0" y="208" name="dclk_in" />
+    <pin polarity="Input" x="0" y="272" name="reset_in" />
+    <pin polarity="Input" x="0" y="400" name="vp_in" />
+    <pin polarity="Input" x="0" y="432" name="vn_in" />
+    <pin polarity="Output" x="672" y="80" name="do_out[15:0]" />
+    <pin polarity="Output" x="672" y="112" name="drdy_out" />
+    <pin polarity="Output" x="672" y="304" name="vccpint_alarm" />
+    <pin polarity="Output" x="672" y="336" name="vccpaux_alarm" />
+    <pin polarity="Output" x="672" y="368" name="vccddro_alarm" />
+    <pin polarity="Output" x="672" y="432" name="alarm_out" />
+    <pin polarity="Output" x="672" y="528" name="eoc_out" />
+    <pin polarity="Output" x="672" y="592" name="busy_out" />
+    <graph>
+        <text style="fontsize:40;fontname:Arial" x="32" y="32">XADC</text>
+        <rect width="608" x="32" y="32" height="1472" />
+        <line x2="32" y1="80" y2="80" style="linewidth:W" x1="0" />
+        <attrtext style="fontsize:24;fontname:Arial" attrname="PinName" x="36" y="80" type="pin di_in[15:0]" />
+        <line x2="32" y1="112" y2="112" style="linewidth:W" x1="0" />
+        <attrtext style="fontsize:24;fontname:Arial" attrname="PinName" x="36" y="112" type="pin daddr_in[6:0]" />
+        <line x2="32" y1="144" y2="144" x1="0" />
+        <attrtext style="fontsize:24;fontname:Arial" attrname="PinName" x="36" y="144" type="pin den_in" />
+        <line x2="32" y1="176" y2="176" x1="0" />
+        <attrtext style="fontsize:24;fontname:Arial" attrname="PinName" x="36" y="176" type="pin dwe_in" />
+        <line x2="32" y1="208" y2="208" x1="0" />
+        <attrtext style="fontsize:24;fontname:Arial" attrname="PinName" x="36" y="208" type="pin dclk_in" />
+        <line x2="32" y1="272" y2="272" x1="0" />
+        <attrtext style="fontsize:24;fontname:Arial" attrname="PinName" x="36" y="272" type="pin reset_in" />
+        <line x2="32" y1="400" y2="400" x1="0" />
+        <attrtext style="fontsize:24;fontname:Arial" attrname="PinName" x="36" y="400" type="pin vp_in" />
+        <line x2="32" y1="432" y2="432" x1="0" />
+        <attrtext style="fontsize:24;fontname:Arial" attrname="PinName" x="36" y="432" type="pin vn_in" />
+        <line x2="640" y1="80" y2="80" style="linewidth:W" x1="672" />
+        <attrtext style="alignment:RIGHT;fontsize:24;fontname:Arial" attrname="PinName" x="636" y="80" type="pin do_out[15:0]" />
+        <line x2="640" y1="112" y2="112" x1="672" />
+        <attrtext style="alignment:RIGHT;fontsize:24;fontname:Arial" attrname="PinName" x="636" y="112" type="pin drdy_out" />
+        <line x2="640" y1="304" y2="304" x1="672" />
+        <attrtext style="alignment:RIGHT;fontsize:24;fontname:Arial" attrname="PinName" x="636" y="304" type="pin vccpint_alarm" />
+        <line x2="640" y1="336" y2="336" x1="672" />
+        <attrtext style="alignment:RIGHT;fontsize:24;fontname:Arial" attrname="PinName" x="636" y="336" type="pin vccpaux_alarm" />
+        <line x2="640" y1="368" y2="368" x1="672" />
+        <attrtext style="alignment:RIGHT;fontsize:24;fontname:Arial" attrname="PinName" x="636" y="368" type="pin vccddro_alarm" />
+        <line x2="640" y1="432" y2="432" x1="672" />
+        <attrtext style="alignment:RIGHT;fontsize:24;fontname:Arial" attrname="PinName" x="636" y="432" type="pin alarm_out" />
+        <line x2="640" y1="528" y2="528" x1="672" />
+        <attrtext style="alignment:RIGHT;fontsize:24;fontname:Arial" attrname="PinName" x="636" y="528" type="pin eoc_out" />
+        <line x2="640" y1="592" y2="592" x1="672" />
+        <attrtext style="alignment:RIGHT;fontsize:24;fontname:Arial" attrname="PinName" x="636" y="592" type="pin busy_out" />
+    </graph>
+</symbol>

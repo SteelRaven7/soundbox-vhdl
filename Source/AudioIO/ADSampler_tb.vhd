@@ -38,23 +38,6 @@ END ADSampler_tb;
 ARCHITECTURE behavior OF ADSampler_tb IS 
  
     -- Component Declaration for the Unit Under Test (UUT)
- 
-    COMPONENT ADSampler
-    PORT(
-         DRP_output : IN  std_logic_vector(15 downto 0);
-         DRP_dataReady : IN  std_logic;
-         DRP_input : OUT  std_logic_vector(15 downto 0);
-         DRP_address : OUT  std_logic_vector(6 downto 0);
-         DRP_enable : OUT  std_logic;
-         DRP_writeEnable : OUT  std_logic;
-         DRP_clk : OUT  std_logic;
-         XADC_reset : OUT  std_logic;
-         XADC_convst : OUT  std_logic;
-         XADC_convstclk : OUT  std_logic;
-         clk : IN  std_logic;
-         reset : IN  std_logic
-        );
-    END COMPONENT;
     
 
    --Inputs
@@ -70,8 +53,8 @@ ARCHITECTURE behavior OF ADSampler_tb IS
    signal DRP_writeEnable : std_logic;
    signal DRP_clk : std_logic;
    signal XADC_reset : std_logic;
-   signal XADC_convst : std_logic;
-   signal XADC_convstclk : std_logic;
+   signal XADC_EOC : std_logic;
+   signal XADC_busy : std_logic;
 
    -- Clock period definitions
    constant DRP_clk_period : time := 10 ns;
@@ -81,7 +64,8 @@ ARCHITECTURE behavior OF ADSampler_tb IS
 BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
-   uut: ADSampler PORT MAP (
+   uut: entity work.ADSampler
+      port map(
           DRP_output => DRP_output,
           DRP_dataReady => DRP_dataReady,
           DRP_input => DRP_input,
@@ -90,28 +74,11 @@ BEGIN
           DRP_writeEnable => DRP_writeEnable,
           DRP_clk => DRP_clk,
           XADC_reset => XADC_reset,
-          XADC_convst => XADC_convst,
-          XADC_convstclk => XADC_convstclk,
+          XADC_EOC => XADC_EOC,
+          XADC_busy => XADC_busy,
           clk => clk,
           reset => reset
         );
-
-   -- Clock process definitions
-   DRP_clk_process :process
-   begin
-		DRP_clk <= '0';
-		wait for DRP_clk_period/2;
-		DRP_clk <= '1';
-		wait for DRP_clk_period/2;
-   end process;
- 
-   XADC_convstclk_process :process
-   begin
-		XADC_convstclk <= '0';
-		wait for XADC_convstclk_period/2;
-		XADC_convstclk <= '1';
-		wait for XADC_convstclk_period/2;
-   end process;
  
    clk_process :process
    begin
@@ -130,7 +97,7 @@ BEGIN
       wait for 100 ns;
       reset <= '0';
 
-      wait for DRP_clk_period*10;
+      wait for clk_period*10;
 
       -- insert stimulus here 
 

@@ -30,14 +30,14 @@ entity ADSampler is
 end entity ; -- ADSampler
 
 architecture arch of ADSampler is
-	constant address_input : std_logic_vector(6 downto 0) := x"03";
+	constant address_input : std_logic_vector(6 downto 0) := "000" & x"3";
 
 	type state_type is (res, busy, busy_conversion, read);
 
 	type reg_type is record
 		state : state_type;
 
-		output : std_logic_vector(11 downto 0);
+		output : std_logic_vector(15 downto 0);
 
 		DRP_enable : std_logic;
 		-- Probably handled by the IP core
@@ -53,6 +53,8 @@ begin
 	DRP_enable <= r.DRP_enable;
 	DRP_writeEnable <= '0';
 	DRP_input <= (others => '0');
+
+	output <= r.output(11 downto 0);
 
 	clk_proc : process( clk, reset )
 	begin
