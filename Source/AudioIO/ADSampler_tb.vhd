@@ -53,8 +53,9 @@ ARCHITECTURE behavior OF ADSampler_tb IS
    signal DRP_writeEnable : std_logic;
    signal DRP_clk : std_logic;
    signal XADC_reset : std_logic;
-   signal XADC_EOC : std_logic;
-   signal XADC_busy : std_logic;
+   signal XADC_EOC : std_logic := '0';
+   signal XADC_busy : std_logic := '0';
+   signal output : std_logic_vector(11 downto 0);
 
    -- Clock period definitions
    constant DRP_clk_period : time := 10 ns;
@@ -76,6 +77,7 @@ BEGIN
           XADC_reset => XADC_reset,
           XADC_EOC => XADC_EOC,
           XADC_busy => XADC_busy,
+          output => output,
           clk => clk,
           reset => reset
         );
@@ -94,10 +96,25 @@ BEGIN
    begin		
       -- hold reset state for 100 ns.
       reset <= '1';
+      XADC_busy <= '1';
       wait for 100 ns;
       reset <= '0';
 
+      wait for clk_period*5;
+      XADC_busy <= '0';
+
       wait for clk_period*10;
+
+      XADC_EOC <= '1';
+      wait for clk_period;
+      XADC_EOC <= '0';
+
+      wait for clk_period*5;
+      
+      DRP_dataReady <= '1';
+      DRP_output <= (others => '1');
+      wait for clk_period;
+      DRP_dataReady <= '0';
 
       -- insert stimulus here 
 
