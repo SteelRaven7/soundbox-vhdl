@@ -19,9 +19,6 @@ entity ADSampler is
 		XADC_busy : in std_logic;
 		XADC_reset : out std_logic;
 
-		-- Probably handled by the IP core
-		--DRP_clk : out std_logic;
-
 		output : out std_logic_vector(11 downto 0);
 
 		clk : in std_logic;
@@ -40,8 +37,6 @@ architecture arch of ADSampler is
 		output : std_logic_vector(15 downto 0);
 
 		DRP_enable : std_logic;
-		-- Probably handled by the IP core
-		--DRP_clk : std_logic;
 	end record;
 
 	signal r, rin : reg_type;
