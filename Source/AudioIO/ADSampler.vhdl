@@ -19,7 +19,7 @@ entity ADSampler is
 		XADC_busy : in std_logic;
 		XADC_reset : out std_logic;
 
-		output : out std_logic_vector(11 downto 0);
+		output : out std_logic_vector(15 downto 0);
 
 		clk : in std_logic;
 		reset : in std_logic
@@ -49,7 +49,7 @@ begin
 	DRP_writeEnable <= '0';
 	DRP_input <= (others => '0');
 
-	output <= r.output(11 downto 0);
+	output <= r.output;
 
 	clk_proc : process( clk, reset )
 	begin
