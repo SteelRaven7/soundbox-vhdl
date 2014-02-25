@@ -44,15 +44,15 @@ architecture behaviour of Generic_IIR is
   constant N_BINALS : integer := 22;
   
   -- Type declarations
-  type array_input       is array(0 to N-1) of std_logic_vector(WIDTH-1           downto 0);
-  type array_coeffecient is array(0 to N-1) of std_logic_vector(        N_WIDTH-1 downto 0);
-  type array_result      is array(0 to N-1) of signed          (WIDTH + N_WIDTH-1 downto 0);
+  type array_input         is array(0 to N-1) of std_logic_vector(WIDTH-1           downto 0);
+  type array_coeffecient_b is array(0 to N-1) of std_logic_vector(        N_WIDTH-1 downto 0);
+  type array_coeffecient_a is array(1 to N-1) of std_logic_vector(        N_WIDTH-1 downto 0);
+  type array_result        is array(0 to N-1) of signed          (WIDTH + N_WIDTH-1 downto 0);
   
   -- Koefficients
-  constant coefficients_b : array_coeffecient := ("000000000000000000000000",
-                                                  "000000010000000100000001");
-  constant coefficients_a : array_coeffecient := ("000000000000000000000000",
-                                                  "000000010000000100000001");
+  constant coefficients_b : array_coeffecient_b := (0 => "010000000000000000000000",
+                                                    1 => "000000000000000000000000");
+  constant coefficients_a : array_coeffecient_a := (1 => "010000000000000000000000");
   
   -- Signal Declarations
   signal my_inputs    : array_input  := (others => (others => '0'));
