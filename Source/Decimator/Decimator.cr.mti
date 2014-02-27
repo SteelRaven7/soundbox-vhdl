@@ -1,0 +1,62 @@
+E:/modelsim/Decimator/stage_3.vhd {1 {vcom -nostats -work work -2002 -explicit E:/modelsim/Decimator/stage_3.vhd
+Model Technology ModelSim PE Student Edition vcom 10.3 Compiler 2014.01 Jan  6 2014
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Compiling entity stage_3
+-- Compiling architecture arch_stage_3 of stage_3
+
+} {} {}} E:/modelsim/Decimator/stage_4.vhd {1 {vcom -nostats -work work -2002 -explicit E:/modelsim/Decimator/stage_4.vhd
+Model Technology ModelSim PE Student Edition vcom 10.3 Compiler 2014.01 Jan  6 2014
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Compiling entity stage_4
+-- Compiling architecture arch_stage_4 of stage_4
+
+} {} {}} E:/modelsim/Decimator/clocks.vhd {1 {vcom -nostats -work work -2002 -explicit E:/modelsim/Decimator/clocks.vhd
+Model Technology ModelSim PE Student Edition vcom 10.3 Compiler 2014.01 Jan  6 2014
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Compiling entity clocks
+-- Compiling architecture arch_clocks of clocks
+
+} {} {}} E:/modelsim/Decimator/stage_1.vhd {1 {vcom -nostats -work work -2002 -explicit E:/modelsim/Decimator/stage_1.vhd
+Model Technology ModelSim PE Student Edition vcom 10.3 Compiler 2014.01 Jan  6 2014
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Compiling entity stage_1
+-- Compiling architecture arch_stage_1 of stage_1
+
+} {} {}} E:/modelsim/Decimator/decimator.vhd {1 {vcom -nostats -work work -2002 -explicit E:/modelsim/Decimator/decimator.vhd
+Model Technology ModelSim PE Student Edition vcom 10.3 Compiler 2014.01 Jan  6 2014
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Compiling entity decimator
+-- Compiling architecture arch_decimator of decimator
+
+} {} {}} E:/modelsim/Decimator/stage_2.vhd {1 {vcom -nostats -work work -2002 -explicit E:/modelsim/Decimator/stage_2.vhd
+Model Technology ModelSim PE Student Edition vcom 10.3 Compiler 2014.01 Jan  6 2014
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Compiling entity stage_2
+-- Compiling architecture arch_stage_2 of stage_2
+
+} {} {}} E:/modelsim/Decimator/decimator_tb.vhd {1 {vcom -nostats -work work -2002 -explicit E:/modelsim/Decimator/decimator_tb.vhd
+Model Technology ModelSim PE Student Edition vcom 10.3 Compiler 2014.01 Jan  6 2014
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Compiling entity decimator_tb
+-- Compiling architecture arch_decimator_tb of decimator_tb
+
+} {} {}}

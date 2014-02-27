@@ -1,0 +1,151 @@
+----------------------------------
+-- testbench type 3 for         --
+-- multiplier/accumulator (MAC) --
+-- for generic vector           --
+----------------------------------
+
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
+USE ieee.numeric_std.ALL;
+
+ENTITY decimator_tb IS
+   
+   PORT(y:OUT STD_LOGIC_VECTOR(23 DOWNTO 0)  );
+END decimator_tb;
+
+ARCHITECTURE arch_decimator_tb OF
+                     decimator_tb IS
+
+   COMPONENT decimator IS
+           PORT(reset:STD_LOGIC;
+           start:STD_LOGIC;
+           clk:STD_LOGIC;
+           input_signal:IN STD_LOGIC_VECTOR(11 DOWNTO 0);
+           output_signal:OUT STD_LOGIC_VECTOR(11 DOWNTO 0));
+--           y:OUT STD_LOGIC_VECTOR(WIDTH-1 DOWNTO 0);
+           
+   END COMPONENT decimator;
+
+   SIGNAL x_tb_signal:STD_LOGIC_VECTOR(11 DOWNTO 0);
+   SIGNAL y_tb_signal:STD_LOGIC_VECTOR(11 DOWNTO 0);
+   SIGNAL clk_tb_signal:STD_LOGIC:='0';
+   SIGNAL reset_tb_signal:STD_LOGIC;
+   SIGNAL start_tb_signal:STD_LOGIC;
+   
+BEGIN
+   decimator_comp:
+   COMPONENT decimator
+         PORT MAP(clk=>clk_tb_signal,
+                  reset=>reset_tb_signal,
+                  start=>start_tb_signal,
+                  input_signal=>x_tb_signal,
+                  output_signal=>y_tb_signal);
+                  
+   
+    y <= y_tb_signal;
+   reset_tb_signal<='0',
+                    '1' AFTER 5 ns,
+                    '0' AFTER 25 ns;
+
+   start_tb_signal<='0',
+                    '1' AFTER 15 ns;
+                    -- '0' AFTER 1025 ns,
+                    -- '1' AFTER 1725 ns,
+                    -- '0' AFTER 1925 ns,
+                    -- '1' AFTER 2625 ns,
+                    -- '0' AFTER 2825 ns,
+                    -- '1' AFTER 3525 ns,
+                    -- '0' AFTER 3725 ns;
+
+   x_tb_signal<="000000000000",  -- 0
+                "000100010001" AFTER 20 ns, -- 0,5=64
+                "001000100010" AFTER 40 ns, -- -0,25=-32=224
+                "001100110011" AFTER 60 ns, -- 0,375=48
+                "010001000100" AFTER 80 ns, -- -0,75=-96=160
+                "010101010101" AFTER 100 ns, -- -0,25=-32=224
+                "011001100110" AFTER 120 ns, -- 0,375=48
+                "011101110111" AFTER 140 ns, -- -0,75=-96=160
+                "100010001000" AFTER 160 ns,
+                "100110011001" AFTER 180 ns,
+                "101010101010" AFTER 200 ns,
+                "101110111011" AFTER 220 ns,
+                "110011001100" AFTER 240 ns,
+                "110111011101" AFTER 260 ns,
+                "111011101110" AFTER 280 ns,
+                "111111111111" AFTER 300 ns,
+                "000000000000" AFTER 320 ns,
+                "000100010001" AFTER 340 ns, -- 0,5=64
+                "001000100010" AFTER 360 ns, -- -0,25=-32=224
+                "001100110011" AFTER 380 ns, -- 0,375=48
+                "010001000100" AFTER 400 ns, -- -0,75=-96=160
+                "010101010101" AFTER 420 ns, -- -0,25=-32=224
+                "011001100110" AFTER 440 ns, -- 0,375=48
+                "011101110111" AFTER 460 ns, -- -0,75=-96=160
+                "100010001000" AFTER 480 ns,
+                "100110011001" AFTER 500 ns,
+                "101010101010" AFTER 520 ns,
+                "101110111011" AFTER 540 ns,
+                "110011001100" AFTER 560 ns,
+                "110111011101" AFTER 580 ns,
+                "111011101110" AFTER 600 ns,
+                "111111111111" AFTER 620 ns,
+                "000000000000" AFTER 640 ns,
+                "000100010001" AFTER 660 ns, -- 0,5=64
+                "001000100010" AFTER 680 ns, -- -0,25=-32=224
+                "001100110011" AFTER 700 ns, -- 0,375=48
+                "010001000100" AFTER 720 ns, -- -0,75=-96=160
+                "010101010101" AFTER 740 ns, -- -0,25=-32=224
+                "011001100110" AFTER 760 ns, -- 0,375=48
+                "011101110111" AFTER 780 ns, -- -0,75=-96=160
+                "100010001000" AFTER 800 ns,
+                "100110011001" AFTER 820 ns,
+                "101010101010" AFTER 840 ns,
+                "101110111011" AFTER 860 ns,
+                "110011001100" AFTER 880 ns,
+                "110111011101" AFTER 900 ns,
+                "111011101110" AFTER 920 ns, 
+                "111111111111" AFTER 940 ns,
+                "000000000000" AFTER 960 ns,
+                "000100010001" AFTER 980 ns, -- 0,5=64
+                "001000100010" AFTER 1000 ns, -- -0,25=-32=224
+                "001100110011" AFTER 1020 ns, -- 0,375=48
+                "010001000100" AFTER 1040 ns, -- -0,75=-96=160
+                "010101010101" AFTER 1060 ns, -- -0,25=-32=224
+                "011001100110" AFTER 1080 ns, -- 0,375=48
+                "011101110111" AFTER 1100 ns, -- -0,75=-96=160
+                "100010001000" AFTER 1120 ns,
+                "100110011001" AFTER 1140 ns,
+                "101010101010" AFTER 1160 ns,
+                "101110111011" AFTER 1180 ns,
+                "110011001100" AFTER 1200 ns,
+                "110111011101" AFTER 1220 ns,
+                "111011101110" AFTER 1240 ns,
+                "111111111111" AFTER 1260 ns;
+                
+   clock_proc: process
+   begin
+      WAIT FOR 10 ns;
+      clk_tb_signal<=NOT(clk_tb_signal);
+   end process clock_proc ;
+
+   test_proc:
+   PROCESS
+   BEGIN
+      WAIT FOR 1400 ns; -- 1400 ns
+      ASSERT (y_tb_signal="111011000000")
+      REPORT "incorrect result"
+      SEVERITY ERROR;
+      WAIT FOR 900 ns; -- 2300 ns
+      ASSERT (y_tb_signal="001100010000")
+      REPORT "incorrect result"
+      SEVERITY ERROR;
+      WAIT FOR 900 ns; -- 3200 ns
+      ASSERT (y_tb_signal="001100010000")
+      REPORT "incorrect result"
+      SEVERITY ERROR;
+      WAIT FOR 900 ns; -- 4100 ns
+      ASSERT (y_tb_signal="001100010000")
+      REPORT "incorrect result"
+      SEVERITY ERROR;
+   END PROCESS test_proc;
+  END arch_decimator_tb;
