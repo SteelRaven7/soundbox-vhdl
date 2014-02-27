@@ -1,0 +1,318 @@
+m255
+K4
+z2
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+dC:/Modeltech_pe_edu_10.3/examples
+Eclocks
+Z0 w1393448854
+Z1 DPx3 std 6 textio 0 22 zE1`LPoLg^DX3Oz^4Fj1K3
+Z2 DPx4 ieee 14 std_logic_1164 0 22 eNV`TJ_GofJTzYa?f<@Oe1
+Z3 dE:/modelsim/Decimator
+Z4 8E:/modelsim/Decimator/clocks.vhd
+Z5 FE:/modelsim/Decimator/clocks.vhd
+l0
+L33
+VH@DJ2if3gG_D_:Wa7E3MD2
+!s100 Cm9QRTTVA5JTMG]Ek^llY1
+Z6 OP;C;10.3;59
+32
+Z7 !s110 1393453640
+!i10b 1
+Z8 !s108 1393453640.604000
+Z9 !s90 -reportprogress|300|-nostats|-work|work|-2002|-explicit|E:/modelsim/Decimator/clocks.vhd|
+Z10 !s107 E:/modelsim/Decimator/clocks.vhd|
+Z11 o-work work -2002 -explicit -O0
+Z12 tExplicit 1
+Aarch_clocks
+R1
+R2
+DEx4 work 6 clocks 0 22 H@DJ2if3gG_D_:Wa7E3MD2
+l52
+L46
+VJF2TCA1=CGXaA5`o8akFN3
+!s100 O^E25W<n61_ff2z;Z3OGJ3
+R6
+32
+R7
+!i10b 1
+R8
+R9
+R10
+R11
+R12
+Edecimator
+Z13 w1393453133
+R1
+R2
+R3
+Z14 8E:/modelsim/Decimator/decimator.vhd
+Z15 FE:/modelsim/Decimator/decimator.vhd
+l0
+L25
+V^MUHkC[U>>iQQ>n8UjRRJ2
+!s100 E3BdJfQ73<0JKVR7JQ`PV3
+R6
+32
+Z16 !s110 1393453641
+!i10b 1
+Z17 !s108 1393453641.090000
+Z18 !s90 -reportprogress|300|-nostats|-work|work|-2002|-explicit|E:/modelsim/Decimator/decimator.vhd|
+Z19 !s107 E:/modelsim/Decimator/decimator.vhd|
+R11
+R12
+Aarch_decimator
+R1
+R2
+DEx4 work 9 decimator 0 22 ^MUHkC[U>>iQQ>n8UjRRJ2
+l118
+L35
+V[6z=9RT7>cL[;a_Pj78553
+!s100 XK9G[DC_z8_cd`Y]n<1cU0
+R6
+32
+R16
+!i10b 1
+R17
+R18
+R19
+R11
+R12
+Edecimator_tb
+Z20 w1393453336
+Z21 DPx4 ieee 11 numeric_std 0 22 :ASDNFgHXf_ih3J@9F3Ze1
+R1
+R2
+R3
+Z22 8E:/modelsim/Decimator/decimator_tb.vhd
+Z23 FE:/modelsim/Decimator/decimator_tb.vhd
+l0
+L11
+VocW>=13Rg5AmedWBHf:gZ3
+!s100 `L24b6TRT?Zz^6c_B80I_2
+R6
+32
+R16
+!i10b 1
+Z24 !s108 1393453641.578000
+Z25 !s90 -reportprogress|300|-nostats|-work|work|-2002|-explicit|E:/modelsim/Decimator/decimator_tb.vhd|
+Z26 !s107 E:/modelsim/Decimator/decimator_tb.vhd|
+R11
+R12
+Aarch_decimator_tb
+R21
+R1
+R2
+DEx4 work 12 decimator_tb 0 22 ocW>=13Rg5AmedWBHf:gZ3
+l37
+L16
+V7;KP8zT;IX@XIm8P=PaOS0
+!s100 ]REPo@?i:RnLY<4SC=jA13
+R6
+32
+R16
+!i10b 1
+R24
+R25
+R26
+R11
+R12
+Emac_serial_implementation
+Z27 w1393364732
+R21
+R1
+R2
+R3
+Z28 8E:/modelsim/Decimator/MAC_serial_implementation.vhd
+Z29 FE:/modelsim/Decimator/MAC_serial_implementation.vhd
+l0
+L7
+Vl85BeU5GM78klQKi4U8@J1
+!s100 LkCe[MRIYlTYlg=IZCMA=1
+R6
+32
+Z30 !s110 1393449035
+!i10b 1
+Z31 !s108 1393449035.033000
+Z32 !s90 -reportprogress|300|-nostats|-work|work|-2002|-explicit|E:/modelsim/Decimator/MAC_serial_implementation.vhd|
+Z33 !s107 E:/modelsim/Decimator/MAC_serial_implementation.vhd|
+R11
+R12
+Aarch_mac_serial_implementation
+R21
+R1
+R2
+DEx4 work 25 mac_serial_implementation 0 22 l85BeU5GM78klQKi4U8@J1
+l29
+L19
+VZ6UnU:fE7J4N]PG7[9Uhk2
+!s100 c8mW8743_6Y4KSZX5m@km2
+R6
+32
+R30
+!i10b 1
+R31
+R32
+R33
+R11
+R12
+Estage_1
+Z34 w1393448858
+R21
+R1
+R2
+R3
+Z35 8E:/modelsim/Decimator/stage_1.vhd
+Z36 FE:/modelsim/Decimator/stage_1.vhd
+l0
+L7
+Vj]N5QAg@OX3mjTBhnYQ^o0
+!s100 NeQbO@5fcI?UMZ=Y6z@=C3
+R6
+32
+Z37 !s110 1393453642
+!i10b 1
+Z38 !s108 1393453642.083000
+Z39 !s90 -reportprogress|300|-nostats|-work|work|-2002|-explicit|E:/modelsim/Decimator/stage_1.vhd|
+Z40 !s107 E:/modelsim/Decimator/stage_1.vhd|
+R11
+R12
+Aarch_stage_1
+R21
+R1
+R2
+DEx4 work 7 stage_1 0 22 j]N5QAg@OX3mjTBhnYQ^o0
+l28
+L18
+V1XiL7YhE@<]3Qln6oj?L_3
+!s100 @8;h]V;V9DTIdF:8Pg3Y80
+R6
+32
+R37
+!i10b 1
+R38
+R39
+R40
+R11
+R12
+Estage_2
+Z41 w1393448915
+R21
+R1
+R2
+R3
+Z42 8E:/modelsim/Decimator/stage_2.vhd
+Z43 FE:/modelsim/Decimator/stage_2.vhd
+l0
+L7
+VBE32j_Jd1a_Ve@d4S<Ucg1
+!s100 G7UFZCC5?KWW]11`Do__X2
+R6
+32
+R37
+!i10b 1
+Z44 !s108 1393453642.595000
+Z45 !s90 -reportprogress|300|-nostats|-work|work|-2002|-explicit|E:/modelsim/Decimator/stage_2.vhd|
+Z46 !s107 E:/modelsim/Decimator/stage_2.vhd|
+R11
+R12
+Aarch_stage_2
+R21
+R1
+R2
+DEx4 work 7 stage_2 0 22 BE32j_Jd1a_Ve@d4S<Ucg1
+l28
+L18
+VE>^L9>[d:YGJo>GN;nben2
+!s100 Bbd1ZJNdeCO^h10nk7Nn^0
+R6
+32
+R37
+!i10b 1
+R44
+R45
+R46
+R11
+R12
+Estage_3
+Z47 w1393448898
+R21
+R1
+R2
+R3
+Z48 8E:/modelsim/Decimator/stage_3.vhd
+Z49 FE:/modelsim/Decimator/stage_3.vhd
+l0
+L7
+VSJS@NY4RBcPm=jYUl0NDU2
+!s100 ZHH87d[Ta]DbT5WRf7JRd2
+R6
+32
+Z50 !s110 1393453643
+!i10b 1
+Z51 !s108 1393453643.103000
+Z52 !s90 -reportprogress|300|-nostats|-work|work|-2002|-explicit|E:/modelsim/Decimator/stage_3.vhd|
+Z53 !s107 E:/modelsim/Decimator/stage_3.vhd|
+R11
+R12
+Aarch_stage_3
+R21
+R1
+R2
+DEx4 work 7 stage_3 0 22 SJS@NY4RBcPm=jYUl0NDU2
+l28
+L18
+Vn_4hAgbQlVDKjiRA6Lg;32
+!s100 cjY7E5G[V9NYJM`1SZ<8E2
+R6
+32
+R50
+!i10b 1
+R51
+R52
+R53
+R11
+R12
+Estage_4
+Z54 w1393448856
+R21
+R1
+R2
+R3
+Z55 8E:/modelsim/Decimator/stage_4.vhd
+Z56 FE:/modelsim/Decimator/stage_4.vhd
+l0
+L7
+Vdk30QGg>]HA?=9Z4PCT8G1
+!s100 :WYgUB@cG62T7FXnOjLVf1
+R6
+32
+R50
+!i10b 1
+Z57 !s108 1393453643.603000
+Z58 !s90 -reportprogress|300|-nostats|-work|work|-2002|-explicit|E:/modelsim/Decimator/stage_4.vhd|
+Z59 !s107 E:/modelsim/Decimator/stage_4.vhd|
+R11
+R12
+Aarch_stage_4
+R21
+R1
+R2
+Z60 DEx4 work 7 stage_4 0 22 dk30QGg>]HA?=9Z4PCT8G1
+l28
+L18
+Z61 VW3e8PFD3n=Nl>2f[aHgAN2
+Z62 !s100 CP_5cMEj9O4<W`;hn:AkV1
+R6
+32
+R50
+!i10b 1
+R57
+R58
+R59
+R11
+R12
