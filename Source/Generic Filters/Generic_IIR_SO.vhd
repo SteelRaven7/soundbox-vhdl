@@ -52,13 +52,13 @@ use ieee.numeric_std.all;
 
 entity Generic_IIR_SO is
    generic (IN_WIDTH          : integer := 16;
-            IN_FRACT          : integer := 14;
-            COEFFICIENT_WIDTH : integer := 20;
-            COEFFICIENT_FRACT : integer := 18;
-			INTERNAL_WIDTH    : integer := 17;
-			INTERNAL_FRACT    : integer := 14;
+            IN_FRACT          : integer := 15;
+            COEFFICIENT_WIDTH : integer := 16;
+            COEFFICIENT_FRACT : integer := 15;
+			INTERNAL_WIDTH    : integer := 32;
+			INTERNAL_FRACT    : integer := 30;
 			OUT_WIDTH         : integer := 16;
-			OUT_FRACT         : integer := 13);
+			OUT_FRACT         : integer := 15);
    port(clk    : in  std_logic;
         clk_en : in  std_logic;
 		reset  : in  std_logic;
