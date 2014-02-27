@@ -33,7 +33,7 @@
 -- y                 - Output signal                                          --
 --                                                                            --
 --                                                                            --
--- Internal Constants                                                         --
+-- Internal Constants:                                                        --
 -- N                 - Number of coefficients, this number is three for a     --
 --                     second order filter and should not be changed. The     --
 --                     constant is mearly there to simplify creation of       --
