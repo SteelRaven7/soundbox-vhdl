@@ -104,13 +104,13 @@ begin
   end generate gen_adds_in;
 
   
-  -- Subtract the output multiplications together
-  my_sum_out(0)   <= my_sum_in(0) - my_sum_out(1);
+  -- Add the output multiplications together
+  my_sum_out(0)   <= my_sum_in(0) + my_sum_out(1);
   my_sum_out(N-1) <= my_mults_out(N-1);
-  gen_subs_out:
+  gen_adds_out:
   for i in 1 to N-2 generate
-    my_sum_out(i) <= my_sum_out(i+1) - my_mults_out(i);
-  end generate gen_subs_out;
+    my_sum_out(i) <= my_sum_out(i+1) + my_mults_out(i);
+  end generate gen_adds_out;
   
   
   -- Multiply the output with coefficients
