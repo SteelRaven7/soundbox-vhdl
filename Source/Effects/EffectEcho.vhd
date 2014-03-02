@@ -31,9 +31,9 @@ architecture arch of EffectEcho is
 	END COMPONENT;
 
 	constant delayDuration : natural := 2;
-	constant decayGain : std_logic_vector(wordLength-1 downto 0) := real_to_fixed(-0.5, wordLength);
-	constant directGain : std_logic_vector(wordLength-1 downto 0) := real_to_fixed(0.8, wordLength);
-	constant echoGain : std_logic_vector(wordLength-1 downto 0) := real_to_fixed(0.5, wordLength);
+	constant decayGain : std_logic_vector(wordLength-1 downto 0) := real_to_fixed(-0.5, constantsWordLength);
+	constant directGain : std_logic_vector(wordLength-1 downto 0) := real_to_fixed(0.8, constantsWordLength);
+	constant echoGain : std_logic_vector(wordLength-1 downto 0) := real_to_fixed(0.5, constantsWordLength);
 
 	-- 2 second max delay
 	constant addressWidth : natural := 17;

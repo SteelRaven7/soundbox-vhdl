@@ -1,11 +1,16 @@
 library ieee ;
-	use ieee.std_logic_1164.all ;
-	use ieee.numeric_std.all ;
+	use ieee.std_logic_1164.all;
+	use ieee.numeric_std.all;
+	use work.fixed_pkg.all;
+	use work.filter_pkg.all;
+
 
 entity FIR is
 	generic (
 		wordLength : natural := 16;
-		order : natural := 3
+		order : natural := 3;
+
+		coefficients : coefficient_array := (0.0, 0.0, 0.0, 0.0)
 	);
 	port (
 		input : in std_logic_vector(wordLength-1 downto 0);
@@ -16,21 +21,24 @@ entity FIR is
 	);
 end entity ; -- FIR
 
+
 architecture arch of FIR is
 	type signalArray is array(0 to order) of std_logic_vector(wordLength-1 downto 0);
 	type sumArray is array(0 to order) of std_logic_vector((wordLength*2)-1 downto 0);
 
-	signal inputs : signalArray := (others => (others => '0'));
-	signal gainedInputs : sumArray := (others => (others => '0'));
-	signal sums : sumArray := (others => (others => '0'));
+	signal inputs : signalArray		:= (others => (others => '0'));
+	signal gainedInputs : sumArray	:= (others => (others => '0'));
+	signal sums : sumArray			:= (others => (others => '0'));
 begin
 
 	inputs(0) <= input;
 	output <= sums(0)(wordLength*2-1 downto wordLength);
-	sums(3) <= gainedInputs(3);
+	sums(order) <= gainedInputs(order);
 
 	delays : for i in 0 to order-1 generate
-		delay : entity work.Delay
+		
+		-- Delay stages
+		delay : entity work.VectorRegister
 		generic map (
 			wordLength => wordLength
 		)
@@ -41,6 +49,7 @@ begin
 			reset => reset
 		);
 
+		-- Output summation
 		adder : entity work.AdderSat
 		generic map (
 			wordLength => wordLength*2
@@ -53,7 +62,9 @@ begin
 		);
 	end generate ; -- delays
 
-	summing : for i in 0 to order generate
+	multiplication : for i in 0 to order generate
+		
+		-- Coefficient multiplication
 		mult : entity work.Mult
 		generic map (
 			wordLengthA => wordLength,
@@ -62,7 +73,7 @@ begin
 		)
 		port map (
 			a => inputs(i),
-			b => (others => '0'),
+			b => real_to_fixed(coefficients(i), wordLength),
 
 			p => gainedInputs(i)
 		);

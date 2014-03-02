@@ -11,6 +11,7 @@ entity ADSampler is
 
 		output : out std_logic_vector(11 downto 0);
 
+		sampleClk : in std_logic;
 		clk : in std_logic;
 		reset : in std_logic
 	) ;
@@ -24,7 +25,7 @@ architecture arch of ADSampler is
 	type reg_type is record
 		state : state_type;
 
-		output : std_logic_vector(15 downto 0);
+		output : std_logic_vector(11 downto 0);
 
 		DRP_enable : std_logic;
 	end record;
@@ -72,6 +73,7 @@ begin
 	DRP_writeEnable <= '0';
 	DRP_input <= (others => '0');
 
+	CONVST_IN <= sampleClk;
 
 	theCore : xadc_wiz_0
 	port map (
@@ -92,18 +94,8 @@ begin
 		VP_IN => '0',
 		VN_IN => '0'
 	);
-
-	sampleClk : entity work.ClockDivider
-	generic map (
-		divider => 142 --100 MHz to 705.6 kHz.
-	)
-	port map (
-		clk => clk,
-		clkOut => CONVST_IN,
-		reset => reset
-	);
-
-	output <= r.output(15 downto 4);
+	
+	output <= r.output;
 
 	clk_proc : process( clk, reset )
 	begin
@@ -148,7 +140,7 @@ begin
 					v.state := busy_conversion;
 
 					-- Read the DRP output
-					v.output := DRP_output;
+					v.output := DRP_output(15 downto 4);
 
 				end if;
 
