@@ -29,11 +29,11 @@ use ieee.numeric_std.all;
 
 entity Multiplier is
    generic (X_WIDTH    : integer := 16;
-            X_FRACTION : integer := 15;
+            X_FRACTION : integer := 14;
             Y_WIDTH    : integer := 16;
-            Y_FRACTION : integer := 15;
+            Y_FRACTION : integer := 14;
             S_WIDTH    : integer := 16;
-            S_FRACTION : integer := 15);
+            S_FRACTION : integer := 13);
    port(x : in  std_logic_vector(X_WIDTH-1 downto 0);
         y : in  std_logic_vector(Y_WIDTH-1 downto 0);
         s : out std_logic_vector(S_WIDTH-1 downto 0));
