@@ -1,3 +1,24 @@
+------------------------------------------------------
+------------------------------------------------------
+-- Description:                                     --
+-- Implementation of a simple multiplier            --
+--                                                  --
+-- Generics:                                        --
+-- X_WIDTH     - Width of the input x               --
+-- X_FRACTION  - Width of the fractional part of x  --
+-- Y_WIDTH     - Width of the input y               --
+-- Y_FRACTION  - Width of the fractional part of y  --
+-- S_WIDTH     - Desired width of the output s      --
+-- S_FRACTION  - Desired width of the fractional    --
+--               part of s                          --
+--                                                  --
+-- Input/Output:                                    --
+-- x           - First factor                       --
+-- y           - Second factor                      --
+-- s           - Product                            --
+--                                                  --
+------------------------------------------------------
+------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
