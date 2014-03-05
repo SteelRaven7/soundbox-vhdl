@@ -28,12 +28,12 @@ use ieee.numeric_std.all;
 --------------------------------------------------------------------------------
 
 entity Multiplier is
-   generic (X_WIDTH    : integer := 16;
-            X_FRACTION : integer := 14;
-            Y_WIDTH    : integer := 16;
-            Y_FRACTION : integer := 14;
-            S_WIDTH    : integer := 16;
-            S_FRACTION : integer := 13);
+   generic (X_WIDTH    : natural := 16;
+            X_FRACTION : natural := 14;
+            Y_WIDTH    : natural := 16;
+            Y_FRACTION : natural := 14;
+            S_WIDTH    : natural := 16;
+            S_FRACTION : natural := 13);
    port(x : in  std_logic_vector(X_WIDTH-1 downto 0);
         y : in  std_logic_vector(Y_WIDTH-1 downto 0);
         s : out std_logic_vector(S_WIDTH-1 downto 0));
@@ -45,8 +45,8 @@ end Multiplier;
 architecture behaviour of Multiplier is
   
   -- Constants -----------------------------------------------------------------
-  constant UPPER_LIMIT : integer := X_FRACTION+Y_FRACTION-S_FRACTION+S_WIDTH-1;
-  constant LOWER_LIMIT : integer := X_FRACTION+Y_FRACTION-S_FRACTION;
+  constant UPPER_LIMIT : natural := X_FRACTION+Y_FRACTION-S_FRACTION+S_WIDTH-1;
+  constant LOWER_LIMIT : natural := X_FRACTION+Y_FRACTION-S_FRACTION;
   
   -- Signals -------------------------------------------------------------------
   signal product : std_logic_vector(X_WIDTH + Y_WIDTH - 1 downto 0);

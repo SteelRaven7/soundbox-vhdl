@@ -7,8 +7,8 @@ use ieee.numeric_std.all;
 --------------------------------------------------------------------------------
 
 entity Equalizer is
-   generic (WIDTH    : integer := 16;
-            FRACTION : integer := 15);
+   generic (WIDTH    : natural := 16;
+            FRACTION : natural := 15);
    port(clk    : in  std_logic;
         clk_en : in  std_logic;
         reset  : in  std_logic;
@@ -26,12 +26,12 @@ architecture behaviour of Equalizer is
 
 -- Multiplier --
 component Multiplier
-   generic (X_WIDTH    : integer := 16;
-            X_FRACTION : integer := 15;
-            Y_WIDTH    : integer := 16;
-            Y_FRACTION : integer := 15;
-            S_WIDTH    : integer := 16;
-            S_FRACTION : integer := 15);
+   generic (X_WIDTH    : natural := 16;
+            X_FRACTION : natural := 15;
+            Y_WIDTH    : natural := 16;
+            Y_FRACTION : natural := 15;
+            S_WIDTH    : natural := 16;
+            S_FRACTION : natural := 15);
    port(x : in  std_logic_vector(X_WIDTH-1 downto 0);
         y : in  std_logic_vector(Y_WIDTH-1 downto 0);
         s : out std_logic_vector(S_WIDTH-1 downto 0));
@@ -39,14 +39,14 @@ end component;
 
 -- Generic IIR SO --
 component Generic_IIR_SO
-   generic (IN_WIDTH          : integer := 16;
-            IN_FRACT          : integer := 15;
-            COEFFICIENT_WIDTH : integer := 16;
-            COEFFICIENT_FRACT : integer := 15;
-            INTERNAL_WIDTH    : integer := 32;
-            INTERNAL_FRACT    : integer := 30;
-            OUT_WIDTH         : integer := 16;
-            OUT_FRACT         : integer := 15);
+   generic (IN_WIDTH          : natural := 16;
+            IN_FRACT          : natural := 15;
+            COEFFICIENT_WIDTH : natural := 16;
+            COEFFICIENT_FRACT : natural := 15;
+            INTERNAL_WIDTH    : natural := 32;
+            INTERNAL_FRACT    : natural := 30;
+            OUT_WIDTH         : natural := 16;
+            OUT_FRACT         : natural := 15);
    port(clk    : in  std_logic;
         clk_en : in  std_logic;
         reset  : in  std_logic;
@@ -60,25 +60,25 @@ component Generic_IIR_SO
 end component;
 
 -- Data Widths -----------------------------------------------------------------
-  constant DATA_WIDTH    : integer := WIDTH;
-  constant DATA_FRACT    : integer := FRACTION;
-  constant SCALE_WIDTH_1 : integer := 16;
-  constant SCALE_FRACT_1 : integer := 13;
-  constant SCALE_WIDTH_2 : integer := 16;
-  constant SCALE_FRACT_2 : integer := 13;
-  constant SCALE_WIDTH_3 : integer := 16;
-  constant SCALE_FRACT_3 : integer := 13;
-  constant SCALE_WIDTH_4 : integer := 16;
-  constant SCALE_FRACT_4 : integer := 13;
+  constant DATA_WIDTH    : natural := WIDTH;
+  constant DATA_FRACT    : natural := FRACTION;
+  constant SCALE_WIDTH_1 : natural := 16;
+  constant SCALE_FRACT_1 : natural := 13;
+  constant SCALE_WIDTH_2 : natural := 16;
+  constant SCALE_FRACT_2 : natural := 13;
+  constant SCALE_WIDTH_3 : natural := 16;
+  constant SCALE_FRACT_3 : natural := 13;
+  constant SCALE_WIDTH_4 : natural := 16;
+  constant SCALE_FRACT_4 : natural := 13;
 
-  constant SPEZIAL_WIDTH : integer := 16;
+  constant SPEZIAL_WIDTH : natural := 16;
 
-  constant COEFF_WIDTH_1 : integer := 18;
-  constant COEFF_FRACT_1 : integer := 16;
-  constant COEFF_WIDTH_2 : integer := 18;
-  constant COEFF_FRACT_2 : integer := 16;
-  constant COEFF_WIDTH_3 : integer := 17;
-  constant COEFF_FRACT_3 : integer := 14;
+  constant COEFF_WIDTH_1 : natural := 18;
+  constant COEFF_FRACT_1 : natural := 16;
+  constant COEFF_WIDTH_2 : natural := 18;
+  constant COEFF_FRACT_2 : natural := 16;
+  constant COEFF_WIDTH_3 : natural := 17;
+  constant COEFF_FRACT_3 : natural := 14;
 -- Type Declarations -----------------------------------------------------------
 
   type scale_array_1 is array(0 to 4) of std_logic_vector(SCALE_WIDTH_1-1 downto 0);
@@ -157,37 +157,37 @@ signal iir_output_3 : std_logic_vector(DATA_WIDTH-1 downto 0);
 begin
 
   -- Set coefficients
-  process(clk)
-    variable v_mode : integer;
-  begin
-    if(rising_edge(clk)) then
-      v_mode := to_integer(unsigned(mode));
-      if(v_mode <= 4) then
-        scale_1 <= SCALE_1_ARRAY(v_mode);
-        scale_2 <= SCALE_2_ARRAY(v_mode);
-        scale_3 <= SCALE_3_ARRAY(v_mode);
-        scale_4 <= SCALE_4_ARRAY(v_mode);
+--  process(clk)
+--    variable v_mode : natural;
+--  begin
+--    if(rising_edge(clk)) then
+--      v_mode := to_natural(unsigned(mode));
+--      if(v_mode <= 4) then
+        scale_1 <= SCALE_1_ARRAY(1);
+        scale_2 <= SCALE_2_ARRAY(1);
+        scale_3 <= SCALE_3_ARRAY(1);
+        scale_4 <= SCALE_4_ARRAY(1);
 
-        B0_1    <= B0_1_ARRAY(v_mode);
-        B1_1    <= B1_1_ARRAY(v_mode);
-        B2_1    <= B2_1_ARRAY(v_mode);
-        A1_1    <= A1_1_ARRAY(v_mode);
-        A2_1    <= A2_1_ARRAY(v_mode);
+        B0_1    <= B0_1_ARRAY(1);
+        B1_1    <= B1_1_ARRAY(1);
+        B2_1    <= B2_1_ARRAY(1);
+        A1_1    <= A1_1_ARRAY(1);
+        A2_1    <= A2_1_ARRAY(1);
 
-        B0_2    <= B0_2_ARRAY(v_mode);
-        B1_2    <= B1_2_ARRAY(v_mode);
-        B2_2    <= B2_2_ARRAY(v_mode);
-        A1_2    <= A1_2_ARRAY(v_mode);
-        A2_2    <= A2_2_ARRAY(v_mode);
+        B0_2    <= B0_2_ARRAY(1);
+        B1_2    <= B1_2_ARRAY(1);
+        B2_2    <= B2_2_ARRAY(1);
+        A1_2    <= A1_2_ARRAY(1);
+        A2_2    <= A2_2_ARRAY(1);
 
-        B0_3    <= B0_3_ARRAY(v_mode);
-        B1_3    <= B1_3_ARRAY(v_mode);
-        B2_3    <= B2_3_ARRAY(v_mode);
-        A1_3    <= A1_3_ARRAY(v_mode);
-        A2_3    <= A2_3_ARRAY(v_mode);
-      end if;
-    end if;
-  end process;
+        B0_3    <= B0_3_ARRAY(1);
+        B1_3    <= B1_3_ARRAY(1);
+        B2_3    <= B2_3_ARRAY(1);
+        A1_3    <= A1_3_ARRAY(1);
+        A2_3    <= A2_3_ARRAY(1);
+--      end if;
+--    end if;
+--  end process;
 
   -- Stage 1 -------------------------------------------------------------------
   Multiplier_1 :	Multiplier

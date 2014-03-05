@@ -46,21 +46,21 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+use work.fixed_pkg.all;
 
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
 entity Generic_IIR_SO is
-   generic (IN_WIDTH          : integer := 16;
-            IN_FRACT          : integer := 15;
-            COEFFICIENT_WIDTH : integer := 16;
-            COEFFICIENT_FRACT : integer := 15;
-			INTERNAL_WIDTH    : integer := 32;
-			INTERNAL_FRACT    : integer := 30;
-			OUT_WIDTH         : integer := 16;
-			OUT_FRACT         : integer := 15);
+   generic (IN_WIDTH          : natural := 16;
+            IN_FRACT          : natural := 15;
+            COEFFICIENT_WIDTH : natural := 16;
+            COEFFICIENT_FRACT : natural := 15;
+			INTERNAL_WIDTH    : natural := 32;
+			INTERNAL_FRACT    : natural := 30;
+			OUT_WIDTH         : natural := 16;
+			OUT_FRACT         : natural := 15);
    port(clk    : in  std_logic;
-        clk_en : in  std_logic;
 		reset  : in  std_logic;
         x      : in  std_logic_vector(IN_WIDTH-1          downto 0);
         B0     : in  std_logic_vector(COEFFICIENT_WIDTH-1 downto 0);
@@ -77,19 +77,19 @@ end Generic_IIR_SO;
 architecture behaviour of Generic_IIR_SO is
 
   -- Constants
-  constant N : integer := 3; -- Filter order
-  constant IN_INT          : integer := IN_WIDTH          - IN_FRACT;
-  constant COEFFICIENT_INT : integer := COEFFICIENT_WIDTH - COEFFICIENT_FRACT;
-  constant INTERNAL_INT    : integer := INTERNAL_WIDTH    - INTERNAL_FRACT;
-  constant OUT_INT         : integer := OUT_WIDTH         - OUT_FRACT;
-  constant PRODUCT_WIDTH   : integer := COEFFICIENT_WIDTH + INTERNAL_WIDTH;
-  constant PRODUCT_FRACT   : integer := COEFFICIENT_FRACT + INTERNAL_FRACT;
-  constant PRODUCT_INT     : integer := PRODUCT_WIDTH     - PRODUCT_FRACT;
+  constant N : natural := 3; -- Filter order
+  constant IN_INT          : natural := IN_WIDTH          - IN_FRACT;
+  constant COEFFICIENT_INT : natural := COEFFICIENT_WIDTH - COEFFICIENT_FRACT;
+  constant INTERNAL_INT    : natural := INTERNAL_WIDTH    - INTERNAL_FRACT;
+  constant OUT_INT         : natural := OUT_WIDTH         - OUT_FRACT;
+  constant PRODUCT_WIDTH   : natural := COEFFICIENT_WIDTH + INTERNAL_WIDTH;
+  constant PRODUCT_FRACT   : natural := COEFFICIENT_FRACT + INTERNAL_FRACT;
+  constant PRODUCT_INT     : natural := PRODUCT_WIDTH     - PRODUCT_FRACT;
   
   -- Type declarations
   type array_input       is array(0 to N-1) of std_logic_vector(IN_WIDTH-1          downto 0);
   type array_coeffecient is array(0 to N-1) of std_logic_vector(COEFFICIENT_WIDTH-1 downto 0);
-  type array_internal    is array(0 to N-1) of signed          (INTERNAL_WIDTH-1    downto 0);
+  type array_internal    is array(0 to N-1) of std_logic_vector(INTERNAL_WIDTH-1    downto 0);
   type array_product     is array(0 to N-1) of signed          (PRODUCT_WIDTH-1     downto 0);
   
   -- Coefficients
@@ -97,6 +97,7 @@ architecture behaviour of Generic_IIR_SO is
   signal coefficients_a : array_coeffecient;
   
   -- Signal Declarations
+  signal input_copy   : std_logic_vector(INTERNAL_WIDTH-1 downto 0);
   signal my_inputs    : array_internal := (others => (others => '0'));
   signal my_outputs   : array_internal := (others => (others => '0'));
   signal my_temp_in   : array_product  := (others => (others => '0'));
@@ -119,32 +120,47 @@ begin
   coefficients_a(2) <= A2;
 
 
-  -- Shift the delay registers
+  input_copy(INTERNAL_WIDTH-1 downto INTERNAL_FRACT + IN_INT)            <= (others => x(IN_WIDTH-1));
+  input_copy(INTERNAL_FRACT + IN_INT-1 downto INTERNAL_FRACT - IN_FRACT) <= x;
+  input_copy(INTERNAL_FRACT - IN_FRACT-1 downto 0)                       <= (others => '0');
+  
   my_outputs(0) <= my_sum_out(0);
-  p_shift_inputs : process(clk, reset)
-  begin
-    if(rising_edge(clk)) then
-      if(clk_en = '1') then
-	    my_inputs(0) <= (others => x(IN_WIDTH-1));
-        my_inputs(0)(INTERNAL_FRACT + IN_INT-1 downto INTERNAL_FRACT - IN_FRACT) <= signed(x);
-        my_inputs(0)(INTERNAL_FRACT - IN_FRACT-1 downto 0) <= (others => '0');
-        my_inputs(1 to N-1) <= my_inputs(0 to N-2);
-        my_outputs(1 to N-1) <= my_outputs(0 to N-2);
-      end if;
-    end if;
-	-- Asynchronous reset
-	if(reset = '1') then
-	  my_inputs            <= (others => (others => '0'));
-	  my_outputs(1 to N-1) <= (others => (others => '0'));
-	end if;
-  end process p_shift_inputs;
+  VectorRegisterIn0 : entity work.VectorRegister
+  generic map (
+    wordLength => INTERNAL_WIDTH)
+  port map (
+    input  => input_copy,
+    output => my_inputs(0),
+    clk    => clk,
+    reset  => reset);
+	
+  gen_shifts:
+  for i in 0 to N-2 generate
+    VectorRegisterIn : entity work.VectorRegister
+	  generic map (
+	    wordLength => INTERNAL_WIDTH)
+	  port map (
+	    input  => my_inputs(i),
+	    output => my_inputs(i+1),
+        clk    => clk,
+	    reset  => reset);
+	  
+    VectorRegisterOut : entity work.VectorRegister
+	  generic map (
+	    wordLength => INTERNAL_WIDTH)
+	  port map (
+	    input  => my_outputs(i),
+	    output => my_outputs(i+1),
+        clk    => clk,
+	    reset  => reset);
+  end generate gen_shifts;
   
   
   -- Multiply the input with coefficients
   gen_mults_in:
   for i in 0 to N-1 generate
     my_temp_in(i) <= signed(my_inputs(i)) * signed(coefficients_b(i));
-	my_mults_in(i) <= my_temp_in(i)(PRODUCT_FRACT + INTERNAL_INT-1 downto COEFFICIENT_FRACT);
+	my_mults_in(i) <= std_logic_vector(my_temp_in(i)(PRODUCT_FRACT + INTERNAL_INT-1 downto COEFFICIENT_FRACT));
   end generate gen_mults_in;
   
   
@@ -152,16 +168,16 @@ begin
   my_sum_in(N-1) <= my_mults_in(N-1);
   gen_adds_in:
   for i in 0 to N-2 generate
-    my_sum_in(i) <= my_mults_in(i) + my_sum_in(i+1);
+    my_sum_in(i) <= std_logic_vector(signed(my_mults_in(i)) + signed(my_sum_in(i+1)));
   end generate gen_adds_in;
 
   
   -- Subtract the output multiplications together
-  my_sum_out(0)   <= my_sum_in(0) - my_sum_out(1);
+  my_sum_out(0)   <= std_logic_vector(signed(my_sum_in(0)) - signed(my_sum_out(1)));
   my_sum_out(N-1) <= my_mults_out(N-1);
   gen_subs_out:
   for i in 1 to N-2 generate
-    my_sum_out(i) <= my_sum_out(i+1) - my_mults_out(i);
+    my_sum_out(i) <= std_logic_vector(signed(my_sum_out(i+1)) - signed(my_mults_out(i)));
   end generate gen_subs_out;
   
   
@@ -169,7 +185,7 @@ begin
   gen_mults_out:
   for i in 1 to N-1 generate
     my_temp_out(i) <= signed(my_outputs(i)) * signed(coefficients_a(i));
-	my_mults_out(i) <= my_temp_out(i)(PRODUCT_FRACT + INTERNAL_INT-1 downto COEFFICIENT_FRACT);
+	my_mults_out(i) <= std_logic_vector(my_temp_out(i)(PRODUCT_FRACT + INTERNAL_INT-1 downto COEFFICIENT_FRACT));
   end generate gen_mults_out;
   
   
