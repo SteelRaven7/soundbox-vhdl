@@ -157,37 +157,37 @@ signal iir_output_3 : std_logic_vector(DATA_WIDTH-1 downto 0);
 begin
 
   -- Set coefficients
---  process(clk)
---    variable v_mode : natural;
---  begin
---    if(rising_edge(clk)) then
---      v_mode := to_natural(unsigned(mode));
---      if(v_mode <= 4) then
-        scale_1 <= SCALE_1_ARRAY(1);
-        scale_2 <= SCALE_2_ARRAY(1);
-        scale_3 <= SCALE_3_ARRAY(1);
-        scale_4 <= SCALE_4_ARRAY(1);
+  process(clk)
+    variable v_mode : natural;
+  begin
+    if(rising_edge(clk)) then
+      v_mode := to_integer(unsigned(mode));
+      if(v_mode <= 4) then
+        scale_1 <= SCALE_1_ARRAY(v_mode);
+        scale_2 <= SCALE_2_ARRAY(v_mode);
+        scale_3 <= SCALE_3_ARRAY(v_mode);
+        scale_4 <= SCALE_4_ARRAY(v_mode);
 
-        B0_1    <= B0_1_ARRAY(1);
-        B1_1    <= B1_1_ARRAY(1);
-        B2_1    <= B2_1_ARRAY(1);
-        A1_1    <= A1_1_ARRAY(1);
-        A2_1    <= A2_1_ARRAY(1);
+        B0_1    <= B0_1_ARRAY(v_mode);
+        B1_1    <= B1_1_ARRAY(v_mode);
+        B2_1    <= B2_1_ARRAY(v_mode);
+        A1_1    <= A1_1_ARRAY(v_mode);
+        A2_1    <= A2_1_ARRAY(v_mode);
 
-        B0_2    <= B0_2_ARRAY(1);
-        B1_2    <= B1_2_ARRAY(1);
-        B2_2    <= B2_2_ARRAY(1);
-        A1_2    <= A1_2_ARRAY(1);
-        A2_2    <= A2_2_ARRAY(1);
+        B0_2    <= B0_2_ARRAY(v_mode);
+        B1_2    <= B1_2_ARRAY(v_mode);
+        B2_2    <= B2_2_ARRAY(v_mode);
+        A1_2    <= A1_2_ARRAY(v_mode);
+        A2_2    <= A2_2_ARRAY(v_mode);
 
-        B0_3    <= B0_3_ARRAY(1);
-        B1_3    <= B1_3_ARRAY(1);
-        B2_3    <= B2_3_ARRAY(1);
-        A1_3    <= A1_3_ARRAY(1);
-        A2_3    <= A2_3_ARRAY(1);
---      end if;
---    end if;
---  end process;
+        B0_3    <= B0_3_ARRAY(v_mode);
+        B1_3    <= B1_3_ARRAY(v_mode);
+        B2_3    <= B2_3_ARRAY(v_mode);
+        A1_3    <= A1_3_ARRAY(v_mode);
+        A2_3    <= A2_3_ARRAY(v_mode);
+      end if;
+    end if;
+  end process;
 
   -- Stage 1 -------------------------------------------------------------------
   Multiplier_1 :	Multiplier
