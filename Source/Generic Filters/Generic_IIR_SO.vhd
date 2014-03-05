@@ -121,7 +121,7 @@ begin
 
   -- Shift the delay registers
   my_outputs(0) <= my_sum_out(0);
-  p_shift_inputs : process(clk)
+  p_shift_inputs : process(clk, reset)
   begin
     if(rising_edge(clk)) then
       if(clk_en = '1') then
