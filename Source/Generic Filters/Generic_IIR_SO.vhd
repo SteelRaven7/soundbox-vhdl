@@ -122,7 +122,7 @@ begin
 
   input_copy(INTERNAL_WIDTH-1 downto INTERNAL_FRACT + IN_INT)            <= (others => x(IN_WIDTH-1));
   input_copy(INTERNAL_FRACT + IN_INT-1 downto INTERNAL_FRACT - IN_FRACT) <= x;
-  input_copy(INTERNAL_FRACT - IN_FRACT-1 downto 0)                       <= (others => '0');
+  input_copy(INTERNAL_FRACT - IN_FRACT-1 downto 0)                       <= (others => x(IN_WIDTH-1));
   
   my_outputs(0) <= my_sum_out(0);
   VectorRegisterIn0 : entity work.VectorRegister
