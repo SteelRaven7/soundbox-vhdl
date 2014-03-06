@@ -9,6 +9,7 @@ use ieee.numeric_std.all;
 entity Equalizer is
    generic (DATA_WIDTH    : natural := 16;
             DATA_FRACT    : natural := 15;
+			
 			SCALE_WIDTH_1 : natural := 16;
 		    SCALE_FRACT_1 : natural := 14;
 		    SCALE_WIDTH_2 : natural := 16;
@@ -17,6 +18,13 @@ entity Equalizer is
 		    SCALE_FRACT_3 : natural := 14;
 		    SCALE_WIDTH_4 : natural := 16;
 		    SCALE_FRACT_4 : natural := 14;
+
+            INTERNAL_IIR_WIDTH_1 : natural := 42;
+            INTERNAL_IIR_FRACT_1 : natural := 31;
+            INTERNAL_IIR_WIDTH_2 : natural := 42;
+            INTERNAL_IIR_FRACT_2 : natural := 31;
+            INTERNAL_IIR_WIDTH_3 : natural := 42;
+            INTERNAL_IIR_FRACT_3 : natural := 31;
 
 		    COEFF_WIDTH_1 : natural := 16;
 		    COEFF_FRACT_1 : natural := 15;
@@ -146,8 +154,8 @@ begin
               IN_FRACT          => DATA_FRACT,
               COEFFICIENT_WIDTH => COEFF_WIDTH_1,
               COEFFICIENT_FRACT => COEFF_FRACT_1,
-              INTERNAL_WIDTH    => 42,
-              INTERNAL_FRACT    => 31,
+              INTERNAL_WIDTH    => INTERNAL_IIR_WIDTH_1,
+              INTERNAL_FRACT    => INTERNAL_IIR_FRACT_1,
               OUT_WIDTH         => DATA_WIDTH,
               OUT_FRACT         => DATA_FRACT)
    port map(clk    => clk,
@@ -179,8 +187,8 @@ begin
               IN_FRACT          => DATA_FRACT,
               COEFFICIENT_WIDTH => COEFF_WIDTH_2,
               COEFFICIENT_FRACT => COEFF_FRACT_2,
-              INTERNAL_WIDTH    => 42,
-              INTERNAL_FRACT    => 31,
+              INTERNAL_WIDTH    => INTERNAL_IIR_WIDTH_2,
+              INTERNAL_FRACT    => INTERNAL_IIR_FRACT_2,
               OUT_WIDTH         => DATA_WIDTH,
               OUT_FRACT         => DATA_FRACT)
    port map(clk    => clk,
@@ -212,8 +220,8 @@ begin
               IN_FRACT          => DATA_FRACT,
               COEFFICIENT_WIDTH => COEFF_WIDTH_3,
               COEFFICIENT_FRACT => COEFF_FRACT_3,
-              INTERNAL_WIDTH    => 42,
-              INTERNAL_FRACT    => 31,
+              INTERNAL_WIDTH    => INTERNAL_IIR_WIDTH_3,
+              INTERNAL_FRACT    => INTERNAL_IIR_FRACT_3,
               OUT_WIDTH         => DATA_WIDTH,
               OUT_FRACT         => DATA_FRACT)
    port map(clk    => clk,
