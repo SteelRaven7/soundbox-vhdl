@@ -22,7 +22,6 @@
 --                                                                            --
 -- Input/Output:                                                              --
 -- clk               - System clock                                           --
--- clk_en            - Clock enable signal, enabled when high                 --
 -- reset             - Asynchronous reset that resets when high               --
 -- x                 - Input signal to be filtered                            --
 -- B0                - Coefficient                                            --
