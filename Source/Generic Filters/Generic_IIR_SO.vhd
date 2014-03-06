@@ -77,7 +77,7 @@ end Generic_IIR_SO;
 architecture behaviour of Generic_IIR_SO is
 
   -- Constants
-  constant N : natural := 3; -- Filter order
+  constant N : natural := 3; -- Number of x-coefficients
   constant IN_INT          : natural := IN_WIDTH          - IN_FRACT;
   constant COEFFICIENT_INT : natural := COEFFICIENT_WIDTH - COEFFICIENT_FRACT;
   constant INTERNAL_INT    : natural := INTERNAL_WIDTH    - INTERNAL_FRACT;
@@ -87,10 +87,8 @@ architecture behaviour of Generic_IIR_SO is
   constant PRODUCT_INT     : natural := PRODUCT_WIDTH     - PRODUCT_FRACT;
   
   -- Type declarations
-  type array_input       is array(0 to N-1) of std_logic_vector(IN_WIDTH-1          downto 0);
   type array_coeffecient is array(0 to N-1) of std_logic_vector(COEFFICIENT_WIDTH-1 downto 0);
   type array_internal    is array(0 to N-1) of std_logic_vector(INTERNAL_WIDTH-1    downto 0);
-  type array_product     is array(0 to N-1) of signed          (PRODUCT_WIDTH-1     downto 0);
   
   -- Coefficients
   signal coefficients_b : array_coeffecient;
@@ -100,9 +98,7 @@ architecture behaviour of Generic_IIR_SO is
   signal input_copy   : std_logic_vector(INTERNAL_WIDTH-1 downto 0);
   signal my_inputs    : array_internal := (others => (others => '0'));
   signal my_outputs   : array_internal := (others => (others => '0'));
-  signal my_temp_in   : array_product  := (others => (others => '0'));
   signal my_mults_in  : array_internal := (others => (others => '0'));
-  signal my_temp_out  : array_product  := (others => (others => '0'));
   signal my_mults_out : array_internal := (others => (others => '0'));
   signal my_sum_in    : array_internal := (others => (others => '0'));
   signal my_sum_out   : array_internal := (others => (others => '0'));
@@ -119,12 +115,12 @@ begin
   coefficients_a(1) <= A1;
   coefficients_a(2) <= A2;
 
-
+  -- Prepare input to fit into internal bit width
   input_copy(INTERNAL_WIDTH-1 downto INTERNAL_FRACT + IN_INT)            <= (others => x(IN_WIDTH-1));
   input_copy(INTERNAL_FRACT + IN_INT-1 downto INTERNAL_FRACT - IN_FRACT) <= x;
   input_copy(INTERNAL_FRACT - IN_FRACT-1 downto 0)                       <= (others => x(IN_WIDTH-1));
   
-  my_outputs(0) <= my_sum_out(0);
+  -- Shift input and ouput
   VectorRegisterIn0 : entity work.VectorRegister
   generic map (
     wordLength => INTERNAL_WIDTH)
@@ -134,6 +130,8 @@ begin
     clk    => clk,
     reset  => reset);
 	
+  my_outputs(0) <= my_sum_out(0);
+  
   gen_shifts:
   for i in 0 to N-2 generate
     VectorRegisterIn : entity work.VectorRegister
@@ -144,7 +142,6 @@ begin
 	    output => my_inputs(i+1),
         clk    => clk,
 	    reset  => reset);
-	  
     VectorRegisterOut : entity work.VectorRegister
 	  generic map (
 	    wordLength => INTERNAL_WIDTH)
@@ -159,38 +156,68 @@ begin
   -- Multiply the input with coefficients
   gen_mults_in:
   for i in 0 to N-1 generate
-    my_temp_in(i) <= signed(my_inputs(i)) * signed(coefficients_b(i));
-	my_mults_in(i) <= std_logic_vector(my_temp_in(i)(PRODUCT_FRACT + INTERNAL_INT-1 downto COEFFICIENT_FRACT));
+    Multiplier_in : entity work.Multiplier
+    generic map(X_WIDTH    => INTERNAL_WIDTH,
+                X_FRACTION => INTERNAL_FRACT,
+                Y_WIDTH    => COEFFICIENT_WIDTH,
+                Y_FRACTION => COEFFICIENT_FRACT,
+                S_WIDTH    => INTERNAL_WIDTH,
+                S_FRACTION => INTERNAL_FRACT)
+      port map(x => my_inputs(i),
+               y => coefficients_b(i),
+               s => my_mults_in(i));
   end generate gen_mults_in;
   
   
   -- Add the input multiplications together
   my_sum_in(N-1) <= my_mults_in(N-1);
+
   gen_adds_in:
   for i in 0 to N-2 generate
-    my_sum_in(i) <= std_logic_vector(signed(my_mults_in(i)) + signed(my_sum_in(i+1)));
+    AdderSat_in : entity work.AdderSat
+	generic map(wordLength => INTERNAL_WIDTH)
+	port map(a => my_mults_in(i),
+		     b => my_sum_in(i+1),
+		     s => my_sum_in(i));
   end generate gen_adds_in;
 
   
-  -- Subtract the output multiplications together
-  my_sum_out(0)   <= std_logic_vector(signed(my_sum_in(0)) - signed(my_sum_out(1)));
+  -- Add the output multiplications together
   my_sum_out(N-1) <= my_mults_out(N-1);
-  gen_subs_out:
+
+  AdderSat_0 : entity work.AdderSat
+  generic map(wordLength => INTERNAL_WIDTH)
+  port map(a => my_sum_in(0),
+  	       b => my_sum_out(1),
+		   s => my_sum_out(0));
+  gen_adds_out:
   for i in 1 to N-2 generate
-    my_sum_out(i) <= std_logic_vector(signed(my_sum_out(i+1)) - signed(my_mults_out(i)));
-  end generate gen_subs_out;
+    AdderSat_out : entity work.AdderSat
+	generic map(wordLength => INTERNAL_WIDTH)
+	port map(a => my_mults_out(i),
+		     b => my_sum_out(i+1),
+		     s => my_sum_out(i));
+  end generate gen_adds_out;
   
   
   -- Multiply the output with coefficients
   gen_mults_out:
   for i in 1 to N-1 generate
-    my_temp_out(i) <= signed(my_outputs(i)) * signed(coefficients_a(i));
-	my_mults_out(i) <= std_logic_vector(my_temp_out(i)(PRODUCT_FRACT + INTERNAL_INT-1 downto COEFFICIENT_FRACT));
+    Multiplier_out : entity work.Multiplier
+    generic map(X_WIDTH    => INTERNAL_WIDTH,
+                X_FRACTION => INTERNAL_FRACT,
+                Y_WIDTH    => COEFFICIENT_WIDTH,
+                Y_FRACTION => COEFFICIENT_FRACT,
+                S_WIDTH    => INTERNAL_WIDTH,
+                S_FRACTION => INTERNAL_FRACT)
+      port map(x => my_outputs(i),
+               y => coefficients_a(i),
+               s => my_mults_out(i));		   
   end generate gen_mults_out;
   
   
   -- Output the result
-  y <= std_logic_vector(my_outputs(0)(INTERNAL_FRACT + OUT_INT-1 downto INTERNAL_FRACT - OUT_FRACT));
+  y <= my_outputs(0)(INTERNAL_FRACT + OUT_INT-1 downto INTERNAL_FRACT - OUT_FRACT);
 end behaviour;
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
