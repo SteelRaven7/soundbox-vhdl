@@ -23,12 +23,15 @@ end entity ; -- Mult
 architecture arch of Mult is
 	signal product : signed(wordLengthA+wordLengthB-1 downto 0);
 	signal pEntire : std_logic_vector(wordLengthA+wordLengthB-1 downto 0);
-	constant LSB : natural := fractionalBitsA+fractionalBitsB-fractionalBitsP;
-	constant MSB : natural := LSB + wordLengthP-1;
+
+	constant integerBitsA : natural := wordLengthA-fractionalBitsA-1;
+	constant integerBitsB : natural := wordLengthB-fractionalBitsB-1;
+
+	constant integerBitsDiff : natural := abs(integerBitsA-integerBitsB);
 begin
 	product <= (signed(a)*signed(b));
 
-	pEntire <= std_logic_vector(product);
+	pEntire <= std_logic_vector(shift_left(product, 1+integerBitsDiff));
 
-	p <= pEntire(MSB downto LSB);
+	p <= pEntire(wordLengthA+wordLengthB-1 downto wordLengthA+wordLengthB-wordLengthP);
 end architecture ; -- arch

@@ -73,38 +73,38 @@ begin
 	multiplication : for i in 0 to order generate
 		
 		-- Coefficient multiplication
---		mult : entity work.Mult
---		generic map (
---			wordLengthA => wordLength,
---			wordLengthB => coeffWordLength,
---			wordLengthP => outputWordLength,
---
---			fractionalBitsA => fractionalBits,
---			fractionalBitsB => coeffFractionalBits,
---			fractionalBitsP => outputFractionalBits
---		)
---		port map (
---			a => inputs(i),
---			b => real_to_fixed(coefficients(i), wordLength),
---
---			p => gainedInputs(i)
---		);
-
-		mult : entity work.Multiplier
+		mult : entity work.Mult
 		generic map (
-			X_WIDTH    => wordLength,
-            X_FRACTION => fractionalBits,
-            Y_WIDTH    => coeffWordLength,
-            Y_FRACTION => coeffFractionalBits,
-            S_WIDTH    => outputWordLength,
-            S_FRACTION => outputFractionalBits
+			wordLengthA => wordLength,
+			wordLengthB => coeffWordLength,
+			wordLengthP => outputWordLength,
+
+			fractionalBitsA => fractionalBits,
+			fractionalBitsB => coeffFractionalBits,
+			fractionalBitsP => outputFractionalBits
 		)
 		port map (
-			x => inputs(i),
-			y => real_to_fixed(coefficients(i), wordLength),
+			a => inputs(i),
+			b => real_to_fixed(coefficients(i), wordLength),
 
-			s => gainedInputs(i)
+			p => gainedInputs(i)
 		);
+
+--		mult : entity work.Multiplier
+--		generic map (
+--			X_WIDTH    => wordLength,
+--			X_FRACTION => fractionalBits,
+--			Y_WIDTH    => coeffWordLength,
+--			Y_FRACTION => coeffFractionalBits,
+--			S_WIDTH    => outputWordLength,
+--			S_FRACTION => outputFractionalBits
+--		)
+--		port map (
+--			x => inputs(i),
+--			y => real_to_fixed(coefficients(i), wordLength, coeffFractionalBits),
+--
+--			s => gainedInputs(i)
+--		);
 	end generate;
 
 end architecture ; -- arch
