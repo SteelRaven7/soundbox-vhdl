@@ -5,17 +5,20 @@
 
 ## Clock signal
 ##Bank = 35, Pin name = IO_L12P_T1_MRCC_35,					Sch name = CLK100MHZ
+
+# Clock the system at 2^11*44.1 KHz = 90.31 MHz
 set_property PACKAGE_PIN E3 [get_ports clk]							
 	set_property IOSTANDARD LVCMOS33 [get_ports clk]
-	create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports clk]
+	create_clock -add -name sys_clk_pin -period 11.072 -waveform {0 5} [get_ports clk]
+	#create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports clk]
  
 ## Switches
 ##Bank = 34, Pin name = IO_L21P_T3_DQS_34,					Sch name = SW0
 set_property PACKAGE_PIN U9 [get_ports muteInput]					
 	set_property IOSTANDARD LVCMOS33 [get_ports muteInput]
 ##Bank = 34, Pin name = IO_25_34,							Sch name = SW1
-#set_property PACKAGE_PIN U8 [get_ports {sw[1]}]					
-	#set_property IOSTANDARD LVCMOS33 [get_ports {sw[1]}]
+set_property PACKAGE_PIN U8 [get_ports bypassLP]					
+	set_property IOSTANDARD LVCMOS33 [get_ports bypassLP]
 ##Bank = 34, Pin name = IO_L23P_T3_34,						Sch name = SW2
 #set_property PACKAGE_PIN R7 [get_ports {sw[2]}]					
 	#set_property IOSTANDARD LVCMOS33 [get_ports {sw[2]}]

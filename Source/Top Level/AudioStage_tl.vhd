@@ -12,6 +12,7 @@ entity AudioStage_tl is
 		leds : out std_logic_vector(15 downto 0);
 
 		muteInput : in std_logic;
+		bypassLP : in std_logic;
 
 		clk : in std_logic;
 		reset : in std_logic
@@ -22,10 +23,12 @@ architecture arch of AudioStage_tl is
 	signal sampleInputClk : std_logic;
 	signal sampleOutput : std_logic_vector(11 downto 0);
 
-	signal decimatorInput : std_logic_vector(11 downto 0);
-	signal decimatorOutput : std_logic_vector(11 downto 0);
-	signal decimatorPipelinedOutput : std_logic_vector(11 downto 0);
+	signal decimatorInput : std_logic_vector(15 downto 0);
+	signal decimatorOutput : std_logic_vector(15 downto 0);
+	signal decimatorMuxedOutput : std_logic_vector(15 downto 0);
+	signal decimatorPipelinedOutput : std_logic_vector(15 downto 0);
 
+	signal sampleClk : std_logic;
 	signal echoClk : std_logic;
 	signal effectInput : std_logic_vector(15 downto 0);
 	signal effectOutput : std_logic_vector(15 downto 0);
@@ -37,10 +40,10 @@ begin
 	pwm_amp <= '1';
 	leds <= effectInput;
 
-	sampleClk : entity work.ClockDivider
+	sampleClkGenerator : entity work.ClockDivider
 	generic map (
-		divider => 142 --100 MHz to 705.6 kHz.
-		--divider => 50000 --100 MHz to 2.0 kHz.
+		divider => 128 --2^11*44.1 k to 705.6 k
+		--divider => 142 --100 MHz to 705.6 kHz.
 	)
 	port map (
 		clk => clk,
@@ -66,105 +69,134 @@ begin
 	--decimatorInput <= sampleOutput & "0000";
 	--decimatorInput <= sampleOutput and (others => muteInput);
 
-	decimatorInput <= 	sampleOutput when muteInput = '0' else
+	decimatorInput <= 	sampleOutput & "0000" when muteInput = '0' else
 						(others => '0');
 
-	decimatorOutput <= decimatorInput;
 
---	LP : entity work.FIR
---	generic map (
---		wordLength => 12,
---		order => 20,
---
---		coefficients => (
---			-0.020104118828858014,
---			-0.058427980043525354,
---			-0.06117840364782169,
---			-0.01093939338533849,
---			0.051250964435349884,
---			0.03322086767894797,
---			-0.05655276971833931,
---			-0.08565500737264502,
---			0.06337959966054495,
---			0.3108544036566358,
---			0.4344309124179416,
---			0.3108544036566358,
---			0.06337959966054495,
---			-0.08565500737264502,
---			-0.05655276971833931,
---			0.03322086767894797,
---			0.051250964435349884,
---			-0.01093939338533849,
---			-0.06117840364782169,
---			-0.058427980043525354,
---			-0.020104118828858014
---		)
---	)
---	port map (
---		input => decimatorInput,
---		output => decimatorOutput,
---
---		clk => sampleInputClk,
---		reset => reset
---	);
 
-	-- Path delay at this point is ~10 ns, insert pipeline stage.
-	PipelineRegister : entity work.VectorRegister
+
+
+	LP : entity work.FIR
 	generic map (
-		wordLength => 12
+		wordLength => 16,
+		coeffWordLength => 16,
+		outputWordLength => 16,
+
+		fractionalBits => 15,
+		coeffFractionalBits => 15,
+		outputFractionalBits => 15,
+
+
+		order => 40,
+
+		coefficients => (
+			0.000035, 
+			0.000067, 
+			0.000111, 
+			0.000166, 
+			0.000233, 
+			0.000313, 
+			0.000404, 
+			0.000506, 
+			0.000618, 
+			0.000737, 
+			0.000860, 
+			0.000986, 
+			0.001111, 
+			0.001231, 
+			0.001344, 
+			0.001445, 
+			0.001533, 
+			0.001605, 
+			0.001658, 
+			0.001690, 
+			0.001701, 
+			0.001690, 
+			0.001658, 
+			0.001605, 
+			0.001533, 
+			0.001445, 
+			0.001344, 
+			0.001231, 
+			0.001111, 
+			0.000986, 
+			0.000860, 
+			0.000737, 
+			0.000618, 
+			0.000506, 
+			0.000404, 
+			0.000313, 
+			0.000233, 
+			0.000166, 
+			0.000111, 
+			0.000067, 
+			0.000035
+		)
 	)
 	port map (
-		input => decimatorOutput,
-		output => decimatorPipelinedOutput,
+		input => decimatorInput,
+		output => decimatorOutput,
 
 		clk => sampleInputClk,
 		reset => reset
 	);
 
+	decimatorMuxedOutput <= decimatorOutput;
+
+--	decimatorMuxedOutput <=	decimatorOutput when bypassLP = '0' else
+--							decimatorInput;
 
 
---	Decimator : entity work.IPFIRDecimator
---	port map (
---		input => sampleOutput,
---		output => effectInput,
---
---		clk => clk,
---		reset => reset
---	);
 
 
---	Decimator : entity work.decimator
---	port map (
---		input_signal => sampleOutput,
---		output_signal => decimatorOutput,
---		clk => clk,
---		reset => reset
---    );
+	internalSampleClock : entity work.ClockDivider
+	generic map (
+		divider => 2048 -- To 44.1 kHz
+	)
+	port map (
+		clk => clk,
+		clkOut => sampleClk,
+		reset => reset
+	);
+
+	-- Path delay at this point is ~10 ns, insert pipeline stage.
+	PipelineRegister : entity work.VectorRegister
+	generic map (
+		wordLength => 16
+	)
+	port map (
+		input => decimatorOutput,
+		output => decimatorPipelinedOutput,
+
+		clk => sampleClk,
+		reset => reset
+	);
 
 
 	-- EFFECTS
 
-	effectInput <= decimatorPipelinedOutput & "0000";
-	--effectOutput <= effectInput;
+	effectInput <= decimatorPipelinedOutput;
+	effectOutput <= effectInput;
 
-	echoClkGenerator : entity work.ClockDivider
-	generic map (
-		divider => 324 -- Clock at 7*44.1 kHz = 308.7 kHz (Echo has 7 states per sample)
-	)
-	port map (
-		clk => clk,
-		clkOut => echoClk,
-		reset => reset
-	);
-
-	Echo: entity work.EffectEcho
-	port map (
-		input => effectInput,
-		output => effectOutput,
-
-		clk => echoClk,
-		reset => reset
-	);
+--	echoClkGenerator : entity work.ClockDivider
+--	generic map (
+--		divider => 
+--		--divider => 324 -- Clock at 7*44.1 kHz = 308.7 kHz (Echo has 7 states per sample)
+--	)
+--	port map (
+--		clk => clk,
+--		clkOut => echoClk,
+--		reset => reset
+--	);
+--
+--	Echo: entity work.EffectEcho
+--	port map (
+--		input => effectInput,
+--		output => effectOutput,
+--
+--		clk => echoClk,
+--		reset => reset
+--	);
 
 	-- OUTPUT
 

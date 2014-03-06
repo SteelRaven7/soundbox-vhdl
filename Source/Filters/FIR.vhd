@@ -8,13 +8,21 @@ library ieee ;
 entity FIR is
 	generic (
 		wordLength : natural := 16;
+		coeffWordLength : natural := 16;
+
+		fractionalBits : natural := 15;
+		coeffFractionalBits : natural := 15;
+
+		outputWordLength : natural := 16;
+		outputFractionalBits : natural := 15;
+
 		order : natural := 3;
 
 		coefficients : coefficient_array := (0.0, 0.0, 0.0, 0.0)
 	);
 	port (
 		input : in std_logic_vector(wordLength-1 downto 0);
-		output : out std_logic_vector(wordLength-1 downto 0);
+		output : out std_logic_vector(outputWordLength-1 downto 0);
 
 		clk : in std_logic;
 		reset : in std_logic
@@ -24,7 +32,7 @@ end entity ; -- FIR
 
 architecture arch of FIR is
 	type signalArray is array(0 to order) of std_logic_vector(wordLength-1 downto 0);
-	type sumArray is array(0 to order) of std_logic_vector((wordLength*2)-1 downto 0);
+	type sumArray is array(0 to order) of std_logic_vector(outputWordLength-1 downto 0);
 
 	signal inputs : signalArray		:= (others => (others => '0'));
 	signal gainedInputs : sumArray	:= (others => (others => '0'));
@@ -32,7 +40,7 @@ architecture arch of FIR is
 begin
 
 	inputs(0) <= input;
-	output <= sums(0)(wordLength*2-1 downto wordLength);
+	output <= sums(0);
 	sums(order) <= gainedInputs(order);
 
 	delays : for i in 0 to order-1 generate
@@ -52,7 +60,7 @@ begin
 		-- Output summation
 		adder : entity work.AdderSat
 		generic map (
-			wordLength => wordLength*2
+			wordLength => outputWordLength
 		)
 		port map (
 			a => gainedInputs(i),
@@ -68,8 +76,12 @@ begin
 		mult : entity work.Mult
 		generic map (
 			wordLengthA => wordLength,
-			wordLengthB => wordLength,
-			wordLengthP => wordLength*2
+			wordLengthB => coeffWordLength,
+			wordLengthP => outputWordLength,
+
+			fractionalBitsA => fractionalBits,
+			fractionalBitsB => coeffFractionalBits,
+			fractionalBitsP => outputFractionalBits
 		)
 		port map (
 			a => inputs(i),
