@@ -43,21 +43,48 @@ end Multiplier;
 --------------------------------------------------------------------------------
 
 architecture behaviour of Multiplier is
+  -- Functions -----------------------------------------------------------------
+  function paddedLength(old_width : integer ;upper_limit : integer) return integer is
+  begin
+    if(upper_limit > old_width) then
+	  return upper_limit;
+	else
+      return old_width;
+	end if;
+  end paddedLength;
   
   -- Constants -----------------------------------------------------------------
-  constant UPPER_LIMIT : natural := X_FRACTION+Y_FRACTION-S_FRACTION+S_WIDTH-1;
-  constant LOWER_LIMIT : natural := X_FRACTION+Y_FRACTION-S_FRACTION;
+  constant UPPER_LIMIT : integer := X_FRACTION+Y_FRACTION-S_FRACTION+S_WIDTH-1;
+  constant LOWER_LIMIT : integer := X_FRACTION+Y_FRACTION-S_FRACTION;
+  constant X_LENGTH    : integer := paddedLength(X_WIDTH, UPPER_LIMIT);
+  constant Y_LENGTH    : integer := paddedLength(Y_WIDTH, UPPER_LIMIT);
   
   -- Signals -------------------------------------------------------------------
-  signal product : std_logic_vector(X_WIDTH + Y_WIDTH - 1 downto 0);
+  signal x_padded : std_logic_vector(X_LENGTH-1 downto 0);
+  signal y_padded : std_logic_vector(Y_LENGTH-1 downto 0);
+  signal product  : std_logic_vector(X_LENGTH + Y_LENGTH - 1 downto 0);
   
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
 begin
+  -- Fill upper bits if necessary
+  x_padder:
+  if(UPPER_LIMIT > X_WIDTH) generate
+    x_padded(UPPER_LIMIT-1 downto X_WIDTH) <= (others => x(X_WIDTH-1));
+  end generate x_padder;
+  
+  y_padder:
+  if(UPPER_LIMIT > Y_WIDTH) generate
+    y_padded(UPPER_LIMIT-1 downto Y_WIDTH) <= (others => y(Y_WIDTH-1));
+  end generate y_padder;
+  
+  -- Put the input onto the multiplier
+  x_padded(X_WIDTH-1 downto 0) <= x;
+  y_padded(Y_WIDTH-1 downto 0) <= y;
   
   -- Multiply and cast result into appropriate size
-  product <= std_logic_vector(signed(x) * signed(y));
+  product <= std_logic_vector(signed(x_padded) * signed(y_padded));
   s <= product(UPPER_LIMIT downto LOWER_LIMIT);
 
 end architecture;
