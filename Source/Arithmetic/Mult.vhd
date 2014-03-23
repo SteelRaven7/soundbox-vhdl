@@ -6,8 +6,11 @@ entity Mult is
 	generic (
 		wordLengthA : natural := 8;
 		wordLengthB : natural := 8;
+		fractionalBitsA : natural := 7;
+		fractionalBitsB : natural := 7;
 
-		wordLengthP : natural := 16
+		wordLengthP : natural := 16;
+		fractionalBitsP : natural := 7
 	);
 	port (
 		a : in std_logic_vector(wordLengthA-1 downto 0);
@@ -20,10 +23,12 @@ end entity ; -- Mult
 architecture arch of Mult is
 	signal product : signed(wordLengthA+wordLengthB-1 downto 0);
 	signal pEntire : std_logic_vector(wordLengthA+wordLengthB-1 downto 0);
+	constant LSB : natural := fractionalBitsA+fractionalBitsB-fractionalBitsP;
+	constant MSB : natural := LSB + wordLengthP-1;
 begin
 	product <= (signed(a)*signed(b));
 
-	pEntire <= std_logic_vector(shift_left(product, 1));
+	pEntire <= std_logic_vector(product);
 
-	p <= pEntire(wordLengthA+wordLengthB-1 downto wordLengthA+wordLengthB-wordLengthP);
+	p <= pEntire(MSB downto LSB);
 end architecture ; -- arch
