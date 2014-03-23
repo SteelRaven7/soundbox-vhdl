@@ -4,8 +4,8 @@ library ieee ;
 
 entity SerialInterface is
 	port (
-		msg : out std_Logic_vector(7 downto 0);
-		payload : out std_logic_vector(15 downto 0);
+		msgCommand : out std_Logic_vector(7 downto 0);
+		msgPayload : out std_logic_vector(15 downto 0);
 		dataOk : out std_logic;
 		msgReady : out std_logic;
 
@@ -18,25 +18,35 @@ entity SerialInterface is
 end entity ; -- SerialInterface
 
 architecture arch of SerialInterface is
+	constant payload_bytes : natural := 2;
+
 	constant MSG_HANDSHAKE : std_logic_vector(7 downto 0) := x"00";
 	constant MSG_HANDSHAKE2 : std_logic_vector(7 downto 0) := x"01";
 
-	type state_type is (ready, r_data, r_parity, r_stop, r_error, r_ok,
+	type state_type is (ready, r_data, r_parity, r_stop, r_nextByte, r_handleMessage,
 						t_start, t_data, t_parity, t_stop);
+
+	type data_type is (command, payload);
+
+	type payload_array is array(payload_bytes-1 downto 0) of std_logic_vector(7 downto 0);
 
 	type reg_type is record
 		-- State
 		state : state_type;
+		dataType : data_type;
 		bitCounter : natural range 0 to 7;
+		payloadNumber : natural range 0 to 3;
 		
 		-- Data
 		dataOk : std_logic;
+		msgOk : std_logic;
 		data : std_logic_vector(7 downto 0);
 		
 		-- Output
 		serialOut : std_logic;
-		msg : std_logic_vector(7 downto 0);
+		command : std_logic_vector(7 downto 0);
 		msgReady : std_logic;
+		payload : payload_array;
 	end record;
 
 	signal r, rin : reg_type;
@@ -50,18 +60,26 @@ begin
 
 	dataOk <= r.dataOk;
 	serialOut <= r.serialOut;
-	msg <= r.msg;
+	msgCommand <= r.command;
+	msgPayload <= r.payload(1) & r.payload(0);
 	msgReady <= r.msgReady;
 
 	clk_proc : process(serialClk, reset)
 	begin
 		if(reset = '1') then
 			r.state <= ready;
-			r.msg <= (others => '0');
+			r.command <= (others => '0');
 			r.data <= (others => '0');
 			r.dataOk <= '0';
+			r.msgOk <= '0';
 			r.msgReady <= '0';
 			r.serialOut <= '1';
+			r.payloadNumber <= 0;
+			r.dataType <= command;
+
+			payload_reset : for i in 0 to payload_bytes-1 loop
+				r.payload(i) <= (others => '0');
+			end loop ; -- payload_reset
 		elsif(rising_edge(serialClk)) then
 			r <= rin;
 		end if;
@@ -80,6 +98,8 @@ begin
 			when ready =>
 				
 				v.msgReady := '0';
+				v.dataType := command;
+				v.msgOk := '1';
 
 				-- Check if start bit was received
 				if(serialIn = '0') then
@@ -105,33 +125,56 @@ begin
 
 			when r_stop =>
 
-				-- Store the message.
-				v.msg := r.data;
-
-				if(r.dataOk = '1') then
-					v.state := r_ok;
-				else
-					v.state := r_error;
+				if(r.dataOk = '0') then
+					-- Parity check failed, message cannot be used.
+					v.msgOk := '0';					
 				end if;
 
-			when r_ok =>
+				v.state := r_nextByte;
 
-				-- @TODO: don't handle payloads here
-				if(r.msg = MSG_HANDSHAKE) then
-					-- Received hanshake, complete it.
+			when r_nextByte =>
+
+				if(r.dataType = command) then
+					-- Store the command
+					v.command := r.data;
+
+					-- We received a command, await payload_bytes more bytes as payloads
+					v.payloadNumber := payload_bytes;
+					v.dataType := payload;
+				else
+					if(r.payloadNumber /= 0) then
+						v.payloadNumber :=  r.payloadNumber-1;
+					end if;
+					
+					v.payload(v.payloadNumber) := r.data;
+				end if;
+
+				if(v.payloadNumber = 0) then
+					-- No more payloads, we're ready for the next command.
+					v.dataType := command;
+					
+					if(r.msgOk = '1') then
+						v.state := r_handleMessage;
+					else
+						v.state := ready;
+					end if;
+				else
+					-- Receive the next payload.
+					v.bitCounter := 0;
+					v.state := r_data;
+				end if;
+
+			when r_handleMessage =>
+
+				v.msgReady := '1';
+
+				if(r.command = MSG_HANDSHAKE) then
+					-- Automatically reply to handshake.
 					v.data := MSG_HANDSHAKE2;
 					v.state := t_start;
 				else
 					v.state := ready;
 				end if;
-
-				-- Parity check OK, message is ready.
-				v.msgReady := '1'; 
-
-			when r_error =>
-
-				-- Handle error
-				v.state := ready;
 
 			when t_start =>
 
@@ -160,6 +203,8 @@ begin
 				v.state := t_stop;
 
 			when t_stop =>
+
+				-- @TODO: Support multi-byte message transmission?
 
 				-- Stop bit
 				v.serialOut := '1';
