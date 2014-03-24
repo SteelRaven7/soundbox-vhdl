@@ -37,7 +37,7 @@ architecture arch of EffectEcho is
 
 	-- 2 second max delay
 	constant addressWidth : natural := 17;
-	constant addressMax : natural := 20000; --44100;
+	constant addressMax : natural := 44100;
 
 	signal feedback : std_logic_vector(wordLength-1 downto 0);
 	signal directGained : std_logic_vector(wordLength-1 downto 0);
@@ -52,7 +52,7 @@ architecture arch of EffectEcho is
 
 	type state_type is (readStart, readWait, read, writeDone);
 
-	constant waitTime : natural := 3;
+	constant waitTime : natural := 4;
 
 	type reg_type is record
 		state : state_type;
@@ -90,46 +90,52 @@ begin
 
 
 	-- Gains
-	directMult : entity work.Mult
+	directMult : entity work.Multiplier
 	generic map (
-		wordLengthA => 16,
-		wordLengthB => 16,
-
-		wordLengthP => 16
+		X_WIDTH    => wordLength,
+		X_FRACTION => wordLength-1,
+		Y_WIDTH    => constantsWordLength,
+		Y_FRACTION => constantsWordLength-1,
+		S_WIDTH    => wordLength,
+		S_FRACTION => wordLength-1
 	)
 	port map (
-		a => input,
-		b => directGain,
+		x => input,
+		y => directGain,
 
-		p => directGained
+		s => directGained
 	);
 
-	feedbackMult : entity work.Mult
+	feedbackMult : entity work.Multiplier
 	generic map (
-		wordLengthA => 16,
-		wordLengthB => 16,
-
-		wordLengthP => 16
+		X_WIDTH    => wordLength,
+		X_FRACTION => wordLength-1,
+		Y_WIDTH    => constantsWordLength,
+		Y_FRACTION => constantsWordLength-1,
+		S_WIDTH    => wordLength,
+		S_FRACTION => wordLength-1
 	)
 	port map (
-		a => delayed,
-		b => decayGain,
+		x => delayed,
+		y => decayGain,
 
-		p => feedback
+		s => feedback
 	);
 
-	echoMult : entity work.Mult
+	echoMult : entity work.Multiplier
 	generic map (
-		wordLengthA => 16,
-		wordLengthB => 16,
-
-		wordLengthP => 16
+		X_WIDTH    => wordLength,
+		X_FRACTION => wordLength-1,
+		Y_WIDTH    => constantsWordLength,
+		Y_FRACTION => constantsWordLength-1,
+		S_WIDTH    => wordLength,
+		S_FRACTION => wordLength-1
 	)
 	port map (
-		a => delayed,
-		b => echoGain,
+		x => delayed,
+		y => echoGain,
 
-		p => delayedGained
+		s => delayedGained
 	);
 
 

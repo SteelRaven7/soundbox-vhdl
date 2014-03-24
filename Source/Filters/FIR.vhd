@@ -8,13 +8,24 @@ library ieee ;
 entity FIR is
 	generic (
 		wordLength : natural := 16;
+		fractionalBits : natural := 15;
+
+		coeffWordLength : natural := 16;
+		coeffFractionalBits : natural := 15;
+
+		sumWordLength : natural := 16;
+		sumFractionalBits : natural := 15;
+
+		outputWordLength : natural := 16;
+		outputFractionalBits : natural := 15;
+
 		order : natural := 3;
 
 		coefficients : coefficient_array := (0.0, 0.0, 0.0, 0.0)
 	);
 	port (
 		input : in std_logic_vector(wordLength-1 downto 0);
-		output : out std_logic_vector(wordLength-1 downto 0);
+		output : out std_logic_vector(outputWordLength-1 downto 0);
 
 		clk : in std_logic;
 		reset : in std_logic
@@ -24,7 +35,7 @@ end entity ; -- FIR
 
 architecture arch of FIR is
 	type signalArray is array(0 to order) of std_logic_vector(wordLength-1 downto 0);
-	type sumArray is array(0 to order) of std_logic_vector((wordLength*2)-1 downto 0);
+	type sumArray is array(0 to order) of std_logic_vector(sumWordLength-1 downto 0);
 
 	signal inputs : signalArray		:= (others => (others => '0'));
 	signal gainedInputs : sumArray	:= (others => (others => '0'));
@@ -32,7 +43,7 @@ architecture arch of FIR is
 begin
 
 	inputs(0) <= input;
-	output <= sums(0)(wordLength*2-1 downto wordLength);
+	output <= sums(0)(sumFractionalBits-outputFractionalBits+outputWordLength-1 downto sumFractionalBits-outputFractionalBits);
 	sums(order) <= gainedInputs(order);
 
 	delays : for i in 0 to order-1 generate
@@ -52,7 +63,7 @@ begin
 		-- Output summation
 		adder : entity work.AdderSat
 		generic map (
-			wordLength => wordLength*2
+			wordLength => sumWordLength
 		)
 		port map (
 			a => gainedInputs(i),
@@ -63,19 +74,21 @@ begin
 	end generate ; -- delays
 
 	multiplication : for i in 0 to order generate
-		
-		-- Coefficient multiplication
-		mult : entity work.Mult
+
+		mult : entity work.Multiplier
 		generic map (
-			wordLengthA => wordLength,
-			wordLengthB => wordLength,
-			wordLengthP => wordLength*2
+			X_WIDTH    => wordLength,
+			X_FRACTION => fractionalBits,
+			Y_WIDTH    => coeffWordLength,
+			Y_FRACTION => coeffFractionalBits,
+			S_WIDTH    => sumWordLength,
+			S_FRACTION => sumFractionalBits
 		)
 		port map (
-			a => inputs(i),
-			b => real_to_fixed(coefficients(i), wordLength),
+			x => inputs(i),
+			y => real_to_fixed(coefficients(i), coeffWordLength, coeffFractionalBits),
 
-			p => gainedInputs(i)
+			s => gainedInputs(i)
 		);
 	end generate;
 
