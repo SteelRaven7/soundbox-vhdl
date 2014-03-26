@@ -99,21 +99,21 @@ use work.filter_pkg.all;
 --------------------------------------------------------------------------------
 
 entity Generic_Equalizer is
-   generic (NO_SECTIONS : natural         := 3;
+   generic (NO_SECTIONS : natural         := 9;
 			
 			DATA_WIDTH : natural          := 8;
             DATA_FRACT : natural          := 6;
 
             SCALE_WIDTH : natural         := 8;
-            SCALE_FRACT : natural_array   := (6,6,6,6);
+            SCALE_FRACT : natural_array   := (6,6,6,6,6,6,6,6,6,6);
 
             INTERNAL_WIDTH : natural      := 14;
             INTERNAL_FRACT : natural      := 8;
 
             COEFF_WIDTH_B : natural       := 8;
-            COEFF_FRACT_B : natural_array := (6,6,6);
+            COEFF_FRACT_B : natural_array := (6,6,6,6,6,6,6,6,6);
             COEFF_WIDTH_A : natural       := 8;
-            COEFF_FRACT_A : natural_array := (6,6,6));
+            COEFF_FRACT_A : natural_array := (6,6,6,6,6,6,6,6,6));
    port(clk        : in  std_logic;
         reset      : in  std_logic;
         write_mode : in  std_logic;
@@ -161,17 +161,17 @@ begin
     if(rising_edge(clk)) then
       if(write_mode = '1') then
 	    scale_loop:
-		for i in 0 to NO_SECTIONS-1 loop
-		  s_scale(i) <= scale(SCALE_WIDTH*(NO_SECTIONS-i)-1 downto SCALE_WIDTH*(NO_SECTIONS-i-1));
+		for i in 0 to NO_SECTIONS loop
+		  s_scale(i) <= scale(SCALE_WIDTH*((NO_SECTIONS+1)-i)-1 downto SCALE_WIDTH*((NO_SECTIONS+1)-i-1));
 		end loop;
 		
         coefficients_loop:
-		for i in 0 to NO_SECTIONS-2 loop
-		  s_b(i) <= b0(COEFF_WIDTH_B*(NO_SECTIONS-1-i)-1 downto COEFF_WIDTH_B*(NO_SECTIONS-i-2)) &
-		            b1(COEFF_WIDTH_B*(NO_SECTIONS-1-i)-1 downto COEFF_WIDTH_B*(NO_SECTIONS-i-2)) &
-		            b2(COEFF_WIDTH_B*(NO_SECTIONS-1-i)-1 downto COEFF_WIDTH_B*(NO_SECTIONS-i-2));
-		  s_a(i) <= a1(COEFF_WIDTH_A*(NO_SECTIONS-1-i)-1 downto COEFF_WIDTH_A*(NO_SECTIONS-i-2)) &
-		            a2(COEFF_WIDTH_A*(NO_SECTIONS-1-i)-1 downto COEFF_WIDTH_A*(NO_SECTIONS-i-2));
+		for i in 0 to NO_SECTIONS-1 loop
+		  s_b(i) <= b0(COEFF_WIDTH_B*(NO_SECTIONS-i)-1 downto COEFF_WIDTH_B*(NO_SECTIONS-i-1)) &
+		            b1(COEFF_WIDTH_B*(NO_SECTIONS-i)-1 downto COEFF_WIDTH_B*(NO_SECTIONS-i-1)) &
+		            b2(COEFF_WIDTH_B*(NO_SECTIONS-i)-1 downto COEFF_WIDTH_B*(NO_SECTIONS-i-1));
+		  s_a(i) <= a1(COEFF_WIDTH_A*(NO_SECTIONS-i)-1 downto COEFF_WIDTH_A*(NO_SECTIONS-i-1)) &
+		            a2(COEFF_WIDTH_A*(NO_SECTIONS-i)-1 downto COEFF_WIDTH_A*(NO_SECTIONS-i-1));
 		end loop;
       end if;
     end if;
@@ -214,7 +214,7 @@ begin
 
   -- Multipliers ---------------------------------------------------------------
   gen_multipliers:
-  for i in 0 to NO_SECTIONS-2 generate
+  for i in 1 to NO_SECTIONS-1 generate
     Multiplier : entity work.Multiplier
     generic map(X_WIDTH    => INTERNAL_WIDTH,
                 X_FRACTION => INTERNAL_FRACT,
@@ -222,9 +222,9 @@ begin
                 Y_FRACTION => SCALE_FRACT(i+1),
                 S_WIDTH    => INTERNAL_WIDTH,
                 S_FRACTION => INTERNAL_FRACT)
-      port map(x => s_iir_output(i),
-               y => s_scale(i+1),
-               s => s_iir_input(i+1));
+      port map(x => s_iir_output(i-1),
+               y => s_scale(i),
+               s => s_iir_input(i));
   end generate;
   
   -- Last multiplier -----------------------------------------------------------
