@@ -6,6 +6,7 @@ library ieee;
 package filter_pkg is
 
 	type coefficient_array is array(natural range <>) of real;
+	type natural_array     is array(natural range <>) of natural;
 
 end package;
 
