@@ -16,8 +16,8 @@ use ieee.numeric_std.all;
 entity Generic_Equalizer_No_Change_Test is
   port(clk    : in  std_logic;
        reset  : in  std_logic;
-       input  : in  std_logic_vector(7 downto 0);
-       output : out std_logic_vector(7 downto 0));
+       input  : in  std_logic_vector(15 downto 0);
+       output : out std_logic_vector(15 downto 0));
 end Generic_Equalizer_No_Change_Test;
 
 --------------------------------------------------------------------------------
@@ -41,33 +41,86 @@ begin
   end process;
 
   Generic_Equalizer : entity work.Generic_Equalizer
-  generic map(NO_SECTIONS    => 3,
+  generic map(NO_SECTIONS    => 9,
 			
-			  DATA_WIDTH     => 8,
-              DATA_FRACT     => 6,
+			  DATA_WIDTH     => 16,
+              DATA_FRACT     => 14,
 
-              SCALE_WIDTH    => 8,
-              SCALE_FRACT    => (6,6,6,6),
+              SCALE_WIDTH    => 16,
+              SCALE_FRACT    => (14,14,14,14,14,14,14,14,14,14),
 
-              INTERNAL_WIDTH => 14,
-              INTERNAL_FRACT => 8,
+              INTERNAL_WIDTH => 30,
+              INTERNAL_FRACT => 24,
 
-              COEFF_WIDTH_B  => 8,
-              COEFF_FRACT_B  => (6,6,6),
-              COEFF_WIDTH_A  => 8,
-              COEFF_FRACT_A  => (6,6,6))
+              COEFF_WIDTH_B  => 16,
+              COEFF_FRACT_B  => (14,14,14,14,14,14,14,14,14),
+              COEFF_WIDTH_A  => 16,
+              COEFF_FRACT_A  => (14,14,14,14,14,14,14,14,14))
    port map(clk        => clk,
             reset      => reset,
             write_mode => write_mode,
             x          => input,
 
-            scale      => (x"40" & x"40" & x"40" & x"40"),
+            scale      => (x"4000" 
+			             & x"4000" 
+						 & x"4000" 
+						 & x"4000" 
+						 & x"4000" 
+						 & x"4000" 
+						 & x"4000" 
+						 & x"4000" 
+						 & x"4000" 
+						 & x"4000"),
 
-            b0         => (x"40" & x"40" & x"40"),
-            b1         => (x"00" & x"00" & x"00"),
-            b2         => (x"00" & x"00" & x"00"),
-            a1         => (x"00" & x"00" & x"00"),
-            a2         => (x"00" & x"00" & x"00"),
+            b0         => (x"4000" 
+			             & x"4000" 
+						 & x"4000" 
+						 & x"4000" 
+						 & x"4000" 
+						 & x"4000" 
+						 & x"4000" 
+						 & x"4000" 
+						 & x"4000"),
+						 
+            b1         => (x"0000" 
+			             & x"0000" 
+						 & x"0000" 
+						 & x"0000" 
+						 & x"0000" 
+						 & x"0000" 
+						 & x"0000" 
+						 & x"0000" 
+						 & x"0000"),
+						 
+            b2         => (x"0000" 
+			             & x"0000" 
+						 & x"0000" 
+						 & x"0000" 
+						 & x"0000" 
+						 & x"0000" 
+						 & x"0000" 
+						 & x"0000" 
+						 & x"0000"),
+			
+            a1         => (x"0000" 
+			             & x"0000" 
+						 & x"0000" 
+						 & x"0000" 
+						 & x"0000" 
+						 & x"0000" 
+						 & x"0000" 
+						 & x"0000" 
+						 & x"0000"),
+			
+            a2         => (x"0000" 
+			             & x"0000" 
+						 & x"0000" 
+						 & x"0000" 
+						 & x"0000" 
+						 & x"0000" 
+						 & x"0000" 
+						 & x"0000" 
+						 & x"0000"),
 
             y          => output);
 
