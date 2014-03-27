@@ -125,7 +125,6 @@ entity Equalizer is
             COEFF_FRACT_3 : natural := 6);
    port(clk        : in  std_logic;
         reset      : in  std_logic;
-        write_mode : in  std_logic;
         x          : in  std_logic_vector(DATA_WIDTH-1 downto 0);
 
         scale_1    : in  std_logic_vector(SCALE_WIDTH_1-1 downto 0);
@@ -197,35 +196,28 @@ signal iir_output_3 : std_logic_vector(DATA_WIDTH-1 downto 0);
 begin
 
   -- Set coefficients
-  process(clk)
-  begin
-    if(rising_edge(clk)) then
-      if(write_mode = '1') then
-        s_scale_1 <= scale_1;
-        s_scale_2 <= scale_2;
-        s_scale_3 <= scale_3;
-        s_scale_4 <= scale_4;
+  s_scale_1 <= scale_1;
+  s_scale_2 <= scale_2;
+  s_scale_3 <= scale_3;
+  s_scale_4 <= scale_4;
 
-        s_b0_1    <= b0_1;
-        s_b1_1    <= b1_1;
-        s_b2_1    <= b2_1;
-        s_a1_1    <= a1_1;
-        s_a2_1    <= a2_1;
+  s_b0_1    <= b0_1;
+  s_b1_1    <= b1_1;
+  s_b2_1    <= b2_1;
+  s_a1_1    <= a1_1;
+  s_a2_1    <= a2_1;
 
-        s_b0_2    <= b0_2;
-        s_b1_2    <= b1_2;
-        s_b2_2    <= b2_2;
-        s_a1_2    <= a1_2;
-        s_a2_2    <= a2_2;
+  s_b0_2    <= b0_2;
+  s_b1_2    <= b1_2;
+  s_b2_2    <= b2_2;
+  s_a1_2    <= a1_2;
+  s_a2_2    <= a2_2;
 
-        s_b0_3    <= b0_3;
-        s_b1_3    <= b1_3;
-        s_b2_3    <= b2_3;
-        s_a1_3    <= a1_3;
-        s_a2_3    <= a2_3;
-      end if;
-    end if;
-  end process;
+  s_b0_3    <= b0_3;
+  s_b1_3    <= b1_3;
+  s_b2_3    <= b2_3;
+  s_a1_3    <= a1_3;
+  s_a2_3    <= a2_3;
 
   -- Stage 1 -------------------------------------------------------------------
   Multiplier_1 : entity work.Multiplier

@@ -24,21 +24,7 @@ end Generic_Equalizer_Low_Pass;
 --------------------------------------------------------------------------------
 
 architecture behaviour of Generic_Equalizer_Low_Pass is
-
-  signal write_mode : std_logic;
-
 begin
-
-  process(clk, reset)
-  begin
-    if(rising_edge(clk)) then
-	  if(reset = '1') then
-	    write_mode <= '1';
-	  else
-	    write_mode <= '0';
-	  end if;
-	end if;
-  end process;
 
   Generic_Equalizer : entity work.Generic_Equalizer
   generic map(NO_SECTIONS    => 9,
@@ -58,7 +44,6 @@ begin
               COEFF_FRACT_A  => (14,14,14,14,14,14,14,14,14))
    port map(clk        => clk,
             reset      => reset,
-            write_mode => write_mode,
             x          => input,
 
             scale      => (x"4000" 
@@ -99,7 +84,7 @@ begin
 			             & x"0000"
 			             & x"0000" 
 						 & x"0000"),
-            a1         => (x"8ab4" 
+            a1         => (x"754C" 
 			             & x"0000"
 			             & x"0000"
 			             & x"0000"
@@ -108,7 +93,7 @@ begin
 			             & x"0000"
 			             & x"0000" 
 						 & x"0000"),
-            a2         => (x"3620" 
+            a2         => (x"C9E0"
 			             & x"0000"
 			             & x"0000"
 			             & x"0000"

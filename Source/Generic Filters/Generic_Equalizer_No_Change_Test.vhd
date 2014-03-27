@@ -24,21 +24,7 @@ end Generic_Equalizer_No_Change_Test;
 --------------------------------------------------------------------------------
 
 architecture behaviour of Generic_Equalizer_No_Change_Test is
-
-  signal write_mode : std_logic;
-
 begin
-
-  process(clk, reset)
-  begin
-    if(rising_edge(clk)) then
-	  if(reset = '1') then
-	    write_mode <= '1';
-	  else
-	    write_mode <= '0';
-	  end if;
-	end if;
-  end process;
 
   Generic_Equalizer : entity work.Generic_Equalizer
   generic map(NO_SECTIONS    => 9,
@@ -58,7 +44,6 @@ begin
               COEFF_FRACT_A  => (14,14,14,14,14,14,14,14,14))
    port map(clk        => clk,
             reset      => reset,
-            write_mode => write_mode,
             x          => input,
 
             scale      => (x"4000" 

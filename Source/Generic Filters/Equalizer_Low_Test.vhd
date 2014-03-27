@@ -25,8 +25,6 @@ end Equalizer_Low_Test;
 
 architecture behaviour of Equalizer_Low_Test is
 
-  signal write_mode : std_logic;
-  
   constant sa1_1 : std_logic_vector(17 downto 0) := (x"8797") & "00";
   constant sa2_1 : std_logic_vector(17 downto 0) := (x"38d6") & "00";
   constant sa1_2 : std_logic_vector(17 downto 0) := (x"88f3") & "00";
@@ -35,17 +33,6 @@ architecture behaviour of Equalizer_Low_Test is
   constant sa2_3 : std_logic_vector(16 downto 0) := "0" & (x"0dc5");
 
 begin
-
-  process(clk, reset)
-  begin
-    if(rising_edge(clk)) then
-	  if(reset = '1') then
-	    write_mode <= '1';
-	  else
-	    write_mode <= '0';
-	  end if;
-	end if;
-  end process;
 
   Equalizer : entity work.Equalizer
   generic map(DATA_WIDTH    => 16,
@@ -75,7 +62,6 @@ begin
               COEFF_FRACT_3 => 14)
    port map(clk        => clk,
             reset      => reset,
-            write_mode => write_mode,
             x          => input,
 
             scale_1    => x"7fb2",

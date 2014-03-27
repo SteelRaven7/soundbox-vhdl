@@ -116,7 +116,6 @@ entity Generic_Equalizer is
             COEFF_FRACT_A : natural_array := (6,6,6,6,6,6,6,6,6));
    port(clk        : in  std_logic;
         reset      : in  std_logic;
-        write_mode : in  std_logic;
         x          : in  std_logic_vector(DATA_WIDTH-1 downto 0);
 
         scale      : in  std_logic_vector(SCALE_WIDTH*(NO_SECTIONS+1)-1 downto 0);
@@ -156,26 +155,19 @@ signal s_iir_output : internal_array;
 begin
 
   -- Set coefficients
-  process(clk)
-  begin
-    if(rising_edge(clk)) then
-      if(write_mode = '1') then
-	    scale_loop:
-		for i in 0 to NO_SECTIONS loop
-		  s_scale(i) <= scale(SCALE_WIDTH*((NO_SECTIONS+1)-i)-1 downto SCALE_WIDTH*((NO_SECTIONS+1)-i-1));
-		end loop;
-		
-        coefficients_loop:
-		for i in 0 to NO_SECTIONS-1 loop
-		  s_b(i) <= b0(COEFF_WIDTH_B*(NO_SECTIONS-i)-1 downto COEFF_WIDTH_B*(NO_SECTIONS-i-1)) &
-		            b1(COEFF_WIDTH_B*(NO_SECTIONS-i)-1 downto COEFF_WIDTH_B*(NO_SECTIONS-i-1)) &
-		            b2(COEFF_WIDTH_B*(NO_SECTIONS-i)-1 downto COEFF_WIDTH_B*(NO_SECTIONS-i-1));
-		  s_a(i) <= a1(COEFF_WIDTH_A*(NO_SECTIONS-i)-1 downto COEFF_WIDTH_A*(NO_SECTIONS-i-1)) &
-		            a2(COEFF_WIDTH_A*(NO_SECTIONS-i)-1 downto COEFF_WIDTH_A*(NO_SECTIONS-i-1));
-		end loop;
-      end if;
-    end if;
-  end process;
+  gen_scale:
+  for i in 0 to NO_SECTIONS generate
+    s_scale(i) <= scale(SCALE_WIDTH*((NO_SECTIONS+1)-i)-1 downto SCALE_WIDTH*((NO_SECTIONS+1)-i-1));
+  end generate;
+
+  gen_coefficients:
+  for i in 0 to NO_SECTIONS-1 generate
+    s_b(i) <= b0(COEFF_WIDTH_B*(NO_SECTIONS-i)-1 downto COEFF_WIDTH_B*(NO_SECTIONS-i-1)) &
+	  		  b1(COEFF_WIDTH_B*(NO_SECTIONS-i)-1 downto COEFF_WIDTH_B*(NO_SECTIONS-i-1)) &
+			  b2(COEFF_WIDTH_B*(NO_SECTIONS-i)-1 downto COEFF_WIDTH_B*(NO_SECTIONS-i-1));
+    s_a(i) <= a1(COEFF_WIDTH_A*(NO_SECTIONS-i)-1 downto COEFF_WIDTH_A*(NO_SECTIONS-i-1)) &
+			  a2(COEFF_WIDTH_A*(NO_SECTIONS-i)-1 downto COEFF_WIDTH_A*(NO_SECTIONS-i-1));
+  end generate;
   
   -- First multiplier ----------------------------------------------------------
   Multiplier_in : entity work.Multiplier
