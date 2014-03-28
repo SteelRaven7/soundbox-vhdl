@@ -69,7 +69,7 @@ begin
 --                  output=>output_signal
 --           );
 
-test_comp: entity work.Generic_Equalizer_Low_Pass 
+test_comp: entity work.Generic_Equalizer_No_Change_Test 
 port map (input => input_signal,
 					output => output_signal,
 					clk=> clock,
@@ -113,7 +113,7 @@ output_signal1 <= SIGNED(output_signal(15 downto 0));
 datawrite <= REAL(CONV_INTEGER(output_signal1))/65536.0 ;
 
 writing:process
-			file      outfile  : text is out "Output_Low.txt";  --declare output file
+			file      outfile  : text is out "Output.txt";  --declare output file
 			variable  outline  : line;   --line number declaration  					
 		begin					
 			wait until clock = '0' and clock'event;

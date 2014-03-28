@@ -211,7 +211,7 @@ begin
     generic map(X_WIDTH    => INTERNAL_WIDTH,
                 X_FRACTION => INTERNAL_FRACT,
                 Y_WIDTH    => SCALE_WIDTH,
-                Y_FRACTION => SCALE_FRACT(i+1),
+                Y_FRACTION => SCALE_FRACT(i),
                 S_WIDTH    => INTERNAL_WIDTH,
                 S_FRACTION => INTERNAL_FRACT)
       port map(x => s_iir_output(i-1),

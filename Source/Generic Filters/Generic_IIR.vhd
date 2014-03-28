@@ -87,6 +87,7 @@ architecture behaviour of Generic_IIR is
   type array_b_coeffecient is array(0 to N-1) of std_logic_vector(B_WIDTH-1        downto 0);
   type array_a_coeffecient is array(1 to N-1) of std_logic_vector(A_WIDTH-1        downto 0);
   type array_internal      is array(0 to N-1) of std_logic_vector(INTERNAL_WIDTH-1 downto 0);
+  type array_internal_a    is array(1 to N-1) of std_logic_vector(INTERNAL_WIDTH-1 downto 0);
   
   -- Coefficients
   signal coefficients_b : array_b_coeffecient;
@@ -94,12 +95,12 @@ architecture behaviour of Generic_IIR is
   
   -- Signal Declarations
   signal input_copy   : std_logic_vector(INTERNAL_WIDTH-1 downto 0);
-  signal my_inputs    : array_internal := (others => (others => '0'));
-  signal my_outputs   : array_internal := (others => (others => '0'));
-  signal my_mults_in  : array_internal := (others => (others => '0'));
-  signal my_mults_out : array_internal := (others => (others => '0'));
-  signal my_sum_in    : array_internal := (others => (others => '0'));
-  signal my_sum_out   : array_internal := (others => (others => '0'));
+  signal my_inputs    : array_internal   := (others => (others => '0'));
+  signal my_outputs   : array_internal   := (others => (others => '0'));
+  signal my_mults_in  : array_internal   := (others => (others => '0'));
+  signal my_mults_out : array_internal_a := (others => (others => '0'));
+  signal my_sum_in    : array_internal   := (others => (others => '0'));
+  signal my_sum_out   : array_internal   := (others => (others => '0'));
   
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -184,7 +185,7 @@ begin
   -- Add the output multiplications together
   my_sum_out(N-1) <= my_mults_out(N-1);
 
-  AdderSat_0 : entity work.AdderSat
+  AdderSat_Out_0 : entity work.AdderSat
   generic map(wordLength => INTERNAL_WIDTH)
   port map(a => my_sum_in(0),
   	       b => my_sum_out(1),
