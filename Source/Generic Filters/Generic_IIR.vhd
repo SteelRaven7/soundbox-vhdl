@@ -1,17 +1,21 @@
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Description:                                                               --
--- Implementation of a discrete-time, second-order, direct-form I IIR filter. --
+-- Implementation of a discrete-time, direct-form I IIR filter.               --
 -- This filter uses fixed point arithmetic to do it's calculations and can be --
 -- described by the following mathematical formula:                           --
--- Y[k] = B0*X[k] + B1*X[k-1] + B2*X[k-2] + A1*Y[k-1] + A2*Y[k-1]             --
+-- Y[k] = B0*X[k] + B1*X[k-1] + Bn*X[k-n] + A1*Y[k-1] + An*Y[k-n]             --
 --                                                                            --
 --                                                                            --
 -- Generic:                                                                   --
+-- ORDER             - The order of the filter                                --
 -- IN_WIDTH          - The width of the input signal                          --
 -- IN_FRACT          - The width of the fractional part of the input signal   --
--- COEFFICIENT_WIDTH - The width of the filter coefficients                   --
--- COEFFICIENT_FRACT - The width of the fractional part of the filter         --
+-- B_WIDTH           - The width of the B coefficients                        --
+-- B_FRACT           - The width of the fractional part of the B              --
+--                     coefficients                                           --
+-- A_WIDTH           - The width of the A coefficients                        --
+-- A_FRACT           - The width of the fractional part of the A              --
 --                     coefficients                                           --
 -- INTERNAL_WIDTH    - The width of internal states of the filter             --
 -- INTERNAL_FRACT    - The width of the fractional part of internal states in --
@@ -24,21 +28,11 @@
 -- clk               - System clock                                           --
 -- reset             - Asynchronous reset that resets when high               --
 -- x                 - Input signal to be filtered                            --
--- B0                - Coefficient                                            --
--- B1                - Coefficient                                            --
--- B2                - Coefficient                                            --
--- A1                - Coefficient                                            --
--- A2                - Coefficient                                            --
+-- B                 - An array containing all the B-coefficients starting    --
+--                     with B0                                                --
+-- A                 - An array containing all the A-coefficients starting    --
+--                     with A1                                                --
 -- y                 - Output signal                                          --
---                                                                            --
---                                                                            --
--- Internal Constants:                                                        --
--- N                 - Number of coefficients, this number is three for a     --
---                     second order filter and should not be changed. The     --
---                     constant is mearly there to simplify creation of       --
---                     higher order filters. Note that for this to be done    --
---                     successfully, you have to increase the number of       --
---                     coefficients as well.                                  --
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
@@ -156,7 +150,7 @@ begin
   -- Multiply the input with coefficients
   gen_mults_in:
   for i in 0 to N-1 generate
-    Multiplier_in : entity work.Multiplier
+    Multiplier_in : entity work.Multiplier_Saturate
     generic map(X_WIDTH    => INTERNAL_WIDTH,
                 X_FRACTION => INTERNAL_FRACT,
                 Y_WIDTH    => B_WIDTH,
@@ -203,7 +197,7 @@ begin
   -- Multiply the output with coefficients
   gen_mults_out:
   for i in 1 to N-1 generate
-    Multiplier_out : entity work.Multiplier
+    Multiplier_out : entity work.Multiplier_Saturate
     generic map(X_WIDTH    => INTERNAL_WIDTH,
                 X_FRACTION => INTERNAL_FRACT,
                 Y_WIDTH    => A_WIDTH,

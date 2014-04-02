@@ -1,8 +1,24 @@
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Description:                                                               --
+-- This components takes two inputs ,x and y, and outputs their signed        --
+-- product on the output s. This component also allows width-scaling of the   --
+-- output in any direction and size. This sclaling may leed to overflow in    --
+-- the output. In that case, the output is saturated.                         --
 --                                                                            --
+-- Generics:                                                                  --
+-- X_WIDTH       - Bitwidth of the input x                                    --
+-- X_FRACTION    - Fractional width of the input x                            --
+-- Y_WIDTH       - Bitwidth of the input y                                    --
+-- Y_FRACTION    - Fractional width of the input y                            --
+-- S_WIDTH       - Bitwidth of the output s                                   --
+-- S_FRACTION    - Fractional width of the output s                           --
 --                                                                            --
+-- Input/Output:                                                              --
+-- x             - First term.                                                --
+-- y             - Second term                                                --
+-- overflow      - Overflow indicator                                         --
+-- s             - Product                                                    --
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
