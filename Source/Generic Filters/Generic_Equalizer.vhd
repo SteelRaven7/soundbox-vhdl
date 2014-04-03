@@ -10,8 +10,10 @@
 -- NO_SECTIONS       - The number of second order sections that the equalizer --
 --                   - should be made up out of                               --
 --                                                                            --
--- DATA_WIDTH        - The width of the input and output data                 --
--- DATA_FRACT        - The fractional width of the input and output data      --
+-- INPUT_WIDTH       - The width of the input data                            --
+-- INPUT_FRACT       - The fractional width of the input data                 --
+-- OUTPUT_WIDTH      - The width of the output data                           --
+-- OUTPUT_FRACT      - The fractional width of the output data                --
 --                                                                            --
 -- SCALE_WIDTH       - The width of the scaling coefficients                  --
 -- SCALE_FRACT       - An array of the fractional widths of the scaling       --
@@ -62,8 +64,10 @@ use work.filter_pkg.all;
 entity Generic_Equalizer is
    generic (NO_SECTIONS : natural         := 9;
 			
-			DATA_WIDTH : natural          := 8;
-            DATA_FRACT : natural          := 6;
+			INPUT_WIDTH  : natural        := 8;
+            INPUT_FRACT  : natural        := 6;
+			OUTPUT_WIDTH : natural        := 8;
+            OUTPUT_FRACT : natural        := 6;
 
             SCALE_WIDTH : natural         := 8;
             SCALE_FRACT : natural_array   := (6,6,6,6,6,6,6,6,6,6);
@@ -77,7 +81,7 @@ entity Generic_Equalizer is
             COEFF_FRACT_A : natural_array := (6,6,6,6,6,6,6,6,6));
    port(clk        : in  std_logic;
         reset      : in  std_logic;
-        x          : in  std_logic_vector(DATA_WIDTH-1 downto 0);
+        x          : in  std_logic_vector(INPUT_WIDTH-1 downto 0);
 
         scale      : in  std_logic_vector(SCALE_WIDTH*(NO_SECTIONS+1)-1 downto 0);
 
@@ -87,7 +91,7 @@ entity Generic_Equalizer is
         a1         : in  std_logic_vector(COEFF_WIDTH_A*(NO_SECTIONS)-1 downto 0);
         a2         : in  std_logic_vector(COEFF_WIDTH_A*(NO_SECTIONS)-1 downto 0);
 
-        y          : out std_logic_vector(DATA_WIDTH-1 downto 0));
+        y          : out std_logic_vector(OUTPUT_WIDTH-1 downto 0));
 end Generic_Equalizer;
 
 --------------------------------------------------------------------------------
@@ -132,8 +136,8 @@ begin
   
   -- First multiplier ----------------------------------------------------------
   Multiplier_in : entity work.Multiplier_Saturate
-  generic map(X_WIDTH    => DATA_WIDTH,
-              X_FRACTION => DATA_FRACT,
+  generic map(X_WIDTH    => INPUT_WIDTH,
+              X_FRACTION => INPUT_FRACT,
               Y_WIDTH    => SCALE_WIDTH,
               Y_FRACTION => SCALE_FRACT(0),
               S_WIDTH    => INTERNAL_WIDTH,
@@ -186,8 +190,8 @@ begin
               X_FRACTION => INTERNAL_FRACT,
               Y_WIDTH    => SCALE_WIDTH,
               Y_FRACTION => SCALE_FRACT(NO_SECTIONS),
-              S_WIDTH    => DATA_WIDTH,
-              S_FRACTION => DATA_FRACT)
+              S_WIDTH    => OUTPUT_WIDTH,
+              S_FRACTION => OUTPUT_FRACT)
     port map(x => s_iir_output(NO_SECTIONS-1),
              y => s_scale(NO_SECTIONS),
              s => y);

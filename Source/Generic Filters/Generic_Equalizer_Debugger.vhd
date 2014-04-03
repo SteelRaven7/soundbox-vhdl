@@ -29,8 +29,10 @@ begin
   Generic_Equalizer : entity work.Generic_Equalizer
   generic map(NO_SECTIONS    => 9,
 			
-			  DATA_WIDTH     => 16,
-              DATA_FRACT     => 15,
+              INPUT_WIDTH    => 16,
+              INPUT_FRACT    => 14,
+              OUTPUT_WIDTH   => 16,
+              OUTPUT_FRACT   => 14,
 
               SCALE_WIDTH    => 16,
               SCALE_FRACT    => (14,14,14,14,14,14,14,14,14,14),
