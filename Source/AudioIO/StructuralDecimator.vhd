@@ -6,14 +6,14 @@ entity StructuralDecimator is
 	port (
 		clk: in std_logic;
 		reset: in std_logic;
-		input: in std_logic_vector(11 downto 0);
+		input: in std_logic_vector(31 downto 0);
 		output: out std_logic_vector(15 downto 0)
 	);
 end entity ; -- StructuralDecimator
 
 architecture arch of StructuralDecimator is
-	constant internalWordLength : natural := 20;
-	constant internalFractions : natural := 18;
+	constant internalWordLength : natural :=32;
+	constant internalFractions : natural := 31;
 
 	signal out_stage1: std_logic_vector(internalWordLength-1 downto 0);
 	signal out_stage2: std_logic_vector(internalWordLength-1 downto 0);
@@ -135,11 +135,11 @@ begin
 	fiter_1: entity work.FIR
 	generic map(
 		
-		wordLength => 12,
-		fractionalBits => 11,
+		wordLength => internalWordLength,
+		fractionalBits => internalFractions,
 
-		coeffWordLength => 12,
-		coeffFractionalBits => 11,
+		coeffWordLength => 16,
+		coeffFractionalBits => 15,
 
 		sumWordLength => internalWordLength,
 		sumFractionalBits => internalFractions,
@@ -149,13 +149,13 @@ begin
 
 		order => 6,
 		coefficients => (
-			-0.03173828125,
-			0.0,
-			0.28173828125,
-			0.5,
-			0.28173828125,
-			0.0,
-			-0.03173828125
+		-0.03167724609375,                                           
+         0.0,                                                          
+         0.2816619873046875,                                         
+         0.4999847412109375,                                         
+         0.2816619873046875,                                         
+         0.0,                                                         
+        -0.03167724609375
 		)
 	)
 	port map(
@@ -174,8 +174,8 @@ begin
 		wordLength => internalWordLength,
 		fractionalBits => internalFractions,
 
-		coeffWordLength => 12,
-		coeffFractionalBits => 11,
+		coeffWordLength => 16,
+		coeffFractionalBits => 15,
 
 		sumWordLength => internalWordLength,
 		sumFractionalBits => internalFractions,
@@ -185,13 +185,13 @@ begin
 
 		order => 6,
 		coefficients => (
-			-0.033203125,
-			0.0,
-			0.28271484375,
-			0.5,
-			0.28271484375,
-			0.0,
-			-0.033203125
+		-0.0329742431640625,                                         
+         0.0,                                                          
+         0.2829132080078125,                                         
+         0.4999847412109375,                                         
+         0.2829132080078125,                                         
+         0.0,                                                          
+        -0.0329742431640625
 		)
 	)
 
@@ -210,8 +210,8 @@ begin
 		wordLength => internalWordLength,
 		fractionalBits => internalFractions,
 
-		coeffWordLength => 12,
-		coeffFractionalBits => 11,
+		coeffWordLength => 16,
+		coeffFractionalBits => 15,
 
 		sumWordLength => internalWordLength,
 		sumFractionalBits => internalFractions,
@@ -221,13 +221,13 @@ begin
 
 		order => 6,
 		coefficients => (
-			-0.0390625,
-			0.0,
-			0.28759765625,
-			0.5,
-			0.28759765625,
-			0.0,
-			-0.0390625
+		-0.0388641357421875,                                         
+         0.0,                                                          
+         0.287811279296875,                                          
+         0.4999847412109375,                                         
+         0.287811279296875,                                          
+         0.0,                                                          
+        -0.0388641357421875
 		)
 	)
 	port map(
@@ -245,8 +245,8 @@ begin
 		wordLength => internalWordLength,
 		fractionalBits => internalFractions,
 
-		coeffWordLength => 12,
-		coeffFractionalBits => 11,
+		coeffWordLength => 16,
+		coeffFractionalBits => 15,
 
 		sumWordLength => internalWordLength,
 		sumFractionalBits => internalFractions,
@@ -256,21 +256,21 @@ begin
 
 		order => 14,
 		coefficients => (
-			-0.01025390625,
-			0.0,
-			0.03173828125,
-			0.0,
-			-0.083984375,
-			0.0,
-			0.31005859375,
-			0.5,
-			0.31005859375,
-			0.0,
-			-0.083984375,
-			0.0,
-			0.03173828125,
-			0.0,
-			-0.01025390625
+		-0.01043701171875,                                           
+         0.0,                                                          
+         0.03179931640625,                                           
+         0.0,                                                          
+        -0.0837554931640625,                                         
+         0.0,                                                          
+         0.3102569580078125,                                         
+         0.4999847412109375,                                         
+         0.3102569580078125,                                         
+         0.0,                                                          
+        -0.0837554931640625,                                         
+         0.0,                                                          
+         0.03179931640625,                                           
+         0.0,                                                          
+        -0.01043701171875 
 		)
 	)
 	port map(

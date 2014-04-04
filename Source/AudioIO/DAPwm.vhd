@@ -24,9 +24,18 @@ architecture arch of DAPwm is
 	end record;
 
 	signal r, rin : reg_type;
+
+	signal inputUnsigned : std_logic_vector(wordLength-1 downto 0);
 begin
 
 	output <= r.bit;
+
+	-- Flip the MSB to map from signed fixed input to output duty cycle
+	--1000 -> 0000
+	--1111 -> 0111
+	--0000 -> 1000
+	--0111 -> 1111
+	inputUnsigned <= not(input(wordLength-1)) & input(wordLength-2 downto 0);
 
 
 	sampleClkGenerator : entity work.ClockDivider
@@ -49,16 +58,21 @@ begin
 		end if;
 	end process ; -- clk_proc
 
-	comb_proc : process( r, rin, input, sampleClk )
+	comb_proc : process( r, rin, inputUnsigned, sampleClk )
 		variable v : reg_type;
 	begin
 		v := r;
 
 		if(sampleClk = '1') then
-			v.countdown := to_integer(unsigned(input));
-			-- We assume that the counter isn't 0.
-			v.bit := '1';
-		elsif(r.countdown = 0) then
+			v.countdown := to_integer(unsigned(inputUnsigned));
+
+			-- If statement may be removed for optimization
+			if(v.countdown >= 0) then
+				v.bit := '1';
+			else
+				v.bit := '0';
+			end if;
+		elsif(r.countdown <= 0) then
 			v.bit := '0';
 		else
 			v.countdown := r.countdown-1;

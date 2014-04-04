@@ -1,223 +1,117 @@
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
--- Description:                                                               --
--- Implementation of a discrete-time, second-order, direct-form I IIR filter. --
--- This filter uses fixed point arithmetic to do it's calculations and can be --
--- described by the following mathematical formula:                           --
--- Y[k] = B0*X[k] + B1*X[k-1] + B2*X[k-2] + A1*Y[k-1] + A2*Y[k-1]             --
---                                                                            --
---                                                                            --
--- Generic:                                                                   --
--- IN_WIDTH          - The width of the input signal                          --
--- IN_FRACT          - The width of the fractional part of the input signal   --
--- COEFFICIENT_WIDTH - The width of the filter coefficients                   --
--- COEFFICIENT_FRACT - The width of the fractional part of the filter         --
---                     coefficients                                           --
--- INTERNAL_WIDTH    - The width of internal states of the filter             --
--- INTERNAL_FRACT    - The width of the fractional part of internal states in --
---                     the filter                                             --
--- OUT_WIDTH         - The width of the output signal                         --
--- OUT_FRACT         - The width of the fractional part of the output signal  --
---                                                                            --
---                                                                            --
--- Input/Output:                                                              --
--- clk               - System clock                                           --
--- reset             - Asynchronous reset that resets when high               --
--- x                 - Input signal to be filtered                            --
--- B0                - Coefficient                                            --
--- B1                - Coefficient                                            --
--- B2                - Coefficient                                            --
--- A1                - Coefficient                                            --
--- A2                - Coefficient                                            --
--- y                 - Output signal                                          --
---                                                                            --
---                                                                            --
--- Internal Constants:                                                        --
--- N                 - Number of coefficients, this number is three for a     --
---                     second order filter and should not be changed. The     --
---                     constant is mearly there to simplify creation of       --
---                     higher order filters. Note that for this to be done    --
---                     successfully, you have to increase the number of       --
---                     coefficients as well.                                  --
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
+
+------------------------------------------------------
+------------------------------------------------------
+-- Description:                                     --
+-- Implementation of a generic direct IIR-filter    --
+-- Note that the lower bits will be binals          --
+--                                                  --
+-- Input/Output:                                    --
+-- WIDTH      - Width of input and output           --
+-- N          - Number of coefficients              --
+-- clk        - Clock                               --
+-- clk_en     - Clock enable, takes input when high --
+-- x          - Input, WIDTH bits                   --
+-- y          - Output, WIDTH bits                  --
+--                                                  --
+-- Internal Constants                               --
+-- N_WIDTH    - Width of the coefficients           --
+-- N_BINALS   - Number of binals in the coefficients--
+------------------------------------------------------
+------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-use work.fixed_pkg.all;
 
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
 entity Generic_IIR is
-   generic (ORDER          : natural := 2;
-            IN_WIDTH       : natural := 8;
-            IN_FRACT       : natural := 6;
-            B_WIDTH        : natural := 8;
-            B_FRACT        : natural := 6;
-            A_WIDTH        : natural := 8;
-            A_FRACT        : natural := 6;
-			INTERNAL_WIDTH : natural := 12;
-			INTERNAL_FRACT : natural := 8;
-			OUT_WIDTH      : natural := 8;
-			OUT_FRACT      : natural := 6);
-   port(clk   : in  std_logic;
-		reset : in  std_logic;
-        x     : in  std_logic_vector(IN_WIDTH-1            downto 0);
-        B     : in  std_logic_vector((B_WIDTH*(ORDER+1))-1 downto 0);
-        A     : in  std_logic_vector((A_WIDTH*ORDER)-1     downto 0);
-        y     : out std_logic_vector(OUT_WIDTH-1           downto 0));
+   generic (WIDTH : integer := 16;
+            N     : integer := 2);
+   port(clk    : in  std_logic;
+        clk_en : in  std_logic;
+        x      : in  std_logic_vector(WIDTH-1 downto 0);
+        y      : out std_logic_vector(WIDTH-1 downto 0));
 end Generic_IIR;
 
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
 architecture behaviour of Generic_IIR is
-
   -- Constants
-  constant N               : natural := ORDER + 1;
-  constant IN_INT          : natural := IN_WIDTH       - IN_FRACT;
-  constant B_INT           : natural := B_WIDTH        - B_FRACT;
-  constant A_INT           : natural := A_WIDTH        - A_FRACT;
-  constant INTERNAL_INT    : natural := INTERNAL_WIDTH - INTERNAL_FRACT;
-  constant OUT_INT         : natural := OUT_WIDTH      - OUT_FRACT;
+  constant N_WIDTH  : integer := 24;
+  constant N_BINALS : integer := 22;
   
   -- Type declarations
-  type array_b_coeffecient is array(0 to N-1) of std_logic_vector(B_WIDTH-1        downto 0);
-  type array_a_coeffecient is array(1 to N-1) of std_logic_vector(A_WIDTH-1        downto 0);
-  type array_internal      is array(0 to N-1) of std_logic_vector(INTERNAL_WIDTH-1 downto 0);
-  type array_internal_a    is array(1 to N-1) of std_logic_vector(INTERNAL_WIDTH-1 downto 0);
+  type array_input         is array(0 to N-1) of std_logic_vector(WIDTH-1           downto 0);
+  type array_coeffecient_b is array(0 to N-1) of std_logic_vector(        N_WIDTH-1 downto 0);
+  type array_coeffecient_a is array(1 to N-1) of std_logic_vector(        N_WIDTH-1 downto 0);
+  type array_result        is array(0 to N-1) of signed          (WIDTH + N_WIDTH-1 downto 0);
   
-  -- Coefficients
-  signal coefficients_b : array_b_coeffecient;
-  signal coefficients_a : array_a_coeffecient;
+  -- Koefficients
+  constant coefficients_b : array_coeffecient_b := (0 => "010000000000000000000000",
+                                                    1 => "000000000000000000000000");
+  constant coefficients_a : array_coeffecient_a := (1 => "010000000000000000000000");
   
   -- Signal Declarations
-  signal input_copy   : std_logic_vector(INTERNAL_WIDTH-1 downto 0);
-  signal my_inputs    : array_internal   := (others => (others => '0'));
-  signal my_outputs   : array_internal   := (others => (others => '0'));
-  signal my_mults_in  : array_internal   := (others => (others => '0'));
-  signal my_mults_out : array_internal_a := (others => (others => '0'));
-  signal my_sum_in    : array_internal   := (others => (others => '0'));
-  signal my_sum_out   : array_internal   := (others => (others => '0'));
-  
+  signal my_inputs    : array_input  := (others => (others => '0'));
+  signal my_outputs   : array_input  := (others => (others => '0'));
+  signal my_mults_in  : array_result := (others => (others => '0'));
+  signal my_mults_out : array_result := (others => (others => '0'));
+  signal my_sum_in    : array_result := (others => (others => '0'));
+  signal my_sum_out   : array_result := (others => (others => '0'));
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
-
 begin
 
-  -- Assign coefficients
-  assign_coefficients:
-  for i in 1 to N-1 generate
-    coefficients_b(i) <= B(B_WIDTH*(N-i)-1 downto B_WIDTH*(N-i-1));
-    coefficients_a(i) <= A(A_WIDTH*(N-i)-1 downto A_WIDTH*(N-i-1));
-  end generate assign_coefficients;
-  coefficients_b(0) <= B(B_WIDTH*N-1 downto B_WIDTH*(N-1));
-
-  -- Prepare input to fit into internal bit width
-  input_copy(INTERNAL_WIDTH-1 downto INTERNAL_FRACT + IN_INT)            <= (others => x(IN_WIDTH-1));
-  input_copy(INTERNAL_FRACT + IN_INT-1 downto INTERNAL_FRACT - IN_FRACT) <= x;
-  input_copy(INTERNAL_FRACT - IN_FRACT-1 downto 0)                       <= (others => x(IN_WIDTH-1));
-  
-  -- Shift input and ouput
-  VectorRegisterIn0 : entity work.VectorRegister
-  generic map (
-    wordLength => INTERNAL_WIDTH)
-  port map (
-    input  => input_copy,
-    output => my_inputs(0),
-    clk    => clk,
-    reset  => reset);
-	
-  my_outputs(0) <= my_sum_out(0);
-  
-  gen_shifts:
-  for i in 0 to N-2 generate
-    VectorRegisterIn : entity work.VectorRegister
-	  generic map (
-	    wordLength => INTERNAL_WIDTH)
-	  port map (
-	    input  => my_inputs(i),
-	    output => my_inputs(i+1),
-        clk    => clk,
-	    reset  => reset);
-    VectorRegisterOut : entity work.VectorRegister
-	  generic map (
-	    wordLength => INTERNAL_WIDTH)
-	  port map (
-	    input  => my_outputs(i),
-	    output => my_outputs(i+1),
-        clk    => clk,
-	    reset  => reset);
-  end generate gen_shifts;
+  -- Shift the delay registers
+  my_outputs(0) <= std_logic_vector(my_sum_out(0)(WIDTH + N_BINALS-1 downto N_BINALS));
+  p_shift_inputs : process(clk)
+  begin
+    if(rising_edge(clk)) then
+      if(clk_en = '1') then
+        my_inputs(0)         <= x;
+        my_inputs(1 to N-1)  <= my_inputs(0 to N-2);
+        my_outputs(1 to N-1) <= my_outputs(0 to N-2);
+      end if;
+    end if;
+  end process p_shift_inputs;
   
   
   -- Multiply the input with coefficients
   gen_mults_in:
   for i in 0 to N-1 generate
-    Multiplier_in : entity work.Multiplier
-    generic map(X_WIDTH    => INTERNAL_WIDTH,
-                X_FRACTION => INTERNAL_FRACT,
-                Y_WIDTH    => B_WIDTH,
-                Y_FRACTION => B_FRACT,
-                S_WIDTH    => INTERNAL_WIDTH,
-                S_FRACTION => INTERNAL_FRACT)
-      port map(x => my_inputs(i),
-               y => coefficients_b(i),
-               s => my_mults_in(i));
+    my_mults_in(i) <= signed(my_inputs(i)) * signed(coefficients_b(i));
   end generate gen_mults_in;
   
   
   -- Add the input multiplications together
   my_sum_in(N-1) <= my_mults_in(N-1);
-
   gen_adds_in:
   for i in 0 to N-2 generate
-    AdderSat_in : entity work.AdderSat
-	generic map(wordLength => INTERNAL_WIDTH)
-	port map(a => my_mults_in(i),
-		     b => my_sum_in(i+1),
-		     s => my_sum_in(i));
+    my_sum_in(i) <= my_mults_in(i) + my_sum_in(i+1);
   end generate gen_adds_in;
 
   
   -- Add the output multiplications together
+  my_sum_out(0)   <= my_sum_in(0) + my_sum_out(1);
   my_sum_out(N-1) <= my_mults_out(N-1);
-
-  AdderSat_Out_0 : entity work.AdderSat
-  generic map(wordLength => INTERNAL_WIDTH)
-  port map(a => my_sum_in(0),
-  	       b => my_sum_out(1),
-		   s => my_sum_out(0));
   gen_adds_out:
   for i in 1 to N-2 generate
-    AdderSat_out : entity work.AdderSat
-	generic map(wordLength => INTERNAL_WIDTH)
-	port map(a => my_mults_out(i),
-		     b => my_sum_out(i+1),
-		     s => my_sum_out(i));
+    my_sum_out(i) <= my_sum_out(i+1) + my_mults_out(i);
   end generate gen_adds_out;
   
   
   -- Multiply the output with coefficients
   gen_mults_out:
   for i in 1 to N-1 generate
-    Multiplier_out : entity work.Multiplier
-    generic map(X_WIDTH    => INTERNAL_WIDTH,
-                X_FRACTION => INTERNAL_FRACT,
-                Y_WIDTH    => A_WIDTH,
-                Y_FRACTION => A_FRACT,
-                S_WIDTH    => INTERNAL_WIDTH,
-                S_FRACTION => INTERNAL_FRACT)
-      port map(x => my_outputs(i),
-               y => coefficients_a(i),
-               s => my_mults_out(i));		   
+    my_mults_out(i) <= signed(my_outputs(i)) * signed(coefficients_a(i));
   end generate gen_mults_out;
   
   
   -- Output the result
-  y <= my_outputs(0)(INTERNAL_FRACT + OUT_INT-1 downto INTERNAL_FRACT - OUT_FRACT);
+  y <= my_outputs(0);
 end behaviour;
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
