@@ -2,7 +2,7 @@ library ieee ;
 	use ieee.std_logic_1164.all ;
 	use ieee.numeric_std.all ;
 
-entity ClockDecimator is
+entity SimpleDecimator is
 	generic (
 		wordLength : natural := 8;
 		divider : natural := 2
@@ -14,9 +14,9 @@ entity ClockDecimator is
 		reset : in std_logic;
 		clk : in std_logic
 	);
-end entity ; -- ClockDecimator
+end entity ; -- SimpleDecimator
 
-architecture arch of ClockDecimator is
+architecture arch of SimpleDecimator is
 	type reg_type is record
 		vector : std_logic_vector(wordLength-1 downto 0);
 	end record;

@@ -50,57 +50,57 @@ use work.fixed_pkg.all;
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
-entity Generic_IIR is
-   generic (ORDER          : natural := 2;
-            IN_WIDTH       : natural := 8;
-            IN_FRACT       : natural := 6;
-            B_WIDTH        : natural := 8;
-            B_FRACT        : natural := 6;
-            A_WIDTH        : natural := 8;
-            A_FRACT        : natural := 6;
-			INTERNAL_WIDTH : natural := 12;
-			INTERNAL_FRACT : natural := 8;
-			OUT_WIDTH      : natural := 8;
-			OUT_FRACT      : natural := 6);
-   port(clk   : in  std_logic;
-		reset : in  std_logic;
-        x     : in  std_logic_vector(IN_WIDTH-1            downto 0);
-        B     : in  std_logic_vector((B_WIDTH*(ORDER+1))-1 downto 0);
-        A     : in  std_logic_vector((A_WIDTH*ORDER)-1     downto 0);
-        y     : out std_logic_vector(OUT_WIDTH-1           downto 0));
-end Generic_IIR;
+entity Generic_IIR_SO is
+   generic (IN_WIDTH          : natural := 16;
+            IN_FRACT          : natural := 15;
+            COEFFICIENT_WIDTH : natural := 16;
+            COEFFICIENT_FRACT : natural := 15;
+			INTERNAL_WIDTH    : natural := 32;
+			INTERNAL_FRACT    : natural := 30;
+			OUT_WIDTH         : natural := 16;
+			OUT_FRACT         : natural := 15);
+   port(clk    : in  std_logic;
+		reset  : in  std_logic;
+        x      : in  std_logic_vector(IN_WIDTH-1          downto 0);
+        B0     : in  std_logic_vector(COEFFICIENT_WIDTH-1 downto 0);
+        B1     : in  std_logic_vector(COEFFICIENT_WIDTH-1 downto 0);
+        B2     : in  std_logic_vector(COEFFICIENT_WIDTH-1 downto 0);
+        A1     : in  std_logic_vector(COEFFICIENT_WIDTH-1 downto 0);
+        A2     : in  std_logic_vector(COEFFICIENT_WIDTH-1 downto 0);
+        y      : out std_logic_vector(OUT_WIDTH-1         downto 0));
+end Generic_IIR_SO;
 
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
-architecture behaviour of Generic_IIR is
+architecture behaviour of Generic_IIR_SO is
 
   -- Constants
-  constant N               : natural := ORDER + 1;
-  constant IN_INT          : natural := IN_WIDTH       - IN_FRACT;
-  constant B_INT           : natural := B_WIDTH        - B_FRACT;
-  constant A_INT           : natural := A_WIDTH        - A_FRACT;
-  constant INTERNAL_INT    : natural := INTERNAL_WIDTH - INTERNAL_FRACT;
-  constant OUT_INT         : natural := OUT_WIDTH      - OUT_FRACT;
+  constant N : natural := 3; -- Number of x-coefficients
+  constant IN_INT          : natural := IN_WIDTH          - IN_FRACT;
+  constant COEFFICIENT_INT : natural := COEFFICIENT_WIDTH - COEFFICIENT_FRACT;
+  constant INTERNAL_INT    : natural := INTERNAL_WIDTH    - INTERNAL_FRACT;
+  constant OUT_INT         : natural := OUT_WIDTH         - OUT_FRACT;
+  constant PRODUCT_WIDTH   : natural := COEFFICIENT_WIDTH + INTERNAL_WIDTH;
+  constant PRODUCT_FRACT   : natural := COEFFICIENT_FRACT + INTERNAL_FRACT;
+  constant PRODUCT_INT     : natural := PRODUCT_WIDTH     - PRODUCT_FRACT;
   
   -- Type declarations
-  type array_b_coeffecient is array(0 to N-1) of std_logic_vector(B_WIDTH-1        downto 0);
-  type array_a_coeffecient is array(1 to N-1) of std_logic_vector(A_WIDTH-1        downto 0);
-  type array_internal      is array(0 to N-1) of std_logic_vector(INTERNAL_WIDTH-1 downto 0);
-  type array_internal_a    is array(1 to N-1) of std_logic_vector(INTERNAL_WIDTH-1 downto 0);
+  type array_coeffecient is array(0 to N-1) of std_logic_vector(COEFFICIENT_WIDTH-1 downto 0);
+  type array_internal    is array(0 to N-1) of std_logic_vector(INTERNAL_WIDTH-1    downto 0);
   
   -- Coefficients
-  signal coefficients_b : array_b_coeffecient;
-  signal coefficients_a : array_a_coeffecient;
+  signal coefficients_b : array_coeffecient;
+  signal coefficients_a : array_coeffecient;
   
   -- Signal Declarations
   signal input_copy   : std_logic_vector(INTERNAL_WIDTH-1 downto 0);
-  signal my_inputs    : array_internal   := (others => (others => '0'));
-  signal my_outputs   : array_internal   := (others => (others => '0'));
-  signal my_mults_in  : array_internal   := (others => (others => '0'));
-  signal my_mults_out : array_internal_a := (others => (others => '0'));
-  signal my_sum_in    : array_internal   := (others => (others => '0'));
-  signal my_sum_out   : array_internal   := (others => (others => '0'));
+  signal my_inputs    : array_internal := (others => (others => '0'));
+  signal my_outputs   : array_internal := (others => (others => '0'));
+  signal my_mults_in  : array_internal := (others => (others => '0'));
+  signal my_mults_out : array_internal := (others => (others => '0'));
+  signal my_sum_in    : array_internal := (others => (others => '0'));
+  signal my_sum_out   : array_internal := (others => (others => '0'));
   
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -108,12 +108,11 @@ architecture behaviour of Generic_IIR is
 begin
 
   -- Assign coefficients
-  assign_coefficients:
-  for i in 1 to N-1 generate
-    coefficients_b(i) <= B(B_WIDTH*(N-i)-1 downto B_WIDTH*(N-i-1));
-    coefficients_a(i) <= A(A_WIDTH*(N-i)-1 downto A_WIDTH*(N-i-1));
-  end generate assign_coefficients;
-  coefficients_b(0) <= B(B_WIDTH*N-1 downto B_WIDTH*(N-1));
+  coefficients_b(0) <= B0;
+  coefficients_b(1) <= B1;
+  coefficients_b(2) <= B2;
+  coefficients_a(1) <= A1;
+  coefficients_a(2) <= A2;
 
   -- Prepare input to fit into internal bit width
   input_copy(INTERNAL_WIDTH-1 downto INTERNAL_FRACT + IN_INT)            <= (others => x(IN_WIDTH-1));
@@ -159,8 +158,8 @@ begin
     Multiplier_in : entity work.Multiplier
     generic map(X_WIDTH    => INTERNAL_WIDTH,
                 X_FRACTION => INTERNAL_FRACT,
-                Y_WIDTH    => B_WIDTH,
-                Y_FRACTION => B_FRACT,
+                Y_WIDTH    => COEFFICIENT_WIDTH,
+                Y_FRACTION => COEFFICIENT_FRACT,
                 S_WIDTH    => INTERNAL_WIDTH,
                 S_FRACTION => INTERNAL_FRACT)
       port map(x => my_inputs(i),
@@ -185,7 +184,7 @@ begin
   -- Add the output multiplications together
   my_sum_out(N-1) <= my_mults_out(N-1);
 
-  AdderSat_Out_0 : entity work.AdderSat
+  AdderSat_0 : entity work.AdderSat
   generic map(wordLength => INTERNAL_WIDTH)
   port map(a => my_sum_in(0),
   	       b => my_sum_out(1),
@@ -206,8 +205,8 @@ begin
     Multiplier_out : entity work.Multiplier
     generic map(X_WIDTH    => INTERNAL_WIDTH,
                 X_FRACTION => INTERNAL_FRACT,
-                Y_WIDTH    => A_WIDTH,
-                Y_FRACTION => A_FRACT,
+                Y_WIDTH    => COEFFICIENT_WIDTH,
+                Y_FRACTION => COEFFICIENT_FRACT,
                 S_WIDTH    => INTERNAL_WIDTH,
                 S_FRACTION => INTERNAL_FRACT)
       port map(x => my_outputs(i),

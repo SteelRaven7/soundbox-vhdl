@@ -48,7 +48,7 @@ architecture behaviour of Generic_FIR is
   type array_coeffecient is array(0 to N-1) of std_logic_vector(        N_WIDTH-1 downto 0);
   type array_result      is array(0 to N-1) of signed          (WIDTH + N_WIDTH-1 downto 0);
   
-  -- Koefficients
+  -- Coefficients
   constant coefficients : array_coeffecient := ("01000000",
                                                 "01000000",
                                                 "01000000",
