@@ -17,16 +17,7 @@ end testbench;
 
 architecture arch_testbench of testbench is 
 
- signal clock	     : std_logic  := '0';
- signal reset_signal : std_logic;
- signal endoffile    : std_logic := '0';
- signal dataread     : real ;
- signal datawrite    : real ;
- signal linenumber   : natural;
- signal input_signal : std_logic_vector(width-1 downto 0);
- signal output_signal: std_logic_vector(width-1 downto 0);
- signal output_signal1: SIGNED(width-1 downto 0);
-
+ 
  -- COMPONENT StructuralDecimator is
  --    Port ( input: in std_logic_vector(11 downto 0);
  --           output: out std_logic_vector(15 downto 0);
