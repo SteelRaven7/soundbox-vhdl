@@ -2,51 +2,32 @@
 --------------------------------------------------------------------------------
 -- Description:                                                               --
 -- This file describes the implementation of a generic equalizer. This        --
--- equaliser is made up out of three second order, direct IIR-filters with    --
+-- equaliser is made up out of N second order, direct IIR-filters with        --
 -- multipliers between.                                                       --
 --                                                                            --
 --                                                                            --
 -- Generic:                                                                   --
--- DATA_WIDTH            - The width of the input data, output data as well   --
---                         as the data signals between the IIR-filters and    --
---                         multipliers                                        --
--- DATA_FRACT            - The factrional width of above data                 --
+-- NO_SECTIONS       - The number of second order sections that the equalizer --
+--                   - should be made up out of                               --
 --                                                                            --
--- SCALE_WIDTH_1         - Data width of the first scaling factor             --
--- SCALE_FRACT_1         - Fractional width of the first scaling factor       --
--- SCALE_WIDTH_2         - Data width of the second scaling factor            --
--- SCALE_FRACT_2         - Fractional width of the second scaling factor      --
--- SCALE_WIDTH_3         - Data width of the third scaling factor             --
--- SCALE_FRACT_3         - Fractional width of the third scaling factor       --
--- SCALE_WIDTH_4         - Data width of the fourth scaling factor            --
--- SCALE_FRACT_4         - Fractional width of the fourth scaling factor      --
+-- INPUT_WIDTH       - The width of the input data                            --
+-- INPUT_FRACT       - The fractional width of the input data                 --
+-- OUTPUT_WIDTH      - The width of the output data                           --
+-- OUTPUT_FRACT      - The fractional width of the output data                --
 --                                                                            --
--- INTERNAL_IIR_WIDTH_1  - Width of the internal calculations within the      --
---                         first IIR-filter                                   --
--- INTERNAL_IIR_FRACT_1  - Fractional width of the internal calculations      --
---                         within the first IIR-filter                        --
--- INTERNAL_IIR_WIDTH_2  - Width of the internal calculations within the      --
---                         second IIR-filter                                  --
--- INTERNAL_IIR_FRACT_2  - Fractional width of the internal calculations      --
---                         within the second IIR-filter                       --
--- INTERNAL_IIR_WIDTH_3  - Width of the internal calculations within the      --
---                         third IIR-filter                                   --
--- INTERNAL_IIR_FRACT_3  - Fractional width of the internal calculations      --
---                         within the third IIR-filter                        --
+-- SCALE_WIDTH       - The width of the scaling coefficients                  --
+-- SCALE_FRACT       - An array of the fractional widths of the scaling       --
+--                     coefficients, starting with the first multiplier       --
 --                                                                            --
--- COEFF_WIDTH_1         - Width of the coefficients used in the first        --
---                         IIR-filter                                         --
--- COEFF_FRACT_1         - Fractional width of the coefficients used in the   --
---                         first IIR-filter                                   --
--- COEFF_WIDTH_2         - Width of the coefficients used in the second       --
---                         IIR-filter                                         --
--- COEFF_FRACT_2         - Fractional width of the coefficients used in the   --
---                         second IIR-filter                                  --
--- COEFF_WIDTH_3         - Width of the coefficients used in the third        --
---                         IIR-filter                                         --
--- COEFF_FRACT_3         - Fractional width of the coefficients used in the   --
---                         third IIR-filter                                   --
+-- INTERNAL_WIDTH    - The width of all internal registers                    --
+-- INTERNAL_FRACT    - The fractional width of all internal registers         --
 --                                                                            --
+-- COEFF_WIDTH_B     - The width of all B-coefficients in the IIR-filters     --
+-- COEFF_FRACT_B     - An array of the fractional widths of all the           --
+--                     B-coefficeints, starting with the first filter         --
+-- COEFF_WIDTH_A     - The width of all A-coefficients in the IIR-filters     --
+-- COEFF_FRACT_A     - An array of the fractional widths of all the           --
+--                     A-coefficeints, starting with the first filter         --
 --                                                                            --
 -- Input/Output:                                                              --
 -- clk               - System clock                                           --
@@ -54,39 +35,21 @@
 -- write_mode        - Write new coefficients when high                       --
 -- x                 - Input                                                  --
 --                                                                            --
--- scale_1           - First scaling factor                                   --
--- scale_2           - Second scaling factor                                  --
--- scale_3           - Third scaling factor                                   --
--- scale_4           - Fourth scaling factor                                  --
+-- scale             - An array of all the scaling factors, put the scaling   --
+--                     value for the first multiplier first                   --
 --                                                                            --
--- b0_1              - B coefficient of the first IIR filter                  --
--- b1_1              - B coefficient of the first IIR filter                  --
--- b2_1              - B coefficient of the first IIR filter                  --
--- a1_1              - A coefficient of the first IIR filter                  --
--- a2_1              - A coefficient of the first IIR filter                  --
---                                                                            --
--- b0_2              - B coefficient of the second IIR filter                 --
--- b1_2              - B coefficient of the second IIR filter                 --
--- b2_2              - B coefficient of the second IIR filter                 --
--- a1_2              - A coefficient of the second IIR filter                 --
--- a2_2              - A coefficient of the second IIR filter                 --
---                                                                            --
--- b0_3              - B coefficient of the third IIR filter                  --
--- b1_3              - B coefficient of the third IIR filter                  --
--- b2_3              - B coefficient of the third IIR filter                  --
--- a1_3              - A coefficient of the third IIR filter                  --
--- a2_3              - A coefficient of the third IIR filter                  --
+-- b0                - An array of all the B0-coefficients, put the           --
+--                     coefficient for the first filter first                 --
+-- b1                - An array of all the B1-coefficients, put the           --
+--                     coefficient for the first filter first                 --
+-- b2                - An array of all the B2-coefficients, put the           --
+--                     coefficient for the first filter first                 --
+-- a1                - An array of all the A1-coefficients, put the           --
+--                     coefficient for the first filter first                 --
+-- a2                - An array of all the A2-coefficients, put the           --
+--                     coefficient for the first filter first                 --
 --                                                                            --
 -- y                 - Output                                                 --
---                                                                            --
---                                                                            --
--- Internal Constants:                                                        --
--- N                 - Number of coefficients, this number is three for a     --
---                     second order filter and should not be changed. The     --
---                     constant is mearly there to simplify creation of       --
---                     higher order filters. Note that for this to be done    --
---                     successfully, you have to increase the number of       --
---                     coefficients as well.                                  --
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
@@ -101,8 +64,10 @@ use work.filter_pkg.all;
 entity Generic_Equalizer is
    generic (NO_SECTIONS : natural         := 9;
 			
-			DATA_WIDTH : natural          := 8;
-            DATA_FRACT : natural          := 6;
+			INPUT_WIDTH  : natural        := 8;
+            INPUT_FRACT  : natural        := 6;
+			OUTPUT_WIDTH : natural        := 8;
+            OUTPUT_FRACT : natural        := 6;
 
             SCALE_WIDTH : natural         := 8;
             SCALE_FRACT : natural_array   := (6,6,6,6,6,6,6,6,6,6);
@@ -116,7 +81,7 @@ entity Generic_Equalizer is
             COEFF_FRACT_A : natural_array := (6,6,6,6,6,6,6,6,6));
    port(clk        : in  std_logic;
         reset      : in  std_logic;
-        x          : in  std_logic_vector(DATA_WIDTH-1 downto 0);
+        x          : in  std_logic_vector(INPUT_WIDTH-1 downto 0);
 
         scale      : in  std_logic_vector(SCALE_WIDTH*(NO_SECTIONS+1)-1 downto 0);
 
@@ -126,7 +91,7 @@ entity Generic_Equalizer is
         a1         : in  std_logic_vector(COEFF_WIDTH_A*(NO_SECTIONS)-1 downto 0);
         a2         : in  std_logic_vector(COEFF_WIDTH_A*(NO_SECTIONS)-1 downto 0);
 
-        y          : out std_logic_vector(DATA_WIDTH-1 downto 0));
+        y          : out std_logic_vector(OUTPUT_WIDTH-1 downto 0));
 end Generic_Equalizer;
 
 --------------------------------------------------------------------------------
@@ -170,9 +135,9 @@ begin
   end generate;
   
   -- First multiplier ----------------------------------------------------------
-  Multiplier_in : entity work.Multiplier
-  generic map(X_WIDTH    => DATA_WIDTH,
-              X_FRACTION => DATA_FRACT,
+  Multiplier_in : entity work.Multiplier_Saturate
+  generic map(X_WIDTH    => INPUT_WIDTH,
+              X_FRACTION => INPUT_FRACT,
               Y_WIDTH    => SCALE_WIDTH,
               Y_FRACTION => SCALE_FRACT(0),
               S_WIDTH    => INTERNAL_WIDTH,
@@ -207,7 +172,7 @@ begin
   -- Multipliers ---------------------------------------------------------------
   gen_multipliers:
   for i in 1 to NO_SECTIONS-1 generate
-    Multiplier : entity work.Multiplier
+    Multiplier : entity work.Multiplier_Saturate
     generic map(X_WIDTH    => INTERNAL_WIDTH,
                 X_FRACTION => INTERNAL_FRACT,
                 Y_WIDTH    => SCALE_WIDTH,
@@ -220,13 +185,13 @@ begin
   end generate;
   
   -- Last multiplier -----------------------------------------------------------
-  Multiplier_out : entity work.Multiplier
+  Multiplier_out : entity work.Multiplier_Saturate
   generic map(X_WIDTH    => INTERNAL_WIDTH,
               X_FRACTION => INTERNAL_FRACT,
               Y_WIDTH    => SCALE_WIDTH,
               Y_FRACTION => SCALE_FRACT(NO_SECTIONS),
-              S_WIDTH    => DATA_WIDTH,
-              S_FRACTION => DATA_FRACT)
+              S_WIDTH    => OUTPUT_WIDTH,
+              S_FRACTION => OUTPUT_FRACT)
     port map(x => s_iir_output(NO_SECTIONS-1),
              y => s_scale(NO_SECTIONS),
              s => y);

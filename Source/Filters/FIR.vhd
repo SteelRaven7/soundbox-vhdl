@@ -7,21 +7,29 @@ library ieee ;
 
 entity FIR is
 	generic (
-		wordLength : natural := 16;
-		fractionalBits : natural := 15;
+		wordLength : natural := 32;
+		fractionalBits : natural := 31;
 
-		coeffWordLength : natural := 16;
-		coeffFractionalBits : natural := 15;
+		coeffWordLength : natural := 12;
+		coeffFractionalBits : natural := 11;
 
-		sumWordLength : natural := 16;
-		sumFractionalBits : natural := 15;
+		sumWordLength : natural := 32;
+		sumFractionalBits : natural := 31;
 
-		outputWordLength : natural := 16;
-		outputFractionalBits : natural := 15;
+		outputWordLength : natural := 32;
+		outputFractionalBits : natural := 31;
 
-		order : natural := 3;
+		order : natural := 6;
 
-		coefficients : coefficient_array := (0.0, 0.0, 0.0, 0.0)
+		coefficients : coefficient_array := (
+			-0.0390625,
+			0.0,
+			0.28759765625,
+			0.5,
+			0.28759765625,
+			0.0,
+			-0.0390625
+		)
 	);
 	port (
 		input : in std_logic_vector(wordLength-1 downto 0);

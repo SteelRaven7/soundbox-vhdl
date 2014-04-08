@@ -33,13 +33,13 @@ architecture arch of EffectFlanger is
 
 	constant delayDuration : natural := 2;
 	constant decayGain : std_logic_vector(wordLength-1 downto 0) := real_to_fixed(0.5, constantsWordLength);
-	constant directGain : std_logic_vector(wordLength-1 downto 0) := real_to_fixed(0.8, constantsWordLength);
+	constant directGain : std_logic_vector(wordLength-1 downto 0) := real_to_fixed(1.0, constantsWordLength);
 	constant echoGain : std_logic_vector(wordLength-1 downto 0) := real_to_fixed(0.7, constantsWordLength);
 
 	-- 2 second max delay
 	constant addressWidth : natural := 11;
-	--signal addressMax : natural := addressWidth-1;
-	signal addressMax : natural := 0;
+	constant addressMax : natural := 440;
+	signal addressOffset : natural := 0;
 
 	signal feedback : std_logic_vector(wordLength-1 downto 0);
 	signal directGained : std_logic_vector(wordLength-1 downto 0);
@@ -50,7 +50,8 @@ architecture arch of EffectFlanger is
 	signal writeBus : std_logic_vector(wordLength-1 downto 0);
 	signal readBus : std_logic_vector(wordLength-1 downto 0);
 	signal writeEnable : std_logic_vector(0 downto 0);
-	signal memoryAddress : std_logic_vector(addressWidth-1 downto 0);
+	signal memoryReadAddress : std_logic_vector(addressWidth-1 downto 0);
+	signal memoryWriteAddress : std_logic_vector(addressWidth-1 downto 0);
 
 	type state_type is (readStart, readWait, read, writeDone);
 
@@ -59,7 +60,8 @@ architecture arch of EffectFlanger is
 	type reg_type is record
 		state : state_type;
 		waitCounter : natural range 0 to waitTime;
-		address : unsigned(addressWidth-1 downto 0);
+		writeAddress : unsigned(addressWidth-1 downto 0);
+		readAddress : unsigned(addressWidth-1 downto 0);
 		writeEnable : std_logic;
 		delayedOutput : std_logic_vector(wordLength-1 downto 0);
 	end record;
@@ -92,7 +94,7 @@ begin
 
 
 	-- Gains
-	directMult : entity work.Multiplier_Saturate
+	directMult : entity work.Multiplier
 	generic map (
 		X_WIDTH    => wordLength,
 		X_FRACTION => wordLength-1,
@@ -108,7 +110,7 @@ begin
 		s => directGained
 	);
 
-	feedbackMult : entity work.Multiplier_Saturate
+	feedbackMult : entity work.Multiplier
 	generic map (
 		X_WIDTH    => wordLength,
 		X_FRACTION => wordLength-1,
@@ -124,7 +126,7 @@ begin
 		s => feedback
 	);
 
-	echoMult : entity work.Multiplier_Saturate
+	echoMult : entity work.Multiplier
 	generic map (
 		X_WIDTH    => wordLength,
 		X_FRACTION => wordLength-1,
@@ -146,7 +148,8 @@ begin
 	writeEnable <= (others => r.writeEnable);
 	delayed <= r.delayedOutput;
 
-	memoryAddress <= std_logic_vector(r.address);
+	memoryReadAddress <= std_logic_vector(r.readAddress);
+	memoryWriteAddress <= std_logic_vector(r.writeAddress);
 
 	memory: blk_mem_gen_Flanger
 	port map (
@@ -155,31 +158,31 @@ begin
 		doutb => readBus,
 		clka => clk,
 		clkb => clk,
-		addra => memoryAddress,
-		addrb => memoryAddress
+		addra => memoryWriteAddress,
+		addrb => memoryReadAddress
 	);
 	
 triangle_proc:process(clk)
 variable intialValue: integer := 0;
-constant  maxValue  : integer := 440;
 constant  minValue  : integer := 0;
+constant sweepLength : natural := 1000;
 variable  temp  	: integer := 0;
 variable counter    : integer  := 0;
 	begin
 		if rising_edge(clk) then
-		if intialValue <= maxValue and temp = 0 then
+		if intialValue <= addressMax and temp = 0 then
 		   	counter := counter + 1 ;
-		   		if counter = 2000 then   			  -- to get a low frequency 
+		   		if counter = sweepLength then   			  -- to get a low frequency 
 		   		intialValue := intialValue + 1;
 		   		counter := 0;
 		    	end if;
 				
-				if intialValue = maxValue then 
+				if intialValue = addressMax then 
 				temp := 1;
 				end if;
 		elsif intialValue >= minValue and temp = 1 then
 			counter := counter + 1 ;
-				if counter = 2000 then 			   	
+				if counter = sweepLength then 			   	
 		   		intialValue := intialValue - 1;
 		   		counter := 0;
 		   		end if ;
@@ -188,7 +191,7 @@ variable counter    : integer  := 0;
 		   		end if;			
 		end if;
 	end if;
-addressMax <= intialValue;
+addressOffset <= intialValue;
 	end process;
 
 
@@ -197,7 +200,8 @@ addressMax <= intialValue;
 	begin
 		if(reset = '1') then
 			r.state <= readStart;
-			r.address <= (others => '0');
+			r.writeAddress <= (others => '0');
+			r.readAddress <= (others => '0');
 			r.writeEnable <= '0';
 			r.delayedOutput <= (others => '0');
 		elsif(rising_edge(clk)) then
@@ -205,12 +209,21 @@ addressMax <= intialValue;
 		end if;
 	end process ; -- clk_proc
 	
-	comb_proc : process( r, rin, readBus, addressMax )
+	comb_proc : process( r, rin, readBus, addressOffset )
 		variable v : reg_type;
+		variable readAddressInteger : integer;
 	begin
 		v := r;
 
 		v.writeEnable := '0';
+
+		readAddressInteger := to_integer(v.writeAddress)-addressOffset;
+
+		if(readAddressInteger > 0) then
+			v.readAddress := to_unsigned(readAddressInteger, addressWidth);
+		else
+			v.readAddress := to_unsigned(addressMax+readAddressInteger, addressWidth);
+		end if;
 
 		case r.state is
 			when readStart =>
@@ -239,10 +252,10 @@ addressMax <= intialValue;
 			when writeDone =>
 				v.state := readStart;
 
-				if(r.address = addressMax) then
-					v.address := (others => '0');
+				if(r.writeAddress = addressMax) then
+					v.writeAddress := (others => '0');
 				else
-					v.address := v.address + 1;
+					v.writeAddress := v.writeAddress + 1;
 				end if;
 
 			when others =>

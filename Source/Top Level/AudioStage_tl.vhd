@@ -26,7 +26,7 @@ architecture arch of AudioStage_tl is
 	signal sampleInputClk : std_logic;
 	signal sampleOutput : std_logic_vector(11 downto 0);
 	
-	signal decimatorInput : std_logic_vector(31 downto 0);
+	signal decimatorInput : std_logic_vector(15 downto 0);
 	signal decimatorOutput : std_logic_vector(15 downto 0);
 	signal decimatorMuxedOutput : std_logic_vector(15 downto 0);
 	
@@ -79,7 +79,7 @@ begin
 	--decimatorInput <= sampleOutput & "0000";
 	--decimatorInput <= sampleOutput and (others => muteInput);
 
-	decimatorInput <= 	sampleOutput & x"00000" when muteInput = '0' else
+	decimatorInput <= 	sampleOutput & x"0" when muteInput = '0' else
 						(others => '0');
 
 
@@ -94,7 +94,7 @@ begin
 
 
 	decimatorMuxedOutput <=	decimatorOutput when bypassLP = '0' else
-							decimatorInput(31 downto 16);
+							decimatorInput;
 
 
 
@@ -164,6 +164,8 @@ effectInputFlanger <= effectOutputEcho when bypassEcho = '0' else
 		clkOut => throughputClk,
 		reset => reset 
 	);
+
+--	temp_eq_out <= temp_eq_in;
 
 	EQ: entity work.Generic_Equalizer_Low_Pass
 	port map(
