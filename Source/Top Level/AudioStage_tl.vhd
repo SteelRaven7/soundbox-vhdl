@@ -125,8 +125,8 @@ effectInputFlanger <= effectOutputEcho when bypassEcho = '0' else
 			      effectInputEcho;
 
 
- pipeline_1: entity work.VectorRegister
- 		generic map(wordLength => 16
+ pipeline_1: entity work.VectorRegister  
+ 		generic map(wordLength => 16 			-- buffer between echo and flanger
  			)
  		port map(
  		input =>effectInputFlanger, 
@@ -165,22 +165,20 @@ effectInputFlanger <= effectOutputEcho when bypassEcho = '0' else
 		reset => reset 
 	);
 
---	temp_eq_out <= temp_eq_in;
+	temp_eq_out <= temp_eq_in;
 
-	EQ: entity work.Generic_Equalizer_Low_Pass
-	port map(
-		clk => throughputClk,
-		reset => reset,
-		input  => temp_eq_in, 
-		output => temp_eq_out
-	);
+	-- EQ: entity work.Generic_Equalizer_Low_Pass
+	-- port map(
+	-- 	clk => throughputClk,
+	-- 	reset => reset,
+	-- 	input  => temp_eq_in, 
+	-- 	output => temp_eq_out
+	-- );
 
---    toPWM <= temp_eq_out(15 downto 7);
- --   	toPWM <= effectOutputEcho(15 downto 7) when bypassEcho = '0' else
- --   			 effectInputEcho(15 downto 7);
-
-	toPWM <= temp_eq_out(15 downto 7) when bypassEQ = '0' else
-		     temp_eq_in(15 downto 7);
+   toPWM <= temp_eq_out(15 downto 7);
+ 
+	-- toPWM <= temp_eq_out(15 downto 7) when bypassEQ = '0' else
+	-- 	     temp_eq_in(15 downto 7);
 
 	-- Output freq: 195.3 kHz
 	PWM: entity work.DAPwm
