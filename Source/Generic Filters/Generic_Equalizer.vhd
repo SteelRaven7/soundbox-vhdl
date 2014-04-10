@@ -32,6 +32,7 @@
 -- Input/Output:                                                              --
 -- clk               - System clock                                           --
 -- reset             - Resets component when high                             --
+-- write_mode        - Write new coefficients when high                       --
 -- x                 - Input                                                  --
 --                                                                            --
 -- scale             - An array of all the scaling factors, put the scaling   --

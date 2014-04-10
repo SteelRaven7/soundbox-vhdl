@@ -79,7 +79,7 @@ begin
 
 			s => sums(i)
 		);
-	end generate ; -- delays 
+	end generate ; -- delays
 
 	multiplication : for i in 0 to order generate
 

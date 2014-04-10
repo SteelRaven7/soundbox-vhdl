@@ -20,20 +20,20 @@ set_property PACKAGE_PIN U9 [get_ports muteInput]
 set_property PACKAGE_PIN U8 [get_ports bypassLP]					
 	set_property IOSTANDARD LVCMOS33 [get_ports bypassLP]
 ##Bank = 34, Pin name = IO_L23P_T3_34,						Sch name = SW2
-set_property PACKAGE_PIN R7 [get_ports bypassEffects]					
-	set_property IOSTANDARD LVCMOS33 [get_ports bypassEffects]
+set_property PACKAGE_PIN R7 [get_ports bypassEcho]					
+	set_property IOSTANDARD LVCMOS33 [get_ports bypassEcho]
 ##Bank = 34, Pin name = IO_L19P_T3_34,						Sch name = SW3
-#set_property PACKAGE_PIN R6 [get_ports {sw[3]}]					
-	#set_property IOSTANDARD LVCMOS33 [get_ports {sw[3]}]
+set_property PACKAGE_PIN R6 [get_ports bypassFlanger]					
+	set_property IOSTANDARD LVCMOS33 [get_ports bypassFlanger]
 ##Bank = 34, Pin name = IO_L19N_T3_VREF_34,					Sch name = SW4
-#set_property PACKAGE_PIN R5 [get_ports {sw[4]}]					
-	#set_property IOSTANDARD LVCMOS33 [get_ports {sw[4]}]
+set_property PACKAGE_PIN R5 [get_ports bypassReverb]					
+	set_property IOSTANDARD LVCMOS33 [get_ports bypassReverb]
 ##Bank = 34, Pin name = IO_L20P_T3_34,						Sch name = SW5
-#set_property PACKAGE_PIN V7 [get_ports {sw[5]}]					
-	#set_property IOSTANDARD LVCMOS33 [get_ports {sw[5]}]
+set_property PACKAGE_PIN V7 [get_ports bypassDistortion]					
+	set_property IOSTANDARD LVCMOS33 [get_ports bypassDistortion]
 ##Bank = 34, Pin name = IO_L20N_T3_34,						Sch name = SW6
-#set_property PACKAGE_PIN V6 [get_ports {sw[6]}]					
-	#set_property IOSTANDARD LVCMOS33 [get_ports {sw[6]}]
+set_property PACKAGE_PIN V6 [get_ports bypassEQ]					
+	set_property IOSTANDARD LVCMOS33 [get_ports bypassEQ]
 ##Bank = 34, Pin name = IO_L10P_T1_34,						Sch name = SW7
 #set_property PACKAGE_PIN V5 [get_ports {sw[7]}]					
 	#set_property IOSTANDARD LVCMOS33 [get_ports {sw[7]}]
