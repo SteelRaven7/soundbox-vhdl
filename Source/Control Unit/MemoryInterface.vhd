@@ -203,28 +203,28 @@ begin
 
 	-- Magically connect the SCLK to the flash through the STARTUPE2 block.
 
-	-- STARTUPE2: STARTUP Block
-	STARTUPE2_inst : STARTUPE2
-	generic map (
-		PROG_USR => "FALSE", -- Activate program event security feature. Requires encrypted bitstreams.
-		SIM_CCLK_FREQ => 5.0 -- Set the Configuration Clock Frequency(ns) for simulation.
-	)
-	port map (
-		--CFGCLK => CFGCLK, -- 1-bit output: Configuration main clock output
-		--CFGMCLK => CFGMCLK, -- 1-bit output: Configuration internal oscillator clock output
-		--EOS => EOS, -- 1-bit output: Active high output signal indicating the End Of Startup.
-		--PREQ => PREQ, -- 1-bit output: PROGRAM request to fabric output
-		CLK => '1', -- 1-bit input: User start-up clock input
-		GSR => '0', -- 1-bit input: Global Set/Reset input (GSR cannot be used for the port name)
-		GTS => '0', -- 1-bit input: Global 3-state input (GTS cannot be used for the port name)
-		KEYCLEARB => '0', -- 1-bit input: Clear AES Decrypter Key input from Battery-Backed RAM (BBRAM)
-		PACK => '0', -- 1-bit input: PROGRAM acknowledge input
-		USRCCLKO => SCLK, -- 1-bit input: User CCLK input
-		USRCCLKTS => '0', -- 1-bit input: User CCLK 3-state enable input
-		USRDONEO => '1', -- 1-bit input: User DONE pin output control
-		USRDONETS => '0' -- 1-bit input: User DONE 3-state enable output
-	);
-	-- End of STARTUPE2_inst instantiation
+--	-- STARTUPE2: STARTUP Block
+--	STARTUPE2_inst : STARTUPE2
+--	generic map (
+--		PROG_USR => "FALSE", -- Activate program event security feature. Requires encrypted bitstreams.
+--		SIM_CCLK_FREQ => 5.0 -- Set the Configuration Clock Frequency(ns) for simulation.
+--	)
+--	port map (
+--		--CFGCLK => CFGCLK, -- 1-bit output: Configuration main clock output
+--		--CFGMCLK => CFGMCLK, -- 1-bit output: Configuration internal oscillator clock output
+--		--EOS => EOS, -- 1-bit output: Active high output signal indicating the End Of Startup.
+--		--PREQ => PREQ, -- 1-bit output: PROGRAM request to fabric output
+--		CLK => '1', -- 1-bit input: User start-up clock input
+--		GSR => '0', -- 1-bit input: Global Set/Reset input (GSR cannot be used for the port name)
+--		GTS => '0', -- 1-bit input: Global 3-state input (GTS cannot be used for the port name)
+--		KEYCLEARB => '0', -- 1-bit input: Clear AES Decrypter Key input from Battery-Backed RAM (BBRAM)
+--		PACK => '0', -- 1-bit input: PROGRAM acknowledge input
+--		USRCCLKO => SCLK, -- 1-bit input: User CCLK input
+--		USRCCLKTS => '0', -- 1-bit input: User CCLK 3-state enable input
+--		USRDONEO => '1', -- 1-bit input: User DONE pin output control
+--		USRDONETS => '0' -- 1-bit input: User DONE 3-state enable output
+--	);
+--	-- End of STARTUPE2_inst instantiation
 
 
 end architecture ; -- arch

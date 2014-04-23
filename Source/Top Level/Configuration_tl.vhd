@@ -47,7 +47,7 @@ begin
 	serialClkGenerator: entity work.ClockDivider
 	generic map (
 		--divider => 10417 -- SoftwareInterfaceClock
-		divider => 5 -- 20 MHz
+		divider => 100 -- 1 MHz
 	)
 	port map(
 		reset => reset,
@@ -71,7 +71,6 @@ begin
 
 	leds <= registerBus.data;
 
-	--address <= x"00" & regMsgCommand;
 	address <= x"0000";
 	MCU: entity work.MemoryController
 	generic map (

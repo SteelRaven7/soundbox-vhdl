@@ -497,11 +497,11 @@ set_property PACKAGE_PIN V10 [get_ports button]
 
 ##USB-RS232 Interface
 ##Bank = 35, Pin name = IO_L7P_T1_AD6P_35,					Sch name = UART_TXD_IN
-#set_property PACKAGE_PIN C4 [get_ports serialIn]						
-	#set_property IOSTANDARD LVCMOS33 [get_ports serialIn]
+set_property PACKAGE_PIN C4 [get_ports serialIn]						
+	set_property IOSTANDARD LVCMOS33 [get_ports serialIn]
 ##Bank = 35, Pin name = IO_L11N_T1_SRCC_35,					Sch name = UART_RXD_OUT
-#set_property PACKAGE_PIN D4 [get_ports serialOut]						
-	#set_property IOSTANDARD LVCMOS33 [get_ports serialOut]
+set_property PACKAGE_PIN D4 [get_ports serialOut]						
+	set_property IOSTANDARD LVCMOS33 [get_ports serialOut]
 ##Bank = 35, Pin name = IO_L12N_T1_MRCC_35,					Sch name = UART_CTS
 #set_property PACKAGE_PIN D3 [get_ports RsCts]						
 	#set_property IOSTANDARD LVCMOS33 [get_ports RsCts]
@@ -567,12 +567,6 @@ set_property PACKAGE_PIN V10 [get_ports button]
 ##Bank = CONFIG, Pin name = CCLK_0,							Sch name = QSPI_SCK
 #set_property PACKAGE_PIN E9 [get_ports {QspiSCK}]					
 	#set_property IOSTANDARD LVCMOS33 [get_ports {QspiSCK}]
-##Bank = CONFIG, Pin name = IO_L1P_T0_D00_MOSI_14,			Sch name = QSPI_DQ0
-set_property PACKAGE_PIN K17 [get_ports SI]				
-	set_property IOSTANDARD LVCMOS33 [get_ports SI]
-##Bank = CONFIG, Pin name = IO_L1N_T0_D01_DIN_14,			Sch name = QSPI_DQ1
-set_property PACKAGE_PIN K18 [get_ports SO]				
-	set_property IOSTANDARD LVCMOS33 [get_ports SO]
 ##Bank = CONFIG, Pin name = IO_L20_T0_D02_14,				Sch name = QSPI_DQ2
 #set_property PACKAGE_PIN L14 [get_ports {QspiDB[2]}]				
 	#set_property IOSTANDARD LVCMOS33 [get_ports {QspiDB[2]}]
@@ -582,6 +576,12 @@ set_property PACKAGE_PIN K18 [get_ports SO]
 ##Bank = CONFIG, Pin name = IO_L15N_T2_DQS_DOUT_CSO_B_14,	Sch name = QSPI_CSN
 set_property PACKAGE_PIN L13 [get_ports CS]					
 	set_property IOSTANDARD LVCMOS33 [get_ports CS]
+##Bank = CONFIG, Pin name = IO_L1P_T0_D00_MOSI_14,			Sch name = QSPI_DQ0
+set_property PACKAGE_PIN K17 [get_ports SI]				
+	set_property IOSTANDARD LVCMOS33 [get_ports SI]
+##Bank = CONFIG, Pin name = IO_L1N_T0_D01_DIN_14,			Sch name = QSPI_DQ1
+set_property PACKAGE_PIN K18 [get_ports SO]				
+	set_property IOSTANDARD LVCMOS33 [get_ports SO]
 
 
 
