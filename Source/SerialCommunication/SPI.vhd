@@ -44,8 +44,8 @@ architecture arch of SPI is
 		outputReady : std_logic;
 		done : std_logic;
 
-		inputIndex : natural range 0 to inputMax;
-		outputIndex : natural range 0 to outputMax;
+		inputIndex : natural range 0 to maxInputWidth-1;
+		outputIndex : natural range 0 to maxOutputWidth-1;
 
 		serialInput : std_logic;
 

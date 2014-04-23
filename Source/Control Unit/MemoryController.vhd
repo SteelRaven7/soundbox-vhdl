@@ -48,6 +48,7 @@ architecture arch of MemoryController is
 	signal MI_address : std_logic_vector(15 downto 0);
 	signal MI_address_padded : std_logic_vector(22 downto 0);
 	signal MI_outputReady : std_logic;
+	signal MI_done : std_logic;
 begin
 	registerBus <= r.registerBus;
 	MI_address <= r.registerBus.address;
@@ -64,6 +65,7 @@ begin
 		dataIn => MI_dataIn,
 		address => MI_address_padded,
 		outputReady => MI_outputReady,
+		done => MI_done,
 
 		CS => CS,
 		SI => SI,
@@ -83,7 +85,7 @@ begin
 		end if;
 	end process ; -- clk_proc
 
-	comb_proc : process(r, rin, MI_outputReady, MI_dataOut, writeConfiguration, readConfiguration, configurationData, configurationAddress )
+	comb_proc : process(r, rin, MI_done, MI_outputReady, MI_dataOut, writeConfiguration, readConfiguration, configurationData, configurationAddress )
 		variable v : reg_type;
 	begin
 		v := r;
@@ -117,8 +119,11 @@ begin
 			when writeMem =>
 				v.dataWrite := '0';
 
-				--v.state := writeReg;
-				--v.registerBus.writeEnable := '1';
+				if(MI_done = '1') then
+					v.state := ready;
+					--v.state := writeReg;
+					--v.registerBus.writeEnable := '1';
+				end if;
 
 			when writeRegPropagate =>
 				v.registerBus.writeEnable := '0';

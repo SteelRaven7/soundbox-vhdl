@@ -5,8 +5,8 @@ library ieee ;
 
 entity Configuration_tl is
 	port (
-		button : in std_logic;
-		button2 : in std_logic;
+		buttonRead : in std_logic;
+		buttonWrite : in std_logic;
 
 		leds : out std_logic_vector(15 downto 0);
 		switches : in std_logic_vector(15 downto 0);
@@ -47,7 +47,7 @@ begin
 	serialClkGenerator: entity work.ClockDivider
 	generic map (
 		--divider => 10417 -- SoftwareInterfaceClock
-		divider => 100 -- 1 MHz
+		divider => 2 -- 10 MHz
 	)
 	port map(
 		reset => reset,
@@ -79,8 +79,8 @@ begin
 	port map (
 		registerBus => registerBus,
 
-		writeConfiguration => button,
-		readConfiguration => button2,
+		writeConfiguration => buttonWrite,
+		readConfiguration => buttonRead,
 		configurationAddress => address,
 		configurationData => switches,
 

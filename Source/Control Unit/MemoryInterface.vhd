@@ -9,8 +9,8 @@ library ieee ;
 	use ieee.numeric_std.all ;
 	use ieee.math_real.all;
 
-library UNISIM;
-	use UNISIM.VCOMPONENTS.all;
+--library UNISIM;
+--	use UNISIM.VCOMPONENTS.all;
 
 entity MemoryInterface is
 	generic (
@@ -24,6 +24,7 @@ entity MemoryInterface is
 		dataIn : in std_logic_vector(dataWidth-1 downto 0);
 		address : in std_logic_vector(addressWidth-1 downto 0);
 
+		done : out std_logic;
 		outputReady : out std_logic;
 
 		-- Serial flash ports
@@ -81,7 +82,7 @@ architecture arch of MemoryInterface is
 	signal spi_done : std_logic;
 	signal SCLK : std_logic;
 
-	type state_type is (res, config, ready, busy);
+	type state_type is (res, config, ready, busy, busy2);
 
 	type reg_type is record
 		state : state_type;
@@ -89,6 +90,7 @@ architecture arch of MemoryInterface is
 		outputMSB : std_logic_vector(outputNumberWidth-1 downto 0);
 		inputMSB : std_logic_vector(inputNumberWidth-1 downto 0);
 		writeEnable : std_logic;
+		done : std_logic;
 	end record;
 
 	signal r, rin : reg_type;
@@ -96,6 +98,9 @@ architecture arch of MemoryInterface is
 begin
 	-- Map to flash address space.
 	flashAddress <= addressMask or (x"00" & (address & '0'));
+
+	-- Propagate the SPI done flag.
+	done <= r.done;
 
 	spi: entity work.SPI
 	generic map (
@@ -127,6 +132,7 @@ begin
 	begin
 		if(reset = '1') then
 			r.state <= res;
+			r.done <= '0';
 			r.writeEnable <= '0';
 		elsif(rising_edge(clk)) then
 			r <= rin;
@@ -162,6 +168,7 @@ begin
 			when ready =>
 
 				v.writeEnable := '0';
+				v.done := '0';
 
 				if(dataWrite = '1') then
 					-- Instruction contains 56 bit input, 0 bit output
@@ -188,6 +195,12 @@ begin
 				v.writeEnable := '0';
 
 				if(spi_done = '1') then
+					v.state := busy2;
+				end if;
+
+			when busy2 =>
+				if(spi_done = '1') then
+					v.done := '1';
 					v.state := ready;
 				end if;
 
