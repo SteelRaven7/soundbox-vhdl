@@ -20,6 +20,7 @@ entity MemoryInterface is
 	port (
 		dataRead : in std_logic;
 		dataWrite : in std_logic;
+		dataClear : in std_logic;
 		dataOut : out std_logic_vector(dataWidth-1 downto 0);
 		dataIn : in std_logic_vector(dataWidth-1 downto 0);
 		address : in std_logic_vector(addressWidth-1 downto 0);
@@ -65,6 +66,8 @@ architecture arch of MemoryInterface is
 	constant instructionWrite : std_logic_vector(7 downto 0) := x"12";
 	constant instructionReadStatus1 : std_logic_vector(7 downto 0) := x"05";
 	constant instructionID : std_logic_vector(7 downto 0) := x"90";
+	constant instructionClearAll : std_logic_vector(7 downto 0) := x"C7";
+	constant instructionClearSector : std_logic_vector(7 downto 0) := x"DC";
 	
 	-- MSB constants for different instruction types
 	constant instruction8MSB : std_logic_vector(inputNumberWidth-1 downto 0) := std_logic_vector(to_unsigned(7, inputNumberWidth));
@@ -86,10 +89,11 @@ architecture arch of MemoryInterface is
 	signal spi_done : std_logic;
 	signal SCLK : std_logic;
 
-	type state_type is (res, config, ready, busy, busy2);
+	type state_type is (res, config, enableWrite, initialClear, clear, flagDone, ready, write, busy, busy2);
 
 	type reg_type is record
 		state : state_type;
+		doneReturnState : state_type;
 		input : std_logic_vector(maxInputWidth-1 downto 0);
 		outputMSB : std_logic_vector(outputNumberWidth-1 downto 0);
 		inputMSB : std_logic_vector(inputNumberWidth-1 downto 0);
@@ -144,7 +148,7 @@ begin
 		end if;
 	end process ; -- clk_proc
 
-	comb_proc : process(r, rin, spi_done, dataIn, dataWrite, dataRead, flashAddress)
+	comb_proc : process(r, rin, spi_done, dataIn, dataWrite, dataRead, dataClear, flashAddress)
 		variable v : reg_type;
 	begin
 		v := r;
@@ -159,6 +163,11 @@ begin
 				end if;
 
 			when config =>
+				
+				-- No need to setup configuration, so pulse the done flag.
+				v.state := flagDone;
+
+			when enableWrite =>
 				-- Send write enable instruction
 
 				-- Instruction contains 8 bit input, 0 bit output
@@ -170,40 +179,70 @@ begin
 				v.writeEnable := '1';
 				v.state := busy;
 
+			when clear =>
+
+				-- Clear the addressed sector
+				v.inputMSB := instruction40MSB;
+				v.outputMSB := (others => '0');
+
+				v.input := padMSB(instructionClearSector&flashAddress, maxInputWidth);
+
+				v.writeEnable := '1';
+				v.state := busy;
+				v.doneReturnState := flagDone;
+
+			when flagDone =>
+				v.done := '1';
+				v.state := ready;
+
 			when ready =>
 
 				v.writeEnable := '0';
 				v.done := '0';
 
-				if(dataWrite = '1') then
-					-- Instruction contains 56 bit input, 0 bit output
-					v.inputMSB := instruction56MSB;
-					v.outputMSB := (others => '0');
+				if(dataClear = '1') then
 
-					v.input := padMSB(instructionWrite&flashAddress&dataIn, maxInputWidth);
+					v.state := enableWrite;
+					v.doneReturnState := clear;
 
-					v.writeEnable := '1';
-					v.state := busy;
+				elsif(dataWrite = '1') then
+					
+					-- We need to set the write enable latch before writing.
+					v.state := enableWrite;
+					v.doneReturnState := write;
+
 				elsif(dataRead = '1') then
+
 					-- Instruction contains 40 bit input, 16 bit output
-					--v.outputMSB := instructionOut16MSB;
-					--v.inputMSB := instruction40MSB;
-					--v.input := padMSB(instructionRead&flashAddress, maxInputWidth);
+					v.outputMSB := instructionOut16MSB;
+					v.inputMSB := instruction40MSB;
+					v.input := padMSB(instructionRead&flashAddress, maxInputWidth);
+
+					-- Read status registers for debugging
+					--v.inputMSB := instruction8MSB;
+					--v.outputMSB := instructionOut8MSB;
+					--v.input := padMSB(instructionReadStatus1, maxInputWidth);
 
 					-- Read ID
 					--v.inputMSB := instruction32MSB;
 					--v.outputMSB := instructionOut16MSB;
 					--v.input := padMSB(instructionID&x"000000", maxInputWidth);
 
-					-- Read status registers for debugging
-					v.inputMSB := instruction8MSB;
-					v.outputMSB := instructionOut8MSB;
-					v.input := padMSB(instructionReadStatus1, maxInputWidth);
-
-
 					v.writeEnable := '1';
 					v.state := busy;
+					v.doneReturnState := flagDone;
 				end if;
+
+			when write =>
+				-- Instruction contains 56 bit input, 0 bit output
+				v.inputMSB := instruction56MSB;
+				v.outputMSB := (others => '0');
+
+				v.input := padMSB(instructionWrite&flashAddress&dataIn, maxInputWidth);
+
+				v.writeEnable := '1';
+				v.state := busy;
+				v.doneReturnState := flagDone;
 
 			when busy =>
 
@@ -215,8 +254,7 @@ begin
 
 			when busy2 =>
 				if(spi_done = '1') then
-					v.done := '1';
-					v.state := ready;
+					v.state := r.doneReturnState;
 				end if;
 
 			when others =>

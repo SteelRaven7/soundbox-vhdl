@@ -27,7 +27,7 @@ end entity ; -- MemoryController
 
 architecture arch of MemoryController is
 	
-	type state_type is (res, readMem, writeMem, writeRegPropagate, writeReg, ready);
+	type state_type is (res, clearMemory, readMem, writeMem, writeRegPropagate, writeReg, ready);
 
 	type reg_type is record
 		state : state_type;
@@ -37,6 +37,7 @@ architecture arch of MemoryController is
 		looping : std_logic;
 		dataRead : std_logic;
 		dataWrite : std_logic;
+		dataClear : std_logic;
 
 		iterator : natural range 0 to numberRegisters;
 	end record;
@@ -45,6 +46,7 @@ architecture arch of MemoryController is
 
 	signal MI_dataRead : std_logic;
 	signal MI_dataWrite : std_logic;
+	signal MI_dataClear : std_logic;
 	signal MI_dataOut : std_logic_vector(15 downto 0);
 	signal MI_dataIn : std_logic_vector(15 downto 0);
 	signal MI_address : std_logic_vector(15 downto 0);
@@ -59,11 +61,13 @@ begin
 	--MI_dataIn <= r.registerBus.data;
 	MI_dataRead <= r.dataRead;
 	MI_dataWrite <= r.dataWrite;
+	MI_dataClear <= r.dataClear;
 
 	MI: entity work.MemoryInterface
 	port map(
 		dataRead => MI_dataRead,
 		dataWrite => MI_dataWrite,
+		dataClear => MI_dataClear,
 		dataOut => MI_dataOut,
 		dataIn => MI_dataIn,
 		address => MI_address_padded,
@@ -96,15 +100,16 @@ begin
 		case r.state is
 			when res =>
 
-				-- Just go to ready for now
-				v.state := ready;
-
 				v.dataWrite := '0';
 				v.dataRead := '0';
-
 				v.registerBus.address := (others => '0');
 				v.registerBus.data := (others => '0');
 				v.registerBus.writeEnable := '0';
+
+				if(MI_done = '1') then
+					v.state := clearMemory;
+					v.dataClear := '1';
+				end if;
 
 				-- Prepare to loop through all memory locations and write to registers
 --				v.iterator := 0;
@@ -112,6 +117,13 @@ begin
 --				v.registerBus.address := (others => '0'); 
 --				v.state := readMem;
 --				v.dataRead := '1';
+
+			when clearMemory =>
+				v.dataClear := '0';
+
+				if(MI_done = '1') then
+					v.state := ready;
+				end if;
 
 			when readMem =>
 				v.dataRead := '0';

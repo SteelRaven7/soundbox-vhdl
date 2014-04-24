@@ -58,7 +58,7 @@ architecture arch of SPI is
 begin
 
 	sharedClk <= r.cs or not(serialClk);
-	sclk <= sharedClk;
+	sclk <= not(serialClk);
 
 	cs <= r.cs;
 	serialInput <= r.serialInput;
