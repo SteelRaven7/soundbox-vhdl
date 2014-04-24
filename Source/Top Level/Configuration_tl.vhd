@@ -56,7 +56,7 @@ begin
 		input => buttonRead,
 		output => buttonRead_D,
 
-		clk => clk,
+		clk => serialClk,
 		reset => reset
 	);
 
@@ -65,35 +65,22 @@ begin
 		input => buttonWrite,
 		output => buttonWrite_D,
 
-		clk => clk,
+		clk => serialClk,
 		reset => reset
 	);
 
-	serialClkGenerator: entity work.ClockDivider
-	generic map (
-		--divider => 10417 -- SoftwareInterfaceClock
-		divider => 10 -- 10 MHz
-	)
-	port map(
-		reset => reset,
-		clk => clk,
-		clkOut => serialClk
-	);
+--	serialClkGenerator: entity work.ClockDivider
+--	generic map (
+--		--divider => 10417 -- SoftwareInterfaceClock
+--		divider => 10 -- 10 MHz
+--	)
+--	port map(
+--		reset => reset,
+--		clk => clk,
+--		clkOut => serialClk
+--	);
 
-	SWI: entity work.SoftwareInterface
-	port map (
-		msgCommand => msgCommand,
-		msgPayload => msgPayload,
-		msgReady => msgReady,
-		dataOk => dataOk,
-
-		serialIn => serialIn,
-		serialOut => serialOut,
-
-		serialClk => serialClk,
-		reset => reset
-	);
-
+	serialClk <= clk;
 
 
 	leds <= registerBus.data;
@@ -106,8 +93,8 @@ begin
 	port map (
 		registerBus => registerBus,
 
-		writeConfiguration => buttonWrite,
-		readConfiguration => buttonRead,
+		writeConfiguration => buttonWrite_D,
+		readConfiguration => buttonRead_D,
 		configurationAddress => address,
 		configurationData => switches,
 

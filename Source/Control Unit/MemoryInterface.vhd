@@ -63,6 +63,7 @@ architecture arch of MemoryInterface is
 	constant instructionWriteEnable : std_logic_vector(7 downto 0) := x"06";
 	constant instructionRead : std_logic_vector(7 downto 0) := x"13";
 	constant instructionWrite : std_logic_vector(7 downto 0) := x"12";
+	constant instructionReadStatus1 : std_logic_vector(7 downto 0) := x"05";
 	constant instructionID : std_logic_vector(7 downto 0) := x"90";
 	
 	-- MSB constants for different instruction types
@@ -70,6 +71,7 @@ architecture arch of MemoryInterface is
 	constant instruction32MSB : std_logic_vector(inputNumberWidth-1 downto 0) := std_logic_vector(to_unsigned(31, inputNumberWidth));
 	constant instruction40MSB : std_logic_vector(inputNumberWidth-1 downto 0) := std_logic_vector(to_unsigned(39, inputNumberWidth));
 	constant instruction56MSB : std_logic_vector(inputNumberWidth-1 downto 0) := std_logic_vector(to_unsigned(55, inputNumberWidth));
+	constant instructionOut8MSB : std_logic_vector(outputNumberWidth-1 downto 0) := std_logic_vector(to_unsigned(7, outputNumberWidth));
 	constant instructionOut16MSB : std_logic_vector(outputNumberWidth-1 downto 0) := std_logic_vector(to_unsigned(15, outputNumberWidth));
 
 	-- Provides the selected address in the flash address space.
@@ -184,12 +186,20 @@ begin
 					v.state := busy;
 				elsif(dataRead = '1') then
 					-- Instruction contains 40 bit input, 16 bit output
+					--v.outputMSB := instructionOut16MSB;
 					--v.inputMSB := instruction40MSB;
+					--v.input := padMSB(instructionRead&flashAddress, maxInputWidth);
+
+					-- Read ID
 					v.inputMSB := instruction32MSB;
 					v.outputMSB := instructionOut16MSB;
-
-					--v.input := padMSB(instructionRead&flashAddress, maxInputWidth);
 					v.input := padMSB(instructionID&x"000000", maxInputWidth);
+
+					-- Read status registers for debugging
+					--v.inputMSB := instruction8MSB;
+					--v.outputMSB := instructionOut8MSB;
+					--v.input := padMSB(instructionReadStatus1, maxInputWidth);
+
 
 					v.writeEnable := '1';
 					v.state := busy;

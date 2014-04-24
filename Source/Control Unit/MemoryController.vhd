@@ -32,6 +32,8 @@ architecture arch of MemoryController is
 	type reg_type is record
 		state : state_type;
 		registerBus : configurableRegisterBus;
+		memAddress : std_logic_vector(15 downto 0);
+		memData : std_logic_vector(15 downto 0);
 		looping : std_logic;
 		dataRead : std_logic;
 		dataWrite : std_logic;
@@ -51,9 +53,10 @@ architecture arch of MemoryController is
 	signal MI_done : std_logic;
 begin
 	registerBus <= r.registerBus;
-	MI_address <= r.registerBus.address;
+	MI_address <= r.memAddress;
 	MI_address_padded <= "0000000" & MI_address;
-	MI_dataIn <= r.registerBus.data;
+	MI_dataIn <= r.memData;
+	--MI_dataIn <= r.registerBus.data;
 	MI_dataRead <= r.dataRead;
 	MI_dataWrite <= r.dataWrite;
 
@@ -99,6 +102,10 @@ begin
 				v.dataWrite := '0';
 				v.dataRead := '0';
 
+				v.registerBus.address := (others => '0');
+				v.registerBus.data := (others => '0');
+				v.registerBus.writeEnable := '0';
+
 				-- Prepare to loop through all memory locations and write to registers
 --				v.iterator := 0;
 --				v.address := (others => '0');
@@ -112,6 +119,7 @@ begin
 				if(MI_outputReady = '1') then
 					-- Propagate the data to the current register.
 					v.state := writeRegPropagate;
+					v.registerBus.address := r.memAddress;
 					v.registerBus.data := MI_dataOut;
 					v.registerBus.writeEnable := '1';
 				end if;
@@ -144,8 +152,8 @@ begin
 				if(writeConfiguration = '1') then
 					v.state := writeMem;
 
-					v.registerBus.data := configurationData;
-					v.registerBus.address := configurationAddress;
+					v.memData := configurationData;
+					v.memAddress := configurationAddress;
 					v.dataWrite := '1';
 --					v.state := writeReg;
 --					v.registerBus.writeEnable := '1';
@@ -154,7 +162,7 @@ begin
 				if(readConfiguration = '1') then
 					v.state := readMem;
 
-					v.registerBus.address := configurationAddress;
+					v.memAddress := configurationAddress;
 					v.dataRead := '1';
 				end if;
 

@@ -13,7 +13,8 @@ entity ButtonDebouncer is
 end entity ; -- ButtonDebouncer
 
 architecture arch of ButtonDebouncer is
-	constant MAX : natural := 2000000; -- 20ms on 100MHz
+	--constant MAX : natural := 2000000; -- 20ms on 100MHz
+	constant MAX : natural := 200000; -- 20ms on 10MHz
 
 	type reg_type is record
 		incrementor : natural range 0 to MAX;
