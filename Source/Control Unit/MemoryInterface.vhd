@@ -9,8 +9,8 @@ library ieee ;
 	use ieee.numeric_std.all ;
 	use ieee.math_real.all;
 
---library UNISIM;
---	use UNISIM.VCOMPONENTS.all;
+library UNISIM;
+	use UNISIM.VCOMPONENTS.all;
 
 entity MemoryInterface is
 	generic (
@@ -63,9 +63,11 @@ architecture arch of MemoryInterface is
 	constant instructionWriteEnable : std_logic_vector(7 downto 0) := x"06";
 	constant instructionRead : std_logic_vector(7 downto 0) := x"13";
 	constant instructionWrite : std_logic_vector(7 downto 0) := x"12";
+	constant instructionID : std_logic_vector(7 downto 0) := x"90";
 	
 	-- MSB constants for different instruction types
 	constant instruction8MSB : std_logic_vector(inputNumberWidth-1 downto 0) := std_logic_vector(to_unsigned(7, inputNumberWidth));
+	constant instruction32MSB : std_logic_vector(inputNumberWidth-1 downto 0) := std_logic_vector(to_unsigned(31, inputNumberWidth));
 	constant instruction40MSB : std_logic_vector(inputNumberWidth-1 downto 0) := std_logic_vector(to_unsigned(39, inputNumberWidth));
 	constant instruction56MSB : std_logic_vector(inputNumberWidth-1 downto 0) := std_logic_vector(to_unsigned(55, inputNumberWidth));
 	constant instructionOut16MSB : std_logic_vector(outputNumberWidth-1 downto 0) := std_logic_vector(to_unsigned(15, outputNumberWidth));
@@ -97,7 +99,8 @@ architecture arch of MemoryInterface is
 
 begin
 	-- Map to flash address space.
-	flashAddress <= addressMask or (x"00" & (address & '0'));
+	--flashAddress <= addressMask or (x"00" & (address & '0'));
+	flashAddress <= (others => '0');
 
 	-- Propagate the SPI done flag.
 	done <= r.done;
@@ -181,10 +184,12 @@ begin
 					v.state := busy;
 				elsif(dataRead = '1') then
 					-- Instruction contains 40 bit input, 16 bit output
-					v.inputMSB := instruction40MSB;
+					--v.inputMSB := instruction40MSB;
+					v.inputMSB := instruction32MSB;
 					v.outputMSB := instructionOut16MSB;
 
-					v.input := padMSB(instructionRead&flashAddress, maxInputWidth);
+					--v.input := padMSB(instructionRead&flashAddress, maxInputWidth);
+					v.input := padMSB(instructionID&x"000000", maxInputWidth);
 
 					v.writeEnable := '1';
 					v.state := busy;
@@ -216,28 +221,28 @@ begin
 
 	-- Magically connect the SCLK to the flash through the STARTUPE2 block.
 
---	-- STARTUPE2: STARTUP Block
---	STARTUPE2_inst : STARTUPE2
---	generic map (
---		PROG_USR => "FALSE", -- Activate program event security feature. Requires encrypted bitstreams.
---		SIM_CCLK_FREQ => 5.0 -- Set the Configuration Clock Frequency(ns) for simulation.
---	)
---	port map (
---		--CFGCLK => CFGCLK, -- 1-bit output: Configuration main clock output
---		--CFGMCLK => CFGMCLK, -- 1-bit output: Configuration internal oscillator clock output
---		--EOS => EOS, -- 1-bit output: Active high output signal indicating the End Of Startup.
---		--PREQ => PREQ, -- 1-bit output: PROGRAM request to fabric output
---		CLK => '1', -- 1-bit input: User start-up clock input
---		GSR => '0', -- 1-bit input: Global Set/Reset input (GSR cannot be used for the port name)
---		GTS => '0', -- 1-bit input: Global 3-state input (GTS cannot be used for the port name)
---		KEYCLEARB => '0', -- 1-bit input: Clear AES Decrypter Key input from Battery-Backed RAM (BBRAM)
---		PACK => '0', -- 1-bit input: PROGRAM acknowledge input
---		USRCCLKO => SCLK, -- 1-bit input: User CCLK input
---		USRCCLKTS => '0', -- 1-bit input: User CCLK 3-state enable input
---		USRDONEO => '1', -- 1-bit input: User DONE pin output control
---		USRDONETS => '0' -- 1-bit input: User DONE 3-state enable output
---	);
---	-- End of STARTUPE2_inst instantiation
+	-- STARTUPE2: STARTUP Block
+	STARTUPE2_inst : STARTUPE2
+	generic map (
+		PROG_USR => "FALSE", -- Activate program event security feature. Requires encrypted bitstreams.
+		SIM_CCLK_FREQ => 5.0 -- Set the Configuration Clock Frequency(ns) for simulation.
+	)
+	port map (
+		--CFGCLK => CFGCLK, -- 1-bit output: Configuration main clock output
+		--CFGMCLK => CFGMCLK, -- 1-bit output: Configuration internal oscillator clock output
+		--EOS => EOS, -- 1-bit output: Active high output signal indicating the End Of Startup.
+		--PREQ => PREQ, -- 1-bit output: PROGRAM request to fabric output
+		CLK => '1', -- 1-bit input: User start-up clock input
+		GSR => '0', -- 1-bit input: Global Set/Reset input (GSR cannot be used for the port name)
+		GTS => '0', -- 1-bit input: Global 3-state input (GTS cannot be used for the port name)
+		KEYCLEARB => '0', -- 1-bit input: Clear AES Decrypter Key input from Battery-Backed RAM (BBRAM)
+		PACK => '0', -- 1-bit input: PROGRAM acknowledge input
+		USRCCLKO => SCLK, -- 1-bit input: User CCLK input
+		USRCCLKTS => '0', -- 1-bit input: User CCLK 3-state enable input
+		USRDONEO => '1', -- 1-bit input: User DONE pin output control
+		USRDONETS => '0' -- 1-bit input: User DONE 3-state enable output
+	);
+	-- End of STARTUPE2_inst instantiation
 
 
 end architecture ; -- arch

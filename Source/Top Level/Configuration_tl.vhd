@@ -20,7 +20,7 @@ entity Configuration_tl is
 		SO : in std_logic;
 
 		clk : std_logic;
-		reset : std_logic
+		reset_n : std_logic
 	) ;
 end entity ; -- Configuration_tl
 
@@ -42,12 +42,37 @@ architecture arch of Configuration_tl is
 
 	signal config : std_logic_vector(15 downto 0);
 	signal config2 : std_logic_vector(15 downto 0);
+
+	signal buttonRead_D : std_logic;
+	signal buttonWrite_D : std_logic;
+
+	signal reset : std_logic;
 begin
+
+	reset <= not(reset_n);
+
+	BR : entity work.ButtonDebouncer
+	port map (
+		input => buttonRead,
+		output => buttonRead_D,
+
+		clk => clk,
+		reset => reset
+	);
+
+	BW : entity work.ButtonDebouncer
+	port map (
+		input => buttonWrite,
+		output => buttonWrite_D,
+
+		clk => clk,
+		reset => reset
+	);
 
 	serialClkGenerator: entity work.ClockDivider
 	generic map (
 		--divider => 10417 -- SoftwareInterfaceClock
-		divider => 2 -- 10 MHz
+		divider => 10 -- 10 MHz
 	)
 	port map(
 		reset => reset,
@@ -68,6 +93,8 @@ begin
 		serialClk => serialClk,
 		reset => reset
 	);
+
+
 
 	leds <= registerBus.data;
 
