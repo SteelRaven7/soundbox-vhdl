@@ -35,7 +35,7 @@ architecture arch of SPI is
 	constant inputMax : natural := natural(ceil(log2(real(maxInputWidth))))-1;
 	constant outputMax : natural := natural(ceil(log2(real(maxOutputWidth))))-1;
 
-	type state_type is (ready, write, sleep, read);
+	type state_type is (ready, write, sleep, sleep2, read);
 
 	type reg_type is record
 		state : state_type;
@@ -122,6 +122,7 @@ begin
 
 				if(r.inputIndex = 0) then
 					if(r.outputIndex = 0) then
+						--v.cs  := '1';
 						v.state := ready;
 					else
 						v.state := sleep;
@@ -131,6 +132,9 @@ begin
 				end if;
 
 			when sleep =>
+				v.state := sleep2;
+
+			when sleep2 =>
 				v.state := read;
 
 			when read =>

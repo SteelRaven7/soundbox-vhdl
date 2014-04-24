@@ -191,14 +191,14 @@ begin
 					--v.input := padMSB(instructionRead&flashAddress, maxInputWidth);
 
 					-- Read ID
-					v.inputMSB := instruction32MSB;
-					v.outputMSB := instructionOut16MSB;
-					v.input := padMSB(instructionID&x"000000", maxInputWidth);
+					--v.inputMSB := instruction32MSB;
+					--v.outputMSB := instructionOut16MSB;
+					--v.input := padMSB(instructionID&x"000000", maxInputWidth);
 
 					-- Read status registers for debugging
-					--v.inputMSB := instruction8MSB;
-					--v.outputMSB := instructionOut8MSB;
-					--v.input := padMSB(instructionReadStatus1, maxInputWidth);
+					v.inputMSB := instruction8MSB;
+					v.outputMSB := instructionOut8MSB;
+					v.input := padMSB(instructionReadStatus1, maxInputWidth);
 
 
 					v.writeEnable := '1';
