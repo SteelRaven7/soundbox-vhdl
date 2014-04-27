@@ -8,6 +8,7 @@ entity SoftwareInterface is
 		msgPayload : out std_logic_vector(15 downto 0);
 		dataOk : out std_logic;
 		msgReady : out std_logic;
+		clearDone : in std_logic;
 
 		serialIn : in std_logic;
 		serialOut : out std_logic;
@@ -19,6 +20,8 @@ end entity ; -- SoftwareInterface
 
 architecture arch of SoftwareInterface is
 	constant payload_bytes : natural := 3;
+
+	constant clearDoneMessage : std_logic_vector(7 downto 0) := x"00";
 
 	type state_type is (ready, r_data, r_parity, r_stop, r_nextByte, r_handleMessage,
 						t_start, t_data, t_parity, t_stop);
@@ -83,7 +86,7 @@ begin
 	end process ; -- clk_proc
 
 
-	comb_proc : process(r, rin, serialIn, dataParity)
+	comb_proc : process(r, rin, serialIn, dataParity, clearDone)
 		variable v : reg_type;
 	begin
 		v := r;
@@ -102,6 +105,12 @@ begin
 				if(serialIn = '0') then
 					v.state := r_data;
 					v.bitCounter := 0;
+				end if;
+
+				if(clearDone = '1') then
+					v.data := clearDoneMessage;
+					v.bitCounter := 0;
+					v.state := t_data;
 				end if;
 
 			when r_data =>

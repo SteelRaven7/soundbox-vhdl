@@ -1,7 +1,3 @@
--- We might change this to a special implementation in the FPGA later, but you
--- can still use this block for simulation and implementation since we'll only
--- change the architecture of this block.
-
 library ieee ;
 	use ieee.std_logic_1164.all ;
 	use ieee.numeric_std.all ;

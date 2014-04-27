@@ -14,6 +14,7 @@ entity MemoryController is
 		command : in std_logic_vector(15 downto 0);
 		payload : in std_logic_vector(15 downto 0);
 		executeCommand : in std_logic;
+		clearDone : out std_logic;
 
 		-- Serial flash ports
 		CS : out std_logic;
@@ -29,7 +30,17 @@ architecture arch of MemoryController is
 	
 	constant commandClear : std_logic_vector(15 downto 0) := x"0000";
 
-	type state_type is (res, clearMemory, readMem, writeMem, writeRegPropagate, writeReg, ready);
+	type state_type is (res,
+		clearMemory,
+		pollMemoryReady,
+		pollMemoryReady2,
+		pollMemoryReady3,
+		readMem,
+		writeMem,
+		writeRegPropagate,
+		writeReg,
+		ready
+	);
 
 	type reg_type is record
 		state : state_type;
@@ -40,6 +51,9 @@ architecture arch of MemoryController is
 		dataRead : std_logic;
 		dataWrite : std_logic;
 		dataClear : std_logic;
+		waitStart : std_logic;
+		pollStatusRegisters : std_logic;
+		clearDone : std_logic;
 
 		iterator : natural range 0 to numberRegisters;
 	end record;
@@ -55,8 +69,12 @@ architecture arch of MemoryController is
 	signal MI_address_padded : std_logic_vector(22 downto 0);
 	signal MI_outputReady : std_logic;
 	signal MI_done : std_logic;
+
+	signal waitDone : std_logic;
 begin
 	registerBus <= r.registerBus;
+	clearDone <= r.clearDone;
+
 	MI_address <= r.memAddress;
 	MI_address_padded <= "0000000" & MI_address;
 	MI_dataIn <= r.memData;
@@ -75,10 +93,23 @@ begin
 		address => MI_address_padded,
 		outputReady => MI_outputReady,
 		done => MI_done,
+		pollStatusRegisters => r.pollStatusRegisters,
 
 		CS => CS,
 		SI => SI,
 		SO => SO,
+
+		clk => clk,
+		reset => reset
+	);
+
+	Delay : entity work.Delay
+	generic map (
+		counter => 10000000 -- 1 sec on 10MHz
+	)
+	port map (
+		input => r.waitStart,
+		output => waitDone,
 
 		clk => clk,
 		reset => reset
@@ -94,7 +125,7 @@ begin
 		end if;
 	end process ; -- clk_proc
 
-	comb_proc : process(r, rin, MI_done, MI_outputReady, MI_dataOut, command, payload, executeCommand)
+	comb_proc : process(r, rin, MI_done, MI_outputReady, MI_dataOut, command, payload, executeCommand, waitDone)
 		variable v : reg_type;
 	begin
 		v := r;
@@ -107,12 +138,8 @@ begin
 				v.registerBus.address := (others => '0');
 				v.registerBus.data := (others => '0');
 				v.registerBus.writeEnable := '0';
-
-				-- Reset dat sector
---				if(MI_done = '1') then
---					v.state := clearMemory;
---					v.dataClear := '1';
---				end if;
+				v.waitStart := '0';
+				v.clearDone := '0';
 
 				v.state := ready;
 
@@ -127,7 +154,33 @@ begin
 				v.dataClear := '0';
 
 				if(MI_done = '1') then
-					v.state := ready;
+					v.state := pollMemoryReady;
+				end if;
+
+			when pollMemoryReady =>
+				v.waitStart := '1';
+				v.state := pollMemoryReady2;
+
+			when pollMemoryReady2 =>
+				v.waitStart := '0';
+
+				if(waitDone = '1') then
+					v.pollStatusRegisters := '1';
+					v.state := pollMemoryReady3;
+				end if;
+
+			when pollMemoryReady3 =>
+				v.pollStatusRegisters := '0';
+
+				if(MI_done = '1') then
+
+					if(MI_dataOut(0) = '1') then
+						-- Memory is still being cleared.
+						v.state := pollMemoryReady;
+					else
+						v.clearDone := '1';
+						v.state := ready;
+					end if;
 				end if;
 
 			when readMem =>
@@ -152,23 +205,16 @@ begin
 
 			when writeRegPropagate =>
 				v.registerBus.writeEnable := '0';
-
 				v.state := ready;
-
---				if(r.iterator = numberRegisters-1) then
---					-- All registers have been written to.
---					v.state := ready;
---				else
---					v.iterator := r.iterator+1;
---					v.registerBus.address := std_logic_vector(to_unsigned(v.iterator, 16));
---					v.state := readMem;
---				end if;
 
 			when ready =>
 
+				v.clearDone := '0';
+
 				if(executeCommand = '1') then
 					if(command = commandClear) then
-						v.registerBus.data := (others => '1');
+						v.state := clearMemory;
+						v.dataClear := '1';
 					end if;
 				end if;
 

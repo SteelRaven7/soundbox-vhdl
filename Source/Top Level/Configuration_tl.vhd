@@ -26,13 +26,19 @@ entity Configuration_tl is
 end entity ; -- Configuration_tl
 
 architecture arch of Configuration_tl is
+
+	constant clk10MHzDivider : natural := 10;
+	constant clk9600HzDivider : natural := 10417;
+
 	signal configRegisterBus : configurableRegisterBus;
 
 	signal SI_msgCommand : std_logic_vector(15 downto 0);
 	signal SI_msgPayload : std_logic_vector(15 downto 0);
 	signal SI_dataOk : std_logic;
 	signal SI_msgReady : std_logic;
+	signal SI_clearDone : std_logic;
 	signal MCU_execute : std_logic;
+	signal MCU_clearDone : std_logic;
 
 	signal serialReggedSignal : std_logic;
 
@@ -100,6 +106,7 @@ begin
 		msgPayload => SI_msgPayload,
 		dataOk => SI_dataOk,
 		msgReady => SI_msgReady,
+		clearDone => SI_clearDone,
 		serialIn => SI_serialIn,
 		serialOut => SI_serialOut,
 		serialClk => serialSIClk,
@@ -115,6 +122,20 @@ begin
 		reset => reset
 	);
 
+	MCU_PK : entity work.PulseKeeper
+	generic map (
+		duration => clk9600HzDivider/clk10MHzDivider
+	)
+	port map (
+		input => MCU_clearDone,
+		output => SI_clearDone,
+
+		clk => serialClk,
+		reset => reset
+	);
+
+
+
 	MCU: entity work.MemoryController
 	generic map (
 		numberRegisters => 1
@@ -125,6 +146,7 @@ begin
 		command => SI_msgCommand,
 		payload => SI_msgPayload,
 		executeCommand => MCU_execute,
+		clearDone => MCU_clearDone,
 
 		CS => CS,
 		SI => SI,

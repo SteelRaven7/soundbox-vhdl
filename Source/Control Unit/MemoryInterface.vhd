@@ -21,6 +21,7 @@ entity MemoryInterface is
 		dataRead : in std_logic;
 		dataWrite : in std_logic;
 		dataClear : in std_logic;
+		pollStatusRegisters : in std_logic;
 		dataOut : out std_logic_vector(dataWidth-1 downto 0);
 		dataIn : in std_logic_vector(dataWidth-1 downto 0);
 		address : in std_logic_vector(addressWidth-1 downto 0);
@@ -181,7 +182,7 @@ begin
 		end if;
 	end process ; -- clk_proc
 
-	comb_proc : process(r, rin, spi_done, dataIn, dataWrite, dataRead, dataClear, flashAddress, waitDone)
+	comb_proc : process(r, rin, spi_done, dataIn, dataWrite, dataRead, dataClear, pollStatusRegisters, flashAddress, waitDone)
 		variable v : reg_type;
 	begin
 		v := r;
@@ -246,17 +247,22 @@ begin
 
 				elsif(dataRead = '1') then
 
-					-- Read status registers for debugging
-					--v.inputMSB := instruction8MSB;
-					--v.outputMSB := instructionOut8MSB;
-					--v.input := padMSB(instructionReadStatus1, maxInputWidth);
-
 					-- Read ID
 					--v.inputMSB := instruction32MSB;
 					--v.outputMSB := instructionOut16MSB;
 					--v.input := padMSB(instructionID&x"000000", maxInputWidth);
 
 					v.state := dummyRead;
+				
+				elsif(pollStatusRegisters = '1') then
+					-- Read status registers
+					v.inputMSB := instruction8MSB;
+					v.outputMSB := instructionOut8MSB;
+					v.input := padMSB(instructionReadStatus1, maxInputWidth);
+
+					v.writeEnable := '1';
+					v.state := busy;
+					v.doneReturnState := flagDone;
 				end if;
 
 			when write =>
