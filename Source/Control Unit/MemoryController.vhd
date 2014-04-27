@@ -106,10 +106,13 @@ begin
 				v.registerBus.data := (others => '0');
 				v.registerBus.writeEnable := '0';
 
-				if(MI_done = '1') then
-					v.state := clearMemory;
-					v.dataClear := '1';
-				end if;
+				-- Reset dat sector
+--				if(MI_done = '1') then
+--					v.state := clearMemory;
+--					v.dataClear := '1';
+--				end if;
+
+				v.state := ready;
 
 				-- Prepare to loop through all memory locations and write to registers
 --				v.iterator := 0;
@@ -128,7 +131,7 @@ begin
 			when readMem =>
 				v.dataRead := '0';
 
-				if(MI_outputReady = '1') then
+				if(MI_done = '1') then
 					-- Propagate the data to the current register.
 					v.state := writeRegPropagate;
 					v.registerBus.address := r.memAddress;

@@ -80,6 +80,8 @@ architecture arch of MemoryInterface is
 	-- Provides the selected address in the flash address space.
 	signal flashAddress : std_logic_vector(31 downto 0);
 
+	signal waitStart : std_logic;
+	signal waitDone : std_logic;
 
 	-- SPI signals
 	signal spi_input : std_logic_vector(maxInputWidth-1 downto 0);
@@ -89,7 +91,22 @@ architecture arch of MemoryInterface is
 	signal spi_done : std_logic;
 	signal SCLK : std_logic;
 
-	type state_type is (res, config, enableWrite, initialClear, clear, flagDone, ready, write, busy, busy2);
+	type state_type is (
+		res,
+		config,
+		enableWrite,
+		initialClear,
+		clear,
+		flagDone,
+		ready,
+		write,
+		dummyRead,
+		waitRead,
+		waitRead2,
+		read,
+		busy,
+		busy2
+	);
 
 	type reg_type is record
 		state : state_type;
@@ -97,6 +114,7 @@ architecture arch of MemoryInterface is
 		input : std_logic_vector(maxInputWidth-1 downto 0);
 		outputMSB : std_logic_vector(outputNumberWidth-1 downto 0);
 		inputMSB : std_logic_vector(inputNumberWidth-1 downto 0);
+		waitStart : std_logic;
 		writeEnable : std_logic;
 		done : std_logic;
 	end record;
@@ -132,6 +150,20 @@ begin
 		reset => reset
 	);
 
+	delay : entity work.Delay
+	generic map (
+		--counter => 100000000 -- 1 sec on 10MHz
+		counter => 10000
+	)
+	port map (
+		input => waitStart,
+		output => waitDone,
+
+		clk => clk,
+		reset => reset
+	);
+
+	waitStart <= r.waitStart;
 	spi_input <= r.input;
 	spi_inputMSB <= r.inputMSB;
 	spi_writeEnable <= r.writeEnable;
@@ -143,12 +175,13 @@ begin
 			r.state <= res;
 			r.done <= '0';
 			r.writeEnable <= '0';
+			r.waitStart <= '0';
 		elsif(rising_edge(clk)) then
 			r <= rin;
 		end if;
 	end process ; -- clk_proc
 
-	comb_proc : process(r, rin, spi_done, dataIn, dataWrite, dataRead, dataClear, flashAddress)
+	comb_proc : process(r, rin, spi_done, dataIn, dataWrite, dataRead, dataClear, flashAddress, waitDone)
 		variable v : reg_type;
 	begin
 		v := r;
@@ -213,11 +246,6 @@ begin
 
 				elsif(dataRead = '1') then
 
-					-- Instruction contains 40 bit input, 16 bit output
-					v.outputMSB := instructionOut16MSB;
-					v.inputMSB := instruction40MSB;
-					v.input := padMSB(instructionRead&flashAddress, maxInputWidth);
-
 					-- Read status registers for debugging
 					--v.inputMSB := instruction8MSB;
 					--v.outputMSB := instructionOut8MSB;
@@ -228,9 +256,7 @@ begin
 					--v.outputMSB := instructionOut16MSB;
 					--v.input := padMSB(instructionID&x"000000", maxInputWidth);
 
-					v.writeEnable := '1';
-					v.state := busy;
-					v.doneReturnState := flagDone;
+					v.state := dummyRead;
 				end if;
 
 			when write =>
@@ -239,6 +265,43 @@ begin
 				v.outputMSB := (others => '0');
 
 				v.input := padMSB(instructionWrite&flashAddress&dataIn, maxInputWidth);
+
+				v.writeEnable := '1';
+				v.state := busy;
+				v.doneReturnState := flagDone;
+
+			when dummyRead =>
+
+				-- For some reason, the first read only outputs the first byte, so do a dummy read.
+
+				-- Instruction contains 40 bit input, 16 bit output
+				v.outputMSB := instructionOut16MSB;
+				v.inputMSB := instruction40MSB;
+				v.input := padMSB(instructionRead&flashAddress, maxInputWidth);
+
+				v.writeEnable := '1';
+				v.state := busy;
+				v.doneReturnState := waitRead;
+
+			when waitRead =>
+
+				-- Wait a bit cause dat flash is a tad slow.
+				v.waitStart := '1';
+				v.state := waitRead2;
+
+			when waitRead2 =>
+
+				v.waitStart := '0';
+
+				if(waitDone = '1') then
+					v.state := read;
+				end if;
+
+			when read =>
+				-- Instruction contains 40 bit input, 16 bit output
+				v.outputMSB := instructionOut16MSB;
+				v.inputMSB := instruction40MSB;
+				v.input := padMSB(instructionRead&flashAddress, maxInputWidth);
 
 				v.writeEnable := '1';
 				v.state := busy;
