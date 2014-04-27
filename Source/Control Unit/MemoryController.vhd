@@ -36,6 +36,7 @@ architecture arch of MemoryController is
 		pollMemoryReady2,
 		pollMemoryReady3,
 		readMem,
+		readMem2,
 		writeMem,
 		writeRegPropagate,
 		writeReg,
@@ -55,7 +56,7 @@ architecture arch of MemoryController is
 		pollStatusRegisters : std_logic;
 		clearDone : std_logic;
 
-		iterator : natural range 0 to numberRegisters;
+		iterator : natural range 1 to numberRegisters;
 	end record;
 
 	signal r, rin : reg_type;
@@ -141,14 +142,11 @@ begin
 				v.waitStart := '0';
 				v.clearDone := '0';
 
-				v.state := ready;
-
-				-- Prepare to loop through all memory locations and write to registers
---				v.iterator := 0;
---				v.address := (others => '0');
---				v.registerBus.address := (others => '0'); 
---				v.state := readMem;
---				v.dataRead := '1';
+				if(MI_done = '1') then
+					-- Loop through all memory locations and write to registers
+					v.iterator := 1;
+					v.state := readMem;
+				end if;
 
 			when clearMemory =>
 				v.dataClear := '0';
@@ -184,6 +182,14 @@ begin
 				end if;
 
 			when readMem =>
+
+				v.dataRead := '1';
+				v.memAddress := std_logic_vector(to_unsigned(r.iterator, v.memAddress'length));
+
+				v.state := readMem2;
+
+			when readMem2 =>
+
 				v.dataRead := '0';
 
 				if(MI_done = '1') then
@@ -194,18 +200,26 @@ begin
 					v.registerBus.writeEnable := '1';
 				end if;
 
+			when writeRegPropagate =>
+				v.registerBus.writeEnable := '0';
+
+				if(r.iterator < numberRegisters) then
+					v.iterator := r.iterator+1;
+					v.state := readMem;
+				else
+					v.state := ready;
+				end if;
+
 			when writeMem =>
 				v.dataWrite := '0';
 
 				if(MI_done = '1') then
-					v.state := ready;
-					--v.state := writeReg;
-					--v.registerBus.writeEnable := '1';
+					-- Also write to the config registers.
+					v.registerBus.data := r.memData;
+					v.registerBus.address := r.memAddress;
+					v.registerBus.writeEnable := '1';
+					v.state := writeReg;
 				end if;
-
-			when writeRegPropagate =>
-				v.registerBus.writeEnable := '0';
-				v.state := ready;
 
 			when ready =>
 
@@ -215,6 +229,12 @@ begin
 					if(command = commandClear) then
 						v.state := clearMemory;
 						v.dataClear := '1';
+					else
+						-- Write new configuration
+						v.state := writeMem;
+						v.memData := payload;
+						v.memAddress := command;
+						v.dataWrite := '1';
 					end if;
 				end if;
 

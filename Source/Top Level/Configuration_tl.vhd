@@ -138,7 +138,7 @@ begin
 
 	MCU: entity work.MemoryController
 	generic map (
-		numberRegisters => 1
+		numberRegisters => 2
 	)
 	port map (
 		registerBus => configRegisterBus,
@@ -156,13 +156,14 @@ begin
 		reset => reset
 	);
 
-	leds <= configRegisterBus.data;
+	--leds <= configRegisterBus.data;
+	leds <= config2;
 
 	-- Configuration registers
 
 	confReg: entity work.ConfigRegister
 	generic map (
-		address => x"0000"
+		address => x"0001"
 	)
 	port map (
 		input => configRegisterBus,
@@ -172,11 +173,9 @@ begin
 		reset => reset
 	);
 
-	--leds <= config;
-
 	confReg2: entity work.ConfigRegister
 	generic map (
-		address => x"0001"
+		address => x"0002"
 	)
 	port map (
 		input => configRegisterBus,
