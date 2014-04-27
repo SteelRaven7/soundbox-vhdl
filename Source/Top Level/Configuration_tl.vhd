@@ -11,8 +11,9 @@ entity Configuration_tl is
 		leds : out std_logic_vector(15 downto 0);
 		switches : in std_logic_vector(15 downto 0);
 
-		serialIn : in std_logic;
-		serialOut : out std_logic;
+		-- Serial interface (RS-232/UART @ 9600 Hz)
+		SI_serialIn : in std_logic;
+		SI_serialOut : out std_logic;
 
 		-- Serial flash ports
 		CS : out std_logic;
@@ -25,20 +26,18 @@ entity Configuration_tl is
 end entity ; -- Configuration_tl
 
 architecture arch of Configuration_tl is
-	signal registerBus : configurableRegisterBus;
+	signal configRegisterBus : configurableRegisterBus;
 
-	signal msgCommand : std_logic_vector(7 downto 0);
-	signal msgPayload : std_logic_vector(15 downto 0);
-	signal dataOk : std_logic;
-	signal msgReady : std_logic;
+	signal SI_msgCommand : std_logic_vector(15 downto 0);
+	signal SI_msgPayload : std_logic_vector(15 downto 0);
+	signal SI_dataOk : std_logic;
+	signal SI_msgReady : std_logic;
+	signal MCU_execute : std_logic;
 
 	signal serialReggedSignal : std_logic;
 
 	signal serialClk : std_logic;
-
-	signal regMsgCommand : std_logic_vector(7 downto 0);
-	signal regMsgPayload : std_logic_vector(15 downto 0);
-	signal address : std_logic_vector(15 downto 0);
+	signal serialSIClk : std_logic;
 
 	signal config : std_logic_vector(15 downto 0);
 	signal config2 : std_logic_vector(15 downto 0);
@@ -48,6 +47,8 @@ architecture arch of Configuration_tl is
 
 	signal reset : std_logic;
 begin
+
+	-- Input
 
 	reset <= not(reset_n);
 
@@ -69,34 +70,61 @@ begin
 		reset => reset
 	);
 
---	serialClkGenerator: entity work.ClockDivider
---	generic map (
---		--divider => 10417 -- SoftwareInterfaceClock
---		divider => 10 -- 10 MHz
---	)
---	port map(
---		reset => reset,
---		clk => clk,
---		clkOut => serialClk
---	);
-
-	serialClk <= clk;
 
 
-	leds <= registerBus.data;
+	-- Serial interfaces
 
-	address <= x"0000";
+	serialClkGenerator: entity work.ClockDivider
+	generic map (
+		divider => 10 -- 10 MHz
+	)
+	port map(
+		reset => reset,
+		clk => clk,
+		clkOut => serialClk
+	);
+
+	serialSIClkGenerator: entity work.ClockDivider
+	generic map (
+		divider => 10417 -- SoftwareInterfaceClock @ 9600 Hz
+	)
+	port map(
+		reset => reset,
+		clk => clk,
+		clkOut => serialSIClk
+	);
+
+	SIU: entity work.SoftwareInterface
+	port map (
+		msgCommand => SI_msgCommand,
+		msgPayload => SI_msgPayload,
+		dataOk => SI_dataOk,
+		msgReady => SI_msgReady,
+		serialIn => SI_serialIn,
+		serialOut => SI_serialOut,
+		serialClk => serialSIClk,
+		reset => reset
+	);
+
+	MCU_PL : entity work.PulseLimiter
+	port map (
+		input => SI_msgReady,
+		output => MCU_execute,
+
+		clk => serialClk,
+		reset => reset
+	);
+
 	MCU: entity work.MemoryController
 	generic map (
 		numberRegisters => 1
 	)
 	port map (
-		registerBus => registerBus,
+		registerBus => configRegisterBus,
 
-		writeConfiguration => buttonWrite_D,
-		readConfiguration => buttonRead_D,
-		configurationAddress => address,
-		configurationData => switches,
+		command => SI_msgCommand,
+		payload => SI_msgPayload,
+		executeCommand => MCU_execute,
 
 		CS => CS,
 		SI => SI,
@@ -106,50 +134,30 @@ begin
 		reset => reset
 	);
 
-	commandReg : entity work.VectorCERegister
-	generic map (
-		wordLength => 8
-	)
-	port map (
-		input => msgCommand,
-		output => regMsgCommand,
+	leds <= configRegisterBus.data;
 
-		clk => serialClk,
-		clkEnable => dataOk,
-		reset => reset
-	);
-
-	payloadReg : entity work.VectorCERegister
-	generic map (
-		wordLength => 16
-	)
-	port map (
-		input => msgPayload,
-		output => regMsgPayload,
-
-		clk => serialClk,
-		clkEnable => dataOk,
-		reset => reset
-	);
+	-- Configuration registers
 
 	confReg: entity work.ConfigRegister
 	generic map (
 		address => x"0000"
 	)
 	port map (
-		input => registerBus,
+		input => configRegisterBus,
 		output => config,
 
 		clk => serialClk,
 		reset => reset
 	);
 
+	--leds <= config;
+
 	confReg2: entity work.ConfigRegister
 	generic map (
 		address => x"0001"
 	)
 	port map (
-		input => registerBus,
+		input => configRegisterBus,
 		output => config2,
 
 		clk => serialClk,

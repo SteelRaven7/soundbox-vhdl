@@ -11,8 +11,8 @@ set_property PACKAGE_PIN E3 [get_ports clk]
 	set_property IOSTANDARD LVCMOS33 [get_ports clk]
 	#create_clock -add -name sys_clk_pin -period 11.072 -waveform {0 5} [get_ports clk]
 	#create_clock -add -name sys_clk_pin -period 10416.67 -waveform {0 5} [get_ports clk]
-	#create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports clk]
-	create_clock -add -name sys_clk_pin -period 100.00 -waveform {0 5} [get_ports clk]
+	create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports clk]
+	#create_clock -add -name sys_clk_pin -period 100.00 -waveform {0 5} [get_ports clk]
  
 ## Switches
 ##Bank = 34, Pin name = IO_L21P_T3_DQS_34,					Sch name = SW0
@@ -498,11 +498,11 @@ set_property PACKAGE_PIN V10 [get_ports buttonWrite]
 
 ##USB-RS232 Interface
 ##Bank = 35, Pin name = IO_L7P_T1_AD6P_35,					Sch name = UART_TXD_IN
-set_property PACKAGE_PIN C4 [get_ports serialIn]						
-	set_property IOSTANDARD LVCMOS33 [get_ports serialIn]
+set_property PACKAGE_PIN C4 [get_ports SI_serialIn]						
+	set_property IOSTANDARD LVCMOS33 [get_ports SI_serialIn]
 ##Bank = 35, Pin name = IO_L11N_T1_SRCC_35,					Sch name = UART_RXD_OUT
-set_property PACKAGE_PIN D4 [get_ports serialOut]						
-	set_property IOSTANDARD LVCMOS33 [get_ports serialOut]
+set_property PACKAGE_PIN D4 [get_ports SI_serialOut]						
+	set_property IOSTANDARD LVCMOS33 [get_ports SI_serialOut]
 ##Bank = 35, Pin name = IO_L12N_T1_MRCC_35,					Sch name = UART_CTS
 #set_property PACKAGE_PIN D3 [get_ports RsCts]						
 	#set_property IOSTANDARD LVCMOS33 [get_ports RsCts]

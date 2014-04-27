@@ -4,7 +4,7 @@ library ieee ;
 
 entity SoftwareInterface is
 	port (
-		msgCommand : out std_Logic_vector(7 downto 0);
+		msgCommand : out std_Logic_vector(15 downto 0);
 		msgPayload : out std_logic_vector(15 downto 0);
 		dataOk : out std_logic;
 		msgReady : out std_logic;
@@ -18,10 +18,7 @@ entity SoftwareInterface is
 end entity ; -- SoftwareInterface
 
 architecture arch of SoftwareInterface is
-	constant payload_bytes : natural := 2;
-
-	constant MSG_HANDSHAKE : std_logic_vector(7 downto 0) := x"00";
-	constant MSG_HANDSHAKE2 : std_logic_vector(7 downto 0) := x"01";
+	constant payload_bytes : natural := 3;
 
 	type state_type is (ready, r_data, r_parity, r_stop, r_nextByte, r_handleMessage,
 						t_start, t_data, t_parity, t_stop);
@@ -60,7 +57,7 @@ begin
 
 	dataOk <= r.dataOk;
 	serialOut <= r.serialOut;
-	msgCommand <= r.command;
+	msgCommand <= r.command & r.payload(2);
 	msgPayload <= r.payload(1) & r.payload(0);
 	msgReady <= r.msgReady;
 
@@ -167,14 +164,7 @@ begin
 			when r_handleMessage =>
 
 				v.msgReady := '1';
-
-				if(r.command = MSG_HANDSHAKE) then
-					-- Automatically reply to handshake.
-					v.data := MSG_HANDSHAKE2;
-					v.state := t_start;
-				else
-					v.state := ready;
-				end if;
+				v.state := ready;
 
 			when t_start =>
 

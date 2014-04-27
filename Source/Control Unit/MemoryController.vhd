@@ -10,10 +10,10 @@ entity MemoryController is
 	port (
 		registerBus : out configurableRegisterBus;
 
-		writeConfiguration : in std_logic;
-		readConfiguration : in std_logic;
-		configurationAddress : in std_logic_vector(15 downto 0);
-		configurationData : in std_logic_vector(15 downto 0);
+		-- Signals from 
+		command : in std_logic_vector(15 downto 0);
+		payload : in std_logic_vector(15 downto 0);
+		executeCommand : in std_logic;
 
 		-- Serial flash ports
 		CS : out std_logic;
@@ -27,6 +27,8 @@ end entity ; -- MemoryController
 
 architecture arch of MemoryController is
 	
+	constant commandClear : std_logic_vector(15 downto 0) := x"0000";
+
 	type state_type is (res, clearMemory, readMem, writeMem, writeRegPropagate, writeReg, ready);
 
 	type reg_type is record
@@ -92,7 +94,7 @@ begin
 		end if;
 	end process ; -- clk_proc
 
-	comb_proc : process(r, rin, MI_done, MI_outputReady, MI_dataOut, writeConfiguration, readConfiguration, configurationData, configurationAddress )
+	comb_proc : process(r, rin, MI_done, MI_outputReady, MI_dataOut, command, payload, executeCommand)
 		variable v : reg_type;
 	begin
 		v := r;
@@ -164,22 +166,26 @@ begin
 
 			when ready =>
 
-				if(writeConfiguration = '1') then
-					v.state := writeMem;
-
-					v.memData := configurationData;
-					v.memAddress := configurationAddress;
-					v.dataWrite := '1';
---					v.state := writeReg;
---					v.registerBus.writeEnable := '1';
+				if(executeCommand = '1') then
+					if(command = commandClear) then
+						v.registerBus.data := (others => '1');
+					end if;
 				end if;
 
-				if(readConfiguration = '1') then
-					v.state := readMem;
-
-					v.memAddress := configurationAddress;
-					v.dataRead := '1';
-				end if;
+--				if(writeConfiguration = '1') then
+--					v.state := writeMem;
+--
+--					v.memData := configurationData;
+--					v.memAddress := configurationAddress;
+--					v.dataWrite := '1';
+--				end if;
+--
+--				if(readConfiguration = '1') then
+--					v.state := readMem;
+--
+--					v.memAddress := configurationAddress;
+--					v.dataRead := '1';
+--				end if;
 
 			when writeReg =>
 
