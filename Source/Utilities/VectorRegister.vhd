@@ -2,7 +2,7 @@ library ieee ;
 	use ieee.std_logic_1164.all ;
 	use ieee.numeric_std.all ;
 
-entity Delay is
+entity VectorRegister is
 	generic (
 		wordLength : natural := 8
 	);
@@ -13,9 +13,9 @@ entity Delay is
 		clk : in std_logic;
 		reset : in std_logic
 	) ;
-end entity ; -- Delay
+end entity ; -- VectorRegister
 
-architecture arch of Delay is
+architecture arch of VectorRegister is
 	signal delayedSignal : std_logic_vector(wordLength-1 downto 0);
 begin
 	

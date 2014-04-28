@@ -18,22 +18,28 @@ signal out_stage1: std_logic_vector(wordLength-1 downto 0);
 signal out_stage2: std_logic_vector(wordLength-1 downto 0);
 signal out_stage3: std_logic_vector(wordLength-1 downto 0);
 signal out_stage4: std_logic_vector(wordLength-1 downto 0);
+signal fir1_out : std_logic_vector(wordLength-1 downto 0);
+signal fir2_out : std_logic_vector(wordLength-1 downto 0);
+signal fir3_out : std_logic_vector(wordLength-1 downto 0);
+signal fir4_out : std_logic_vector(wordLength-1 downto 0);
+
 signal clk1: std_logic;
 signal clk2: std_logic;
 signal clk3: std_logic;
 signal clk4: std_logic;
+signal clk5: std_logic;
 
 begin
 
-
---Stage 1
 clk_1:entity work.ClockDivider 
-	generic map(divider => 71) -- 50M/(44100*16)=70.861
+	generic map(divider => 71) -- 50M/(44100*2^4)=70.861
 	port map(
 		reset => reset,
-		clk => clk,
-		clkOut=>clk1
+		clk => clk,				
+		clkOut=>clk1 			--(44100*2^4)
 		);
+
+--Stage 1
 fiter_1:entity work.FIR
 	generic map( wordLength=>wordLength,
 		order => 6,
@@ -49,21 +55,29 @@ fiter_1:entity work.FIR
 	)
 	port map(
 		input=> input,
-		output=> out_stage1,
-		clk => clk1,
+		output=> fir1_out,
+		clk => clk1,			--(44100*2^4)
 		reset => reset
 		);
-
-
---Stage 2
-clk_2:entity work.ClockDivider 
+clk_2:entity work.ClockDivider    
 	generic map(divider => 2)
 	port map(
 		reset => reset,
-		clk => clk1,
-		clkOut=>clk2
+		clk => clk1,				-- (44100*2^4)
+		clkOut=>clk2 				-- (44100*2^3)
 		);
 
+downsampler1:entity work.VectorRegister
+    generic map(wordLength => 16)
+    port map(
+    	input=> fir1_out,
+    	output=> out_stage1,
+    	clk=>clk2,					--(44100*2^3)
+    	reset=> reset
+    	);
+
+
+--Stage 2
 fiter_2:entity work.FIR
 		generic map( wordLength=>wordLength,
 			order => 6,
@@ -80,19 +94,31 @@ fiter_2:entity work.FIR
 
 		port map(
 			input=> out_stage1,
-			output=> out_stage2,
-			clk => clk2,
+			output=> fir2_out,
+			clk => clk2,   				-- (44100*2^3)
 			reset => reset
 			);
 
---Stage 3
 clk_3:entity work.ClockDivider 
 	generic map(divider => 2)
 	port map(
 		reset => reset,
-		clk => clk2,
-		clkOut=>clk3
+		clk => clk2,					 --(44100*2^3)
+		clkOut=>clk3    					--(44100*2^2)
 		);
+downsampler2:entity work.VectorRegister
+    generic map(wordLength => 16)
+    port map(
+    	input=> fir2_out,
+    	output=> out_stage2,
+    	clk=>clk3,						--(44100*2^2)
+    	reset=> reset
+    	);
+
+
+		
+
+--Stage 3
 fiter_3:entity work.FIR
 		generic map( wordLength=>wordLength,
 			order => 6,
@@ -108,19 +134,31 @@ fiter_3:entity work.FIR
 		)
 		port map(
 			input=> out_stage2,
-			output=> out_stage3,
-			clk => clk3,
+			output=> fir3_out,
+			clk => clk3,				--(44100*2^2)
 			reset => reset
 			);
-
---Stage 4
 clk_4:entity work.ClockDivider 
 	generic map(divider => 2)
 	port map(
 		reset => reset,
-		clk => clk3,
-		clkOut=>clk4
+		clk => clk3,					--(44100*2^2)
+		clkOut=>clk4    				--(44100*2^1)
 		);
+downsampler3:entity work.VectorRegister
+    generic map(wordLength => 16)
+    port map(
+    	input=> fir3_out,
+    	output=> out_stage3,
+    	clk=>clk4,						--(44100*2^1)
+    	reset=> reset
+    	);
+
+
+
+
+
+--Stage 4
 fiter_4:entity work.FIR
 		generic map( wordLength=>wordLength,
 			order => 14,
@@ -145,10 +183,28 @@ fiter_4:entity work.FIR
 
 		port map(
 			input=> out_stage3,
-			output=> out_stage4,
+			output=> fir4_out,
 			clk => clk4,
 			reset => reset
 			);
+
+clk_5:entity work.ClockDivider 
+	generic map(divider => 2)
+	port map(
+		reset => reset,
+		clk => clk4,					--(44100*2^1)
+		clkOut=>clk5    				--(44100*2^0)
+		);
+
+downsampler4:entity work.VectorRegister
+    generic map(wordLength => 16)
+    port map(
+    	input=> fir4_out,
+    	output=> out_stage4,
+    	clk=>clk5,						--(44100*2^0)
+    	reset=> reset
+    	);
+
 output<= out_stage4;
 
 end architecture ; -- arch
