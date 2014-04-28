@@ -169,7 +169,6 @@ begin
 		input => configRegisterBus,
 		output => config,
 
-		clk => serialClk,
 		reset => reset
 	);
 
@@ -181,7 +180,6 @@ begin
 		input => configRegisterBus,
 		output => config2,
 
-		clk => serialClk,
 		reset => reset
 	);
 

@@ -12,7 +12,6 @@ entity ConfigRegister is
 		input : in configurableRegisterBus;
 		output : out std_logic_vector(wordLength-1 downto 0);
 
-		clk : in std_logic;
 		reset : in std_logic
 	);
 end entity ; -- ConfigRegister
@@ -38,7 +37,7 @@ begin
 		output => output,
 
 		clkEnable => reg_clkEnable,
-		clk => clk,
+		clk => input.clk,
 		reset => reset
 	);
 

@@ -74,6 +74,8 @@ architecture arch of MemoryController is
 	signal waitDone : std_logic;
 begin
 	registerBus <= r.registerBus;
+	registerBus.clk <= clk;
+	
 	clearDone <= r.clearDone;
 
 	MI_address <= r.memAddress;

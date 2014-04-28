@@ -8,6 +8,7 @@ package memory_pkg is
 		-- This likely doesn't need to be 15 bits.
 		address : std_logic_vector(15 downto 0);
 		data : std_logic_vector(15 downto 0);
+		clk : std_logic;
 
 		writeEnable : std_logic;
 	end record;
