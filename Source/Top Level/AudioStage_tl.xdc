@@ -26,8 +26,13 @@ set_property PACKAGE_PIN R7 [get_ports bypassEcho]
 set_property PACKAGE_PIN R6 [get_ports bypassFlanger]					
 	set_property IOSTANDARD LVCMOS33 [get_ports bypassFlanger]
 ##Bank = 34, Pin name = IO_L19N_T3_VREF_34,					Sch name = SW4
+<<<<<<< HEAD
 set_property PACKAGE_PIN R5 [get_ports bypassReverb]					
 	set_property IOSTANDARD LVCMOS33 [get_ports bypassReverb]
+=======
+set_property PACKAGE_PIN R5 [get_ports bypassEQ]					
+	set_property IOSTANDARD LVCMOS33 [get_ports bypassEQ]
+>>>>>>> origin/master
 ##Bank = 34, Pin name = IO_L20P_T3_34,						Sch name = SW5
 set_property PACKAGE_PIN V7 [get_ports bypassDistortion]					
 	set_property IOSTANDARD LVCMOS33 [get_ports bypassDistortion]

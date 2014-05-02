@@ -15,8 +15,11 @@ entity AudioStage_tl is
 		bypassLP : in std_logic;
 		bypassEcho : in std_logic;
 		bypassFlanger : in std_logic;
+<<<<<<< HEAD
 		bypassReverb : in std_logic;
 		bypassDistortion : in std_logic;
+=======
+>>>>>>> origin/master
 		bypassEQ : in std_logic;
 
 		clk : in std_logic;
@@ -32,7 +35,10 @@ architecture arch of AudioStage_tl is
 	signal decimatorOutput : std_logic_vector(15 downto 0);
 	signal decimatorMuxedOutput : std_logic_vector(15 downto 0);
 	
+<<<<<<< HEAD
 	
+=======
+>>>>>>> origin/master
 	signal throughputClk : std_logic;
 	signal sampleClk : std_logic;
 	signal echoClk : std_logic;
@@ -40,6 +46,7 @@ architecture arch of AudioStage_tl is
 	signal effectOutputEcho : std_logic_vector(15 downto 0);
     signal effectInputFlanger : std_logic_vector(15 downto 0);
 	signal effectOutputFlanger : std_logic_vector(15 downto 0);
+<<<<<<< HEAD
 	signal effectInputReverb : std_logic_vector(15 downto 0);
 	signal effectOutputReverb : std_logic_vector(15 downto 0);
 	signal effectInputDistortion : std_logic_vector(15 downto 0);
@@ -51,6 +58,10 @@ architecture arch of AudioStage_tl is
     signal effectInputDistortionb : std_logic_vector(15 downto 0);
     signal effectOutputDistortionb : std_logic_vector(15 downto 0);
 
+=======
+	signal effectInputFlangerb : std_logic_vector(15 downto 0);
+    
+>>>>>>> origin/master
 
     signal temp_eq_in  : std_logic_vector(15 downto 0);
     signal temp_eq_out : std_logic_vector(15 downto 0);
@@ -123,9 +134,13 @@ buf_Dec2Echo: entity work.VectorRegister
 	
  				);
 
+<<<<<<< HEAD
 
 
 	effectInputEcho <= decimatorMuxedOutputb;
+=======
+	effectInputEcho <= decimatorMuxedOutput;
+>>>>>>> origin/master
 
 	echoClkGenerator : entity work.ClockDivider
 	generic map (
@@ -147,10 +162,17 @@ buf_Dec2Echo: entity work.VectorRegister
 	);
 
 effectInputFlanger <= effectOutputEcho when bypassEcho = '0' else
+<<<<<<< HEAD
 			      decimatorMuxedOutputb;
 
 
  buf_Echo2Fla: entity work.VectorRegister  
+=======
+			      effectInputEcho;
+
+
+ pipeline_1: entity work.VectorRegister  
+>>>>>>> origin/master
  		generic map(wordLength => 16 			-- buffer between echo and flanger
  			)
  		port map(
@@ -175,6 +197,7 @@ effectInputFlanger <= effectOutputEcho when bypassEcho = '0' else
 
 	-- OUTPUT
     
+<<<<<<< HEAD
 
 	effectInputReverb <= effectOutputFlanger when bypassFlanger = '0' else
 			      effectInputFlangerb;
@@ -242,6 +265,12 @@ buf_afterDist: entity work.VectorRegister
  			);
 temp_eq_in <= effectOutputDistortion when bypassDistortion = '0' else
 			      effectInputDistortionb;
+=======
+	
+
+	temp_eq_in <= effectOutputFlanger when bypassFlanger = '0' else
+			      effectInputFlanger;
+>>>>>>> origin/master
 
 	EqualizerClkGenerator : entity work.ClockDivider
 	generic map (
@@ -253,7 +282,11 @@ temp_eq_in <= effectOutputDistortion when bypassDistortion = '0' else
 		reset => reset 
 	);
 
+<<<<<<< HEAD
 	-- temp_eq_out <= temp_eq_in;
+=======
+	temp_eq_out <= temp_eq_in;
+>>>>>>> origin/master
 
 	-- EQ: entity work.Generic_Equalizer_Low_Pass
 	-- port map(

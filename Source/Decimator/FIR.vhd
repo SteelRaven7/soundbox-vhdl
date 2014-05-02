@@ -1,12 +1,17 @@
 library ieee ;
 	use ieee.std_logic_1164.all;
 	use ieee.numeric_std.all;
+<<<<<<< HEAD
+=======
+	library work;
+>>>>>>> origin/master
 	use work.fixed_pkg.all;
 	use work.filter_pkg.all;
 
 
 entity FIR is
 	generic (
+<<<<<<< HEAD
 		wordLength : natural := 32;
 		fractionalBits : natural := 31;
 
@@ -34,6 +39,16 @@ entity FIR is
 	port (
 		input : in std_logic_vector(wordLength-1 downto 0);
 		output : out std_logic_vector(outputWordLength-1 downto 0);
+=======
+		wordLength : natural := 16;
+		order : natural := 3;
+
+		coefficients : coefficient_array := (0.0, 0.0, 0.0, 0.0)
+	);
+	port (
+		input : in std_logic_vector(wordLength-1 downto 0);
+		output : out std_logic_vector(wordLength-1 downto 0);
+>>>>>>> origin/master
 
 		clk : in std_logic;
 		reset : in std_logic
@@ -43,7 +58,11 @@ end entity ; -- FIR
 
 architecture arch of FIR is
 	type signalArray is array(0 to order) of std_logic_vector(wordLength-1 downto 0);
+<<<<<<< HEAD
 	type sumArray is array(0 to order) of std_logic_vector(sumWordLength-1 downto 0);
+=======
+	type sumArray is array(0 to order) of std_logic_vector((wordLength*2)-1 downto 0);
+>>>>>>> origin/master
 
 	signal inputs : signalArray		:= (others => (others => '0'));
 	signal gainedInputs : sumArray	:= (others => (others => '0'));
@@ -51,11 +70,19 @@ architecture arch of FIR is
 begin
 
 	inputs(0) <= input;
+<<<<<<< HEAD
 	output <= sums(0)(sumFractionalBits-outputFractionalBits+outputWordLength-1 downto sumFractionalBits-outputFractionalBits);
 	sums(order) <= gainedInputs(order);
 
 	delays : for i in 0 to order-1 generate
 
+=======
+	output <= sums(0)(wordLength*2-1 downto wordLength);
+	sums(order) <= gainedInputs(order);
+
+	delays : for i in 0 to order-1 generate
+		
+>>>>>>> origin/master
 		-- Delay stages
 		delay : entity work.VectorRegister
 		generic map (
@@ -71,7 +98,11 @@ begin
 		-- Output summation
 		adder : entity work.AdderSat
 		generic map (
+<<<<<<< HEAD
 			wordLength => sumWordLength
+=======
+			wordLength => wordLength*2
+>>>>>>> origin/master
 		)
 		port map (
 			a => gainedInputs(i),
@@ -82,6 +113,7 @@ begin
 	end generate ; -- delays
 
 	multiplication : for i in 0 to order generate
+<<<<<<< HEAD
 
 		mult : entity work.Multiplier
 		generic map (
@@ -97,6 +129,21 @@ begin
 			y => real_to_fixed(coefficients(i), coeffWordLength, coeffFractionalBits),
 
 			s => gainedInputs(i)
+=======
+		
+		-- Coefficient multiplication
+		mult : entity work.Mult
+		generic map (
+			wordLengthA => wordLength,
+			wordLengthB => wordLength,
+			wordLengthP => wordLength*2
+		)
+		port map (
+			a => inputs(i),
+			b => real_to_fixed(coefficients(i), wordLength),
+
+			p => gainedInputs(i)
+>>>>>>> origin/master
 		);
 	end generate;
 
