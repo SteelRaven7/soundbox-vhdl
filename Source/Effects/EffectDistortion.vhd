@@ -21,7 +21,7 @@ entity EffectDistortion is
   
 architecture behav of EffectDistortion is
   
-  COMPONENT blk_mem_distortion_2
+  COMPONENT blk_mem_gen_1
   PORT (
     clka : IN STD_LOGIC;
     addra : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
@@ -30,13 +30,17 @@ architecture behav of EffectDistortion is
 END COMPONENT;
 signal temp_ADDR : std_logic_vector(ADDR_WIDTH-1 downto 0);
 
+signal shifted : signed(ADDR_WIDTH-1 downto 0);
+
   begin
 
-  
- memory: blk_mem_distortion_2
+  shifted <= shift_left(signed(ADDR),2);
+  temp_ADDR <= std_logic_vector(shifted);
+
+ memory: blk_mem_gen_1
  port map(
  	clka =>clk,
-    addra =>ADDR,
+    addra => temp_ADDR,
  	-- addra=>ADDR,
  	douta=>OUTPUT
  	);

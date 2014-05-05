@@ -29,11 +29,11 @@ set_property PACKAGE_PIN R6 [get_ports bypassFlanger]
 set_property PACKAGE_PIN R5 [get_ports bypassReverb]					
 	set_property IOSTANDARD LVCMOS33 [get_ports bypassReverb]
 ##Bank = 34, Pin name = IO_L20P_T3_34,						Sch name = SW5
-set_property PACKAGE_PIN V7 [get_ports bypassDistortion]					
-	set_property IOSTANDARD LVCMOS33 [get_ports bypassDistortion]
+set_property PACKAGE_PIN V7 [get_ports bypassDistortionEnable]					
+	set_property IOSTANDARD LVCMOS33 [get_ports bypassDistortionEnable]
 ##Bank = 34, Pin name = IO_L20N_T3_34,						Sch name = SW6
-set_property PACKAGE_PIN V6 [get_ports bypassEQ]					
-	set_property IOSTANDARD LVCMOS33 [get_ports bypassEQ]
+set_property PACKAGE_PIN V6 [get_ports bypassDistortionSelect]					
+	set_property IOSTANDARD LVCMOS33 [get_ports bypassDistortionSelect]
 ##Bank = 34, Pin name = IO_L10P_T1_34,						Sch name = SW7
 #set_property PACKAGE_PIN V5 [get_ports {sw[7]}]					
 	#set_property IOSTANDARD LVCMOS33 [get_ports {sw[7]}]
@@ -213,11 +213,11 @@ set_property PACKAGE_PIN F15 [get_ports reset]
 
 ##Pmod Header JA
 ##Bank = 15, Pin name = IO_L1N_T0_AD0N_15,					Sch name = JA1
-#set_property PACKAGE_PIN B13 [get_ports {JA[0]}]					
-	#set_property IOSTANDARD LVCMOS33 [get_ports {JA[0]}]
+#set_property PACKAGE_PIN B13 [get_ports tempclock]					
+	#set_property IOSTANDARD LVCMOS33 [get_ports tempclock]
 ##Bank = 15, Pin name = IO_L5N_T0_AD9N_15,					Sch name = JA2
-#set_property PACKAGE_PIN F14 [get_ports {JA[1]}]					
-	#set_property IOSTANDARD LVCMOS33 [get_ports {JA[1]}]
+#set_property PACKAGE_PIN F14 [get_ports sclk]					
+	#set_property IOSTANDARD LVCMOS33 [get_ports sclk]
 ##Bank = 15, Pin name = IO_L16N_T2_A27_15,					Sch name = JA3
 #set_property PACKAGE_PIN D17 [get_ports {JA[2]}]					
 	#set_property IOSTANDARD LVCMOS33 [get_ports {JA[2]}]
@@ -240,15 +240,15 @@ set_property PACKAGE_PIN F15 [get_ports reset]
 
 
 ##Pmod Header JB
-##Bank = 15, Pin name = IO_L15N_T2_DQS_ADV_B_15,				Sch name = JB1
-#set_property PACKAGE_PIN G14 [get_ports {JB[0]}]					
-	#set_property IOSTANDARD LVCMOS33 [get_ports {JB[0]}]
+##Bank = 15, Pin name = IO_L15N_T2_DQS_ADV_B_15,			Sch name = JB1
+set_property PACKAGE_PIN G14 [get_ports cs]					
+	set_property IOSTANDARD LVCMOS33 [get_ports cs]
 ##Bank = 14, Pin name = IO_L13P_T2_MRCC_14,					Sch name = JB2
-#set_property PACKAGE_PIN P15 [get_ports {JB[1]}]					
-	#set_property IOSTANDARD LVCMOS33 [get_ports {JB[1]}]
+set_property PACKAGE_PIN P15 [get_ports sclk]					
+	set_property IOSTANDARD LVCMOS33 [get_ports sclk]
 ##Bank = 14, Pin name = IO_L21N_T3_DQS_A06_D22_14,			Sch name = JB3
-#set_property PACKAGE_PIN V11 [get_ports {JB[2]}]					
-	#set_property IOSTANDARD LVCMOS33 [get_ports {JB[2]}]
+set_property PACKAGE_PIN V11 [get_ports toDA]					
+	set_property IOSTANDARD LVCMOS33 [get_ports toDA]
 ##Bank = CONFIG, Pin name = IO_L16P_T2_CSI_B_14,				Sch name = JB4
 #set_property PACKAGE_PIN V15 [get_ports {JB[3]}]					
 	#set_property IOSTANDARD LVCMOS33 [get_ports {JB[3]}]
@@ -269,14 +269,14 @@ set_property PACKAGE_PIN F15 [get_ports reset]
 
 ##Pmod Header JC
 ##Bank = 35, Pin name = IO_L23P_T3_35,						Sch name = JC1
-#set_property PACKAGE_PIN K2 [get_ports {JC[0]}]					
-	#set_property IOSTANDARD LVCMOS33 [get_ports {JC[0]}]
+#set_property PACKAGE_PIN K2 [get_ports cs]					
+	#set_property IOSTANDARD LVCMOS33 [get_ports cs]
 ##Bank = 35, Pin name = IO_L6P_T0_35,						Sch name = JC2
-#set_property PACKAGE_PIN E7 [get_ports {JC[1]}]					
-	#set_property IOSTANDARD LVCMOS33 [get_ports {JC[1]}]
+#set_property PACKAGE_PIN E7 [get_ports sclk]					
+	#set_property IOSTANDARD LVCMOS33 [get_ports sclk]
 ##Bank = 35, Pin name = IO_L22P_T3_35,						Sch name = JC3
-#set_property PACKAGE_PIN J3 [get_ports {JC[2]}]					
-	#set_property IOSTANDARD LVCMOS33 [get_ports {JC[2]}]
+#set_property PACKAGE_PIN J3 [get_ports toDA]					
+	#set_property IOSTANDARD LVCMOS33 [get_ports toDA]
 ##Bank = 35, Pin name = IO_L21P_T3_DQS_35,					Sch name = JC4
 #set_property PACKAGE_PIN J4 [get_ports {JC[3]}]					
 	#set_property IOSTANDARD LVCMOS33 [get_ports {JC[3]}]

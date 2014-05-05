@@ -18,6 +18,8 @@ architecture behav of EffectReverb is
 	
 	type signal_array is array(3 downto 0) of std_logic_vector(c_length-1 downto 0);
 	type gain_array is array(3 downto 0) of signed(IO_length+c_length-1 downto 0);
+	type sum_array is array(3 downto 0) of std_logic_vector(IO_length+c_length-1 downto 0);
+	
 	
 	constant coeff_pos : std_logic_vector(c_length-1 downto 0) := x"7F5B";
 	constant coeff_neg : std_logic_vector(c_length-1 downto 0) := x"80A5";
@@ -27,10 +29,13 @@ architecture behav of EffectReverb is
 	signal scalar : gain_array;
 	signal matrix_outputs : signal_array;
 	
+	signal dry_gain : std_logic_vector(IO_length+c_length-1 downto 0);
+	
 	signal delay_outputs : signal_array;
 	signal wet_gain : gain_array;
-	signal wet_sum : signed(IO_length+c_length-1 downto 0);
-	signal wet_2_out : std_logic_vector(IO_length-1 downto 0);
+	signal wet_sum : sum_array;
+	signal wet_2_out : std_logic_vector(2*IO_length-1 downto 0);
+	signal input_sum : signal_array;
 
 	type mem_signals is record
 		--writeEnable : std_logic;
@@ -130,10 +135,10 @@ architecture behav of EffectReverb is
 		gain_outputs(3) <= signed(delay_outputs(3))*signed(coeff_neg);
 		
 		--summation of the input and the mixed feedback signals
-		delay1.dataIn <= std_logic_vector(signed(input)+signed(matrix_outputs(0)));
-		delay2.dataIn <= std_logic_vector(signed(input)+signed(matrix_outputs(1)));
-		delay3.dataIn <= std_logic_vector(signed(input)+signed(matrix_outputs(2)));
-		delay4.dataIn <= std_logic_vector(signed(input)+signed(matrix_outputs(3)));
+		delay1.dataIn <= input_sum(0);
+		delay2.dataIn <= input_sum(1);
+		delay3.dataIn <= input_sum(2);
+		delay4.dataIn <= input_sum(3);
 		
 		--vector*vector transpose = scalar. a(0:3)*delayOut(0:3) = a(0)*delayOut(0) + ...
 		--minimizing gain stages by using subtractions instead of two separate gains.
@@ -153,11 +158,108 @@ architecture behav of EffectReverb is
 		wet_gain(1) <= signed(delay_outputs(1))*signed(wet_coeff);
 		wet_gain(2) <= signed(delay_outputs(2))*signed(wet_coeff);
 		wet_gain(3) <= signed(delay_outputs(3))*signed(wet_coeff);
+		dry_gain <= input & x"0000" when input(15) = '0' else
+					input & x"FFFF";
+
+		
 		
 		--Summation of the wet signals and the dry input
-		wet_sum <= wet_gain(0) + wet_gain(1) + wet_gain(2) + wet_gain(3);
-		wet_2_out <= std_logic_vector(wet_sum(IO_length+c_length-1 downto IO_length));
-		output <= std_logic_vector(signed(input)+signed(wet_2_out));
+	   -- a:for i in 1 to 3 generate
+		accuma : entity work.AdderSat
+		generic map (
+			wordLength => 2*IO_length
+		)
+		port map (
+			a => std_logic_vector(wet_gain(0)),
+			b => wet_sum(0),
+
+			s => wet_sum(1)
+		);
+
+		accumb : entity work.AdderSat
+		generic map (
+			wordLength => 2*IO_length
+		)
+		port map (
+			a => std_logic_vector(wet_gain(1)),
+			b => wet_sum(1),
+
+			s => wet_sum(2)
+		);
+
+		accumc : entity work.AdderSat
+		generic map (
+			wordLength => 2*IO_length
+		)
+		port map (
+			a => std_logic_vector(wet_gain(2)),
+			b => wet_sum(2),
+
+			s => wet_sum(3)
+		);
+
+		
+		-- end generate;
+		
+	   -- b:for i in 0 to 3 generate
+		accum2 : entity work.AdderSat
+		generic map (
+			wordLength => IO_length
+		)
+		port map (
+			a => input,
+			b => matrix_outputs(0),
+
+			s => input_sum(0)
+		);
+
+		accum3 : entity work.AdderSat
+		generic map (
+			wordLength => IO_length
+		)
+		port map (
+			a => input,
+			b => matrix_outputs(1),
+
+			s => input_sum(1)
+		);
+
+		accum4 : entity work.AdderSat
+		generic map (
+			wordLength => IO_length
+		)
+		port map (
+			a => input,
+			b => matrix_outputs(2),
+
+			s => input_sum(2)
+		);
+
+		accum5 : entity work.AdderSat
+		generic map (
+			wordLength => IO_length
+		)
+		port map (
+			a => input,
+			b => matrix_outputs(3),
+
+			s => input_sum(3)
+		);
+		-- end generate;
+		
+		accum1 : entity work.AdderSat
+		generic map (
+			wordLength => 2*IO_length
+		)
+		port map (
+			a => dry_gain,
+			b => std_logic_vector(wet_gain(3)),
+
+			s => wet_sum(0)
+		);
+		
+		wet_2_out <= std_logic_vector(wet_sum(3));
+		output <= wet_2_out(2*IO_length-1 downto IO_length);
 
 		memory_1:blk_mem_gen_delay1
 		port map (

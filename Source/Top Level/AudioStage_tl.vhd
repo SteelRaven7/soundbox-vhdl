@@ -16,8 +16,13 @@ entity AudioStage_tl is
 		bypassEcho : in std_logic;
 		bypassFlanger : in std_logic;
 		bypassReverb : in std_logic;
-		bypassDistortion : in std_logic;
+		bypassDistortionSelect : in std_logic;
+		bypassDistortionEnable : in std_logic;
 		bypassEQ : in std_logic;
+
+		cs: out std_logic;
+		sclk: out std_logic;
+		toDA: out std_logic;
 
 		clk : in std_logic;
 		reset : in std_logic
@@ -30,6 +35,7 @@ architecture arch of AudioStage_tl is
 	
 	signal decimatorInput : std_logic_vector(15 downto 0);
 	signal decimatorOutput : std_logic_vector(15 downto 0);
+	signal decimatorInputb : std_logic_vector(15 downto 0);
 	signal decimatorMuxedOutput : std_logic_vector(15 downto 0);
 	
 	
@@ -45,25 +51,31 @@ architecture arch of AudioStage_tl is
 	signal effectOutputReverb : std_logic_vector(15 downto 0);
 	signal effectInputDistortion : std_logic_vector(15 downto 0);
 	signal effectOutputDistortion : std_logic_vector(15 downto 0);
+	signal DistortionSwitch : std_logic_vector(15 downto 0);
 
 	signal decimatorMuxedOutputb : std_logic_vector(15 downto 0); -- Buffer Signals
     signal effectInputFlangerb : std_logic_vector(15 downto 0);
     signal effectInputReverbb : std_logic_vector(15 downto 0);
     signal effectInputDistortionb : std_logic_vector(15 downto 0);
     signal effectOutputDistortionb : std_logic_vector(15 downto 0);
+    signal effectOutputDistortionSoft: std_logic_vector(15 downto 0);
+    signal effectOutputDistortionHard: std_logic_vector(15 downto 0);
 
 
     signal temp_eq_in  : std_logic_vector(15 downto 0);
     signal temp_eq_out : std_logic_vector(15 downto 0);
+    signal temp_check : std_logic_vector(15 downto 0);
 	
 	signal toPWM : std_logic_vector(8 downto 0);
 	signal clkPWM : std_logic;
-
+	signal serialClock_temp: std_logic;
 	signal testSignal : std_logic_vector(19 downto 0);
+
+	constant uggabugga : std_logic_vector(15 downto 0) := "1000000000000000";
 begin
 
 	pwm_amp <= '1';
-	leds <= effectInputEcho;
+	leds <= temp_eq_out;
 
 	sampleClkGenerator : entity work.ClockDivider
 	generic map (
@@ -94,7 +106,10 @@ begin
 	--decimatorInput <= sampleOutput & "0000";
 	--decimatorInput <= sampleOutput and (others => muteInput);
     -- testSignal <= (others => sampleOutput(11));
-	decimatorInput <= 	sampleOutput & x"0" when muteInput = '0' else
+    decimatorInput <= sampleOutput & "0000" when sampleOutput(11) = '0' else
+    					sampleOutput & "1111";
+
+	decimatorInputb <= 	decimatorInput when muteInput = '0' else
 						(others => '0');
 
 	decimator: entity work.StructuralDecimator
@@ -206,22 +221,23 @@ effectInputFlanger <= effectOutputEcho when bypassEcho = '0' else
 
  			);
 
-	Reverb: entity work.EffectReverb
-	generic map(
-		IO_length => 16,
-		c_length => 16,
-		addr_length  => 12)
-	port map(
-		input => effectInputReverbb,
-		output => effectOutputReverb,
+	-- Reverb: entity work.EffectReverb
+	-- generic map(
+	-- 	IO_length => 16,
+	-- 	c_length => 16,
+	-- 	addr_length  => 12)
+	-- port map(
+	-- 	input => effectInputReverbb,
+	-- 	output => effectOutputReverb,
 
-		clk =>echoClk,
-		reset =>reset
-	);
+	-- 	clk =>echoClk,
+	-- 	reset =>reset
+	-- );
 
-	effectInputDistortion <= effectOutputReverb when bypassReverb = '0' else
+	-- effectInputDistortion <= effectOutputReverb when bypassReverb = '0' else
+	-- 					effectInputReverbb;
+effectInputDistortion <= effectInputReverbb when bypassReverb = '0' else
 						effectInputReverbb;
-
 
 ----------------------------DISTORTION-----------------------------------------------
 
@@ -239,13 +255,31 @@ buf_beforeDist: entity work.VectorRegister
  			);	
 
 	Distortion: entity work.EffectDistortion
-	generic map(DATA_WIDTH => 16,
-              ADDR_WIDTH => 16)
+	generic map( DATA_WIDTH => 16,
+                 ADDR_WIDTH => 16
+               )
 	port map(
-		addr =>effectInputDistortionb,
-		output=>effectOutputDistortion,
-		clk => echoClk
+		ADDR =>effectInputDistortionb,
+		output=>effectOutputDistortionSoft,
+		clk => throughputClk
+		-- reset =>reset
 	);		     
+DistortionSwitch <= effectOutputDistortionSoft when bypassDistortionSelect = '0' else
+			      effectOutputDistortionHard;
+
+
+Distortion2: entity work.hard_dist
+	generic map(wordlength => 16,
+			coeff_address => 13)
+	port map(
+		input =>effectInputDistortionb,
+		output=>effectOutputDistortionHard,
+		clk => throughputClk,
+		reset =>reset
+	);
+
+temp_eq_in <= DistortionSwitch when bypassDistortionEnable = '0' else
+			      effectInputDistortionb;
 
 buf_afterDist: entity work.VectorRegister  
  		generic map(wordLength => 16 			-- buffer after Distortion
@@ -258,8 +292,7 @@ buf_afterDist: entity work.VectorRegister
 		reset =>reset
 
  			);
-temp_eq_in <= effectOutputDistortion when bypassDistortion = '0' else
-			      effectInputDistortionb;
+
 
 
 ----------------------------EQUALIZER----------------------------------------------
@@ -301,6 +334,35 @@ temp_eq_in <= effectOutputDistortion when bypassDistortion = '0' else
 
 		clk => clk,
 		reset => reset
+	);
+
+
+	clockSerial : entity work.ClockDivider
+	generic map (
+		-- divider => 128 --2^11*44.1 k to 705.6 k
+		-- divider => 76 -- 2^10*44.1k 100 MHz to 705.6 kHz.
+		divider => 32
+	)
+	port map (
+		clk => clk,
+		clkOut => serialClock_temp,
+		reset => reset
+	);
+
+	temp_check <= std_logic_vector(signed(temp_eq_out)+signed(uggabugga));
+	sclk <= serialClock_temp;
+	-- tempclock <= throughputClk;
+	da:entity work.DA
+	generic map(
+		width => 16
+		)
+	port map(
+	   clk =>serialClock_temp,
+       reset =>reset,
+       sample_clk => throughputClk,
+       data => temp_check,
+       CS =>cs,
+       SDI =>toDA
 	);
 
 end architecture ; -- arch

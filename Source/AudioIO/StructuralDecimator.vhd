@@ -13,7 +13,7 @@ end entity ; -- StructuralDecimator
 
 architecture arch of StructuralDecimator is
 	constant internalWordLength : natural := 16;
-	constant internalFractions : natural := 15;
+	constant internalFractions : natural := 16;
 
 	constant internalSumWordLength : natural := 30;
 	constant internalSumFractions : natural := 19;
@@ -143,7 +143,7 @@ begin
 		fractionalBits => internalFractions,
 
 		coeffWordLength => 16,
-		coeffFractionalBits => 15,
+		coeffFractionalBits => 16,
 
 		sumWordLength => internalSumWordLength,
 		sumFractionalBits => internalSumFractions,
@@ -179,7 +179,7 @@ begin
 		fractionalBits => internalFractions,
 
 		coeffWordLength => 16,
-		coeffFractionalBits => 15,
+		coeffFractionalBits => 16,
 
 		sumWordLength => internalSumWordLength,
 		sumFractionalBits => internalSumFractions,
@@ -215,7 +215,7 @@ begin
 		fractionalBits => internalFractions,
 
 		coeffWordLength => 16,
-		coeffFractionalBits => 15,
+		coeffFractionalBits => 16,
 
 		sumWordLength => internalSumWordLength,
 		sumFractionalBits => internalSumFractions,
@@ -250,13 +250,13 @@ begin
 		fractionalBits => internalFractions,
 
 		coeffWordLength => 16,
-		coeffFractionalBits => 15,
+		coeffFractionalBits => 16,
 
 		sumWordLength => internalSumWordLength,
 		sumFractionalBits => internalSumFractions,
 
 		outputWordLength => 16,
-		outputFractionalBits => 15,
+		outputFractionalBits => 16,
 
 		order => 14,
 		coefficients => (
