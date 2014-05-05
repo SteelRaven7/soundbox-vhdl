@@ -148,7 +148,7 @@ begin
 		input => SI_msgReady,
 		output => MCU_execute,
 
-		clk => serialClk,
+		clk => controlClk,
 		reset => reset
 	);
 
@@ -160,7 +160,7 @@ begin
 		input => MCU_clearDone,
 		output => SI_clearDone,
 
-		clk => serialClk,
+		clk => controlClk,
 		reset => reset
 	);
 
