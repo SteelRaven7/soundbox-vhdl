@@ -1,6 +1,7 @@
 library ieee ;
 	use ieee.std_logic_1164.all ;
 	use ieee.numeric_std.all ;
+	use work.memory_pkg.all;
 
 entity AudioStage_tl is
 	port (
@@ -11,6 +12,7 @@ entity AudioStage_tl is
 		pwm_amp : out std_logic;
 		leds : out std_logic_vector(15 downto 0);
 
+		-- Switches
 		muteInput : in std_logic;
 		bypassLP : in std_logic;
 		bypassEcho : in std_logic;
@@ -19,10 +21,20 @@ entity AudioStage_tl is
 		bypassDistortionSelect : in std_logic;
 		bypassDistortionEnable : in std_logic;
 		bypassEQ : in std_logic;
+		debugSwitch : in std_logic;
 
 		cs: out std_logic;
 		sclk: out std_logic;
 		toDA: out std_logic;
+
+		-- Serial interface (RS-232/UART @ 9600 Hz)
+		SI_serialIn : in std_logic;
+		SI_serialOut : out std_logic;
+
+		-- Serial flash ports
+		MCU_CS : out std_logic;
+		MCU_SI : out std_logic;
+		MCU_SO : in std_logic;
 
 		clk : in std_logic;
 		reset : in std_logic
@@ -30,6 +42,18 @@ entity AudioStage_tl is
 end entity ; -- AudioStage_tl
 
 architecture arch of AudioStage_tl is
+
+	-- Clocking constants (@ 100 MHz)
+	constant clk10MHzDivider : natural := 10;
+	constant clk9600HzDivider : natural := 10417;
+	constant clk705KHzDivider : natural := 142; -- 705.6 KHz
+
+	
+
+	--constant maxConfigRegisterAddress : natural := 1000;
+	constant maxConfigRegisterAddress : natural := 3;
+	constant uggabugga : std_logic_vector(15 downto 0) := "1000000000000000";
+
 	signal sampleInputClk : std_logic;
 	signal sampleOutput : std_logic_vector(11 downto 0);
 	
@@ -39,6 +63,9 @@ architecture arch of AudioStage_tl is
 	signal decimatorMuxedOutput : std_logic_vector(15 downto 0);
 	
 	
+	signal controlClk : std_logic;
+	signal softwareSerialClk : std_logic;
+
 	signal throughputClk : std_logic;
 	signal sampleClk : std_logic;
 	-- signal decimatorClk : std_logic;
@@ -61,26 +88,126 @@ architecture arch of AudioStage_tl is
     signal effectOutputDistortionSoft: std_logic_vector(15 downto 0);
     signal effectOutputDistortionHard: std_logic_vector(15 downto 0);
 
-
     signal temp_eq_in  : std_logic_vector(15 downto 0);
     signal temp_eq_out : std_logic_vector(15 downto 0);
     signal temp_check : std_logic_vector(15 downto 0);
-	
+
+
 	signal toPWM : std_logic_vector(8 downto 0);
 	signal clkPWM : std_logic;
 	signal serialClock_temp: std_logic;
 	signal testSignal : std_logic_vector(19 downto 0);
 
-	constant uggabugga : std_logic_vector(15 downto 0) := "1000000000000000";
+
+	-- Control unit signals
+	signal configRegisterBus : configurableRegisterBus;
+
+	signal SI_msgCommand : std_logic_vector(15 downto 0);
+	signal SI_msgPayload : std_logic_vector(15 downto 0);
+	signal SI_dataOk : std_logic;
+	signal SI_msgReady : std_logic;
+	signal SI_clearDone : std_logic;
+	signal MCU_execute : std_logic;
+	signal MCU_clearDone : std_logic;
+
+	signal debugAddress : std_logic_vector(15 downto 0);
 begin
 
+	-- Control unit
+
+	controlClkGenerator: entity work.ClockDivider
+	generic map (
+		divider => clk10MHzDivider -- 10 MHz
+	)
+	port map(
+		reset => reset,
+		clk => clk,
+		clkOut => controlClk
+	);
+
+	softwareSerialGenerator: entity work.ClockDivider
+	generic map (
+		divider => clk9600HzDivider -- SoftwareInterfaceClock @ 9600 Hz
+	)
+	port map(
+		reset => reset,
+		clk => clk,
+		clkOut => softwareSerialClk
+	);
+
+	SIU: entity work.SoftwareInterface
+	port map (
+		msgCommand => SI_msgCommand,
+		msgPayload => SI_msgPayload,
+		dataOk => SI_dataOk,
+		msgReady => SI_msgReady,
+		clearDone => SI_clearDone,
+		serialIn => SI_serialIn,
+		serialOut => SI_serialOut,
+		serialClk => softwareSerialClk,
+		reset => reset
+	);
+
+	MCU_PL : entity work.PulseLimiter
+	port map (
+		input => SI_msgReady,
+		output => MCU_execute,
+
+		clk => controlClk,
+		reset => reset
+	);
+
+	MCU_PK : entity work.PulseKeeper
+	generic map (
+		duration => clk9600HzDivider/clk10MHzDivider
+	)
+	port map (
+		input => MCU_clearDone,
+		output => SI_clearDone,
+
+		clk => controlClk,
+		reset => reset
+	);
+
+	MCU: entity work.MemoryController
+	generic map (
+		numberRegisters => maxConfigRegisterAddress
+	)
+	port map (
+		registerBus => configRegisterBus,
+
+		command => SI_msgCommand,
+		payload => SI_msgPayload,
+		executeCommand => MCU_execute,
+		clearDone => MCU_clearDone,
+
+		CS => MCU_CS,
+		SI => MCU_SI,
+		SO => MCU_SO,
+
+		clk => controlClk,
+		reset => reset
+	);
+
+	debugAddress <= x"000" & "001" & debugSwitch;
+	
+	DebugConfig : entity work.DebugConfigRegister
+	port map (
+		input => configRegisterBus,
+		output => leds,
+		address => debugAddress,
+
+		reset => reset
+	);
+
+	-- Audio
+
 	pwm_amp <= '1';
-	leds <= temp_eq_out;
+	--leds <= temp_eq_out;
 
 	sampleClkGenerator : entity work.ClockDivider
 	generic map (
-		-- divider => 128 --2^11*44.1 k to 705.6 k
-		divider => 64 -- 2^10*44.1k 100 MHz to 705.6 kHz.
+		divider => clk705KHzDivider
 	)
 	port map (
 		clk => clk,

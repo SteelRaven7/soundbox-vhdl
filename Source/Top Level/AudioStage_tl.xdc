@@ -59,8 +59,8 @@ set_property PACKAGE_PIN V6 [get_ports bypassDistortionSelect]
 #set_property PACKAGE_PIN P3 [get_ports {sw[14]}]					
 	#set_property IOSTANDARD LVCMOS33 [get_ports {sw[14]}]
 ##Bank = 34, Pin name = IO_L14P_T2_SRCC_34,					Sch name = SW15
-#set_property PACKAGE_PIN P4 [get_ports {sw[15]}]					
-	#set_property IOSTANDARD LVCMOS33 [get_ports {sw[15]}]
+set_property PACKAGE_PIN P4 [get_ports debugSwitch]					
+	set_property IOSTANDARD LVCMOS33 [get_ports debugSwitch]
  
 
 
@@ -494,6 +494,11 @@ set_property PACKAGE_PIN D12 [get_ports pwm_amp]
 	set_property IOSTANDARD LVTTL [get_ports pwm_amp]
 
 
+set_property PACKAGE_PIN C4 [get_ports SI_serialIn]						
+	set_property IOSTANDARD LVCMOS33 [get_ports SI_serialIn]
+set_property PACKAGE_PIN D4 [get_ports SI_serialOut]						
+	set_property IOSTANDARD LVCMOS33 [get_ports SI_serialOut]
+
 ##USB-RS232 Interface
 ##Bank = 35, Pin name = IO_L7P_T1_AD6P_35,					Sch name = UART_TXD_IN
 #set_property PACKAGE_PIN C4 [get_ports RsRx]						
@@ -561,6 +566,15 @@ set_property PACKAGE_PIN D12 [get_ports pwm_amp]
 	#set_property IOSTANDARD LVCMOS33 [get_ports PhyIntn]
 
 
+
+set_property PACKAGE_PIN L13 [get_ports MCU_CS]					
+	set_property IOSTANDARD LVCMOS33 [get_ports MCU_CS]
+##Bank = CONFIG, Pin name = IO_L1P_T0_D00_MOSI_14,			Sch name = QSPI_DQ0
+set_property PACKAGE_PIN K17 [get_ports MCU_SI]				
+	set_property IOSTANDARD LVCMOS33 [get_ports MCU_SI]
+##Bank = CONFIG, Pin name = IO_L1N_T0_D01_DIN_14,			Sch name = QSPI_DQ1
+set_property PACKAGE_PIN K18 [get_ports MCU_SO]				
+	set_property IOSTANDARD LVCMOS33 [get_ports MCU_SO]
 
 ##Quad SPI Flash
 ##Bank = CONFIG, Pin name = CCLK_0,							Sch name = QSPI_SCK
