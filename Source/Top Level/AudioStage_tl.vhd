@@ -381,17 +381,16 @@ buf_beforeDist: entity work.VectorRegister
 
  			);	
 
---	Distortion: entity work.EffectDistortion
---	generic map( DATA_WIDTH => 16,
---                 ADDR_WIDTH => 16
---               )
---	port map(
---		ADDR =>effectInputDistortionb,
---		output=>effectOutputDistortionSoft,
---		clk => throughputClk
---		-- reset =>reset
---	);		     
-effectOutputDistortionSoft <= effectInputDistortionb;
+	Distortion: entity work.EffectDistortion
+	generic map( DATA_WIDTH => 16,
+                 ADDR_WIDTH => 16
+               )
+	port map(
+		ADDR =>effectInputDistortionb,
+		output=>effectOutputDistortionSoft,
+		clk => throughputClk
+		-- reset =>reset
+	);		     
 DistortionSwitch <= effectOutputDistortionSoft when bypassDistortionSelect = '0' else
 			      effectOutputDistortionHard;
 
