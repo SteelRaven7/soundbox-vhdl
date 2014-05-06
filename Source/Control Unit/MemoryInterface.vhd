@@ -104,6 +104,8 @@ architecture arch of MemoryInterface is
 		dummyRead,
 		waitRead,
 		waitRead2,
+		waitMoreRead,
+		waitMoreRead2,
 		read,
 		busy,
 		busy2
@@ -124,8 +126,8 @@ architecture arch of MemoryInterface is
 
 begin
 	-- Map to flash address space.
-	--flashAddress <= addressMask or (x"00" & (address & '0'));
-	flashAddress <= (others => '0');
+	flashAddress <= addressMask or (x"00" & (address & '0'));
+	--flashAddress <= (others => '0');
 
 	-- Propagate the SPI done flag.
 	done <= r.done;
@@ -311,7 +313,7 @@ begin
 
 				v.writeEnable := '1';
 				v.state := busy;
-				v.doneReturnState := flagDone;
+				v.doneReturnState := waitMoreRead;
 
 			when busy =>
 
@@ -324,6 +326,20 @@ begin
 			when busy2 =>
 				if(spi_done = '1') then
 					v.state := r.doneReturnState;
+				end if;
+
+			when waitMoreRead =>
+
+				-- Wait more cause dat flash
+				v.waitStart := '1';
+				v.state := waitMoreRead2;
+
+			when waitMoreRead2 =>
+
+				v.waitStart := '0';
+
+				if(waitDone = '1') then
+					v.state := flagDone;
 				end if;
 
 			when others =>

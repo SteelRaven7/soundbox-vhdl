@@ -186,7 +186,7 @@ begin
 			when readMem =>
 
 				v.dataRead := '1';
-				v.memAddress := std_logic_vector(to_unsigned(r.iterator, v.memAddress'length));
+				v.memAddress := std_logic_vector(to_unsigned(r.iterator, r.memAddress'length));
 
 				v.state := readMem2;
 

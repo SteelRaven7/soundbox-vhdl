@@ -12,6 +12,7 @@ entity AudioStage_tl is
 		pwm_amp : out std_logic;
 		leds : out std_logic_vector(15 downto 0);
 
+		-- Switches
 		muteInput : in std_logic;
 		bypassLP : in std_logic;
 		bypassEcho : in std_logic;
@@ -20,6 +21,7 @@ entity AudioStage_tl is
 		bypassDistortionSelect : in std_logic;
 		bypassDistortionEnable : in std_logic;
 		bypassEQ : in std_logic;
+		debugSwitch : in std_logic;
 
 		cs: out std_logic;
 		sclk: out std_logic;
@@ -48,7 +50,8 @@ architecture arch of AudioStage_tl is
 
 	
 
-	constant maxConfigRegisterAddress : natural := 2;
+	--constant maxConfigRegisterAddress : natural := 1000;
+	constant maxConfigRegisterAddress : natural := 3;
 	constant uggabugga : std_logic_vector(15 downto 0) := "1000000000000000";
 
 	signal sampleInputClk : std_logic;
@@ -106,6 +109,8 @@ architecture arch of AudioStage_tl is
 	signal SI_clearDone : std_logic;
 	signal MCU_execute : std_logic;
 	signal MCU_clearDone : std_logic;
+
+	signal debugAddress : std_logic_vector(15 downto 0);
 begin
 
 	-- Control unit
@@ -184,11 +189,21 @@ begin
 		reset => reset
 	);
 
+	debugAddress <= x"000" & "001" & debugSwitch;
+	
+	DebugConfig : entity work.DebugConfigRegister
+	port map (
+		input => configRegisterBus,
+		output => leds,
+		address => debugAddress,
+
+		reset => reset
+	);
 
 	-- Audio
 
 	pwm_amp <= '1';
-	leds <= temp_eq_out;
+	--leds <= temp_eq_out;
 
 	sampleClkGenerator : entity work.ClockDivider
 	generic map (
@@ -366,16 +381,17 @@ buf_beforeDist: entity work.VectorRegister
 
  			);	
 
-	Distortion: entity work.EffectDistortion
-	generic map( DATA_WIDTH => 16,
-                 ADDR_WIDTH => 16
-               )
-	port map(
-		ADDR =>effectInputDistortionb,
-		output=>effectOutputDistortionSoft,
-		clk => throughputClk
-		-- reset =>reset
-	);		     
+--	Distortion: entity work.EffectDistortion
+--	generic map( DATA_WIDTH => 16,
+--                 ADDR_WIDTH => 16
+--               )
+--	port map(
+--		ADDR =>effectInputDistortionb,
+--		output=>effectOutputDistortionSoft,
+--		clk => throughputClk
+--		-- reset =>reset
+--	);		     
+effectOutputDistortionSoft <= effectInputDistortionb;
 DistortionSwitch <= effectOutputDistortionSoft when bypassDistortionSelect = '0' else
 			      effectOutputDistortionHard;
 
