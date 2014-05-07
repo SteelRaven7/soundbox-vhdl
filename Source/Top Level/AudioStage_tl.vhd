@@ -291,6 +291,7 @@ buf_Dec2Echo: entity work.VectorRegister
 	port map (
 		input => effectInputEcho,
 		output => effectOutputEcho,
+		configBus => configRegisterBus,
 
 		clk => echoClk,
 		reset => reset

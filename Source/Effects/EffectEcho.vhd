@@ -2,6 +2,7 @@ library ieee ;
 	use ieee.std_logic_1164.all ;
 	use ieee.numeric_std.all ;
 	use work.fixed_pkg.all;
+	use work.memory_pkg.all;
 
 entity EffectEcho is
 	generic (
@@ -11,6 +12,7 @@ entity EffectEcho is
 	port (
 		input : in std_logic_vector(wordLength-1 downto 0);
 		output : out std_logic_vector(wordLength-1 downto 0);
+		configBus : configurableRegisterBus;
 
 		clk : in std_logic;
 		reset : in std_logic
@@ -30,14 +32,13 @@ architecture arch of EffectEcho is
 	);
 	END COMPONENT;
 
-	constant delayDuration : natural := 2;
-	constant decayGain : std_logic_vector(wordLength-1 downto 0) := real_to_fixed(-0.5, constantsWordLength);
-	constant directGain : std_logic_vector(wordLength-1 downto 0) := real_to_fixed(0.8, constantsWordLength);
-	constant echoGain : std_logic_vector(wordLength-1 downto 0) := real_to_fixed(0.5, constantsWordLength);
+	signal decayGain : std_logic_vector(wordLength-1 downto 0);
+	signal directGain : std_logic_vector(wordLength-1 downto 0);
+	signal echoGain : std_logic_vector(wordLength-1 downto 0);
 
 	-- 2 second max delay
 	constant addressWidth : natural := 17;
-	constant addressMax : natural := 44100;
+	signal addressMax : natural;
 
 	signal feedback : std_logic_vector(wordLength-1 downto 0);
 	signal directGained : std_logic_vector(wordLength-1 downto 0);
@@ -49,6 +50,9 @@ architecture arch of EffectEcho is
 	signal readBus : std_logic_vector(wordLength-1 downto 0);
 	signal writeEnable : std_logic_vector(0 downto 0);
 	signal memoryAddress : std_logic_vector(addressWidth-1 downto 0);
+
+	--
+	signal delayConfig : std_logic_vector(15 downto 0);
 
 	type state_type is (readStart, readWait, read, writeDone);
 
@@ -64,6 +68,53 @@ architecture arch of EffectEcho is
 
 	signal r, rin : reg_type;
 begin
+
+	-- Configuration
+	confRegDelay: entity work.ConfigRegister
+	generic map (
+		address => x"0001"
+	)
+	port map (
+		input => configBus,
+		output => delayConfig,
+
+		reset => reset
+	);
+	addressMax <= to_integer(unsigned(delayConfig));
+
+	confRegDecay: entity work.ConfigRegister
+	generic map (
+		address => x"0002"
+	)
+	port map (
+		input => configBus,
+		output => decayGain,
+
+		reset => reset
+	);
+
+	confRegDry: entity work.ConfigRegister
+	generic map (
+		address => x"0003"
+	)
+	port map (
+		input => configBus,
+		output => directGain,
+
+		reset => reset
+	);
+
+	confRegWet: entity work.ConfigRegister
+	generic map (
+		address => x"0004"
+	)
+	port map (
+		input => configBus,
+		output => echoGain,
+
+		reset => reset
+	);
+
 
 	-- Summation
 	feedbackSum : entity work.AdderSat
@@ -169,7 +220,7 @@ begin
 		end if;
 	end process ; -- clk_proc
 	
-	comb_proc : process( r, rin, readBus)
+	comb_proc : process( r, rin, readBus, addressMax )
 		variable v : reg_type;
 	begin
 		v := r;
