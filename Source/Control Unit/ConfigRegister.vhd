@@ -6,7 +6,7 @@ library ieee ;
 entity ConfigRegister is
 	generic (
 		wordLength : natural := 16;
-		address : std_logic_vector(15 downto 0) := x"0000"
+		address : natural := 0
 	);
 	port (
 		input : in configurableRegisterBus;
@@ -24,7 +24,7 @@ begin
 	
 	reg_input <= input.data(wordLength-1 downto 0);
 	
-	addressMatch <= '1' when address = input.address else '0';
+	addressMatch <= '1' when address = to_integer(unsigned(input.address)) else '0';
 	
 	reg_clkEnable <= addressMatch and input.writeEnable;
 
