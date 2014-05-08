@@ -85,7 +85,7 @@ entity Generic_Equalizer is
         x           : in  std_logic_vector(INPUT_WIDTH-1 downto 0);
 
         config_bus  : in configurableRegisterBus;
-		
+        
         band_1_gain : in  natural range 0 to 4;
         band_2_gain : in  natural range 0 to 4;
         band_3_gain : in  natural range 0 to 4;
@@ -142,7 +142,7 @@ begin
       port map(input  => config_bus,
                output => s_coeff_array_low(i),
                reset  => reset);
-		
+        
     config_register_upper : entity work.ConfigRegister
       generic map(wordLength => 4,
                   address    => 2*i+13)
@@ -157,22 +157,22 @@ begin
   gen_choice:
   for i in 0 to NO_SECTIONS generate
     scale <= s_coeff_array(0  + 194 * band_1_gain) &
-	         s_coeff_array(1  + 194 * band_1_gain) &
-	         s_coeff_array(2  + 194 * band_2_gain) &
-	         s_coeff_array(3  + 194 * band_2_gain) &
-	         s_coeff_array(4  + 194 * band_2_gain) &
-	         s_coeff_array(5  + 194 * band_2_gain) &
-	         s_coeff_array(6  + 194 * band_3_gain) &
-	         s_coeff_array(7  + 194 * band_3_gain) &
-	         s_coeff_array(8  + 194 * band_3_gain) &
-	         s_coeff_array(9  + 194 * band_3_gain) &
-	         s_coeff_array(10 + 194 * band_4_gain) &
-	         s_coeff_array(11 + 194 * band_4_gain) &
-	         s_coeff_array(12 + 194 * band_4_gain) &
-	         s_coeff_array(13 + 194 * band_4_gain) &
-	         s_coeff_array(14 + 194 * band_5_gain) &
-	         s_coeff_array(15 + 194 * band_5_gain) &
-	         s_coeff_array(16 + 194 * band_5_gain);
+             s_coeff_array(1  + 194 * band_1_gain) &
+             s_coeff_array(2  + 194 * band_2_gain) &
+             s_coeff_array(3  + 194 * band_2_gain) &
+             s_coeff_array(4  + 194 * band_2_gain) &
+             s_coeff_array(5  + 194 * band_2_gain) &
+             s_coeff_array(6  + 194 * band_3_gain) &
+             s_coeff_array(7  + 194 * band_3_gain) &
+             s_coeff_array(8  + 194 * band_3_gain) &
+             s_coeff_array(9  + 194 * band_3_gain) &
+             s_coeff_array(10 + 194 * band_4_gain) &
+             s_coeff_array(11 + 194 * band_4_gain) &
+             s_coeff_array(12 + 194 * band_4_gain) &
+             s_coeff_array(13 + 194 * band_4_gain) &
+             s_coeff_array(14 + 194 * band_5_gain) &
+             s_coeff_array(15 + 194 * band_5_gain) &
+             s_coeff_array(16 + 194 * band_5_gain);
     b0 <= s_coeff_array(17 + 194 * band_1_gain) &
           s_coeff_array(18 + 194 * band_1_gain) &
           s_coeff_array(19 + 194 * band_2_gain) &
