@@ -450,8 +450,8 @@ buf_afterDist: entity work.VectorRegister
     --  SCALE_WIDTH => 20,
     --  SCALE_FRACT => (16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16),
 
-    --  INTERNAL_WIDTH => 20,
-    --  INTERNAL_FRACT => 16,
+    --  INTERNAL_WIDTH => 30,
+    --  INTERNAL_FRACT => 24,
 
     --  COEFF_WIDTH_B => 20,
     --  COEFF_FRACT_B => (16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16),
@@ -463,7 +463,7 @@ buf_afterDist: entity work.VectorRegister
 	-- 	reset => reset,
 	-- 	x  => temp_eq_in,
 
-    --  config_bus =>
+    --  config_bus => configRegisterBus,
     --  band_1_gain =>
     --  band_2_gain =>
     --  band_3_gain =>
