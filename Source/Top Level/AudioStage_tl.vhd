@@ -473,22 +473,6 @@ buf_afterDist: entity work.VectorRegister
 	-- 	y => temp_eq_out
 	-- );
 
-
-(clk         : in  std_logic;
-        reset       : in  std_logic;
-        x           : in  std_logic_vector(INPUT_WIDTH-1 downto 0);
-
-        config_bus  : in configurableRegisterBus;
-        
-        band_1_gain : in  natural range 0 to 4;
-        band_2_gain : in  natural range 0 to 4;
-        band_3_gain : in  natural range 0 to 4;
-        band_4_gain : in  natural range 0 to 4;
-        band_5_gain : in  natural range 0 to 4;
-
-        y           : out std_logic_vector(OUTPUT_WIDTH-1 downto 0));
-
-
    toPWM <= temp_eq_out(15 downto 7);
  
 	-- toPWM <= temp_eq_out(15 downto 7) when bypassEQ = '0' else
