@@ -438,13 +438,56 @@ buf_afterDist: entity work.VectorRegister
 
 	-- temp_eq_out <= temp_eq_in;
 
-	-- EQ: entity work.Generic_Equalizer_Low_Pass
+	-- EQ: entity work.Generic_Equalizer
+	-- generic map(
+    --  NO_SECTIONS => 16,
+   
+    --  INPUT_WIDTH  => 16,
+    --  INPUT_FRACT  => 15,
+    --  OUTPUT_WIDTH => 16,
+    --  OUTPUT_FRACT => 15,
+
+    --  SCALE_WIDTH => 20,
+    --  SCALE_FRACT => (16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16),
+
+    --  INTERNAL_WIDTH => 20,
+    --  INTERNAL_FRACT => 16,
+
+    --  COEFF_WIDTH_B => 20,
+    --  COEFF_FRACT_B => (16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16),
+    --  COEFF_WIDTH_A => 20,
+    --  COEFF_FRACT_A => (16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16)
+	-- )
 	-- port map(
 	-- 	clk => throughputClk,
 	-- 	reset => reset,
-	-- 	input  => temp_eq_in, 
-	-- 	output => temp_eq_out
+	-- 	x  => temp_eq_in,
+
+    --  config_bus =>
+    --  band_1_gain =>
+    --  band_2_gain =>
+    --  band_3_gain =>
+    --  band_4_gain =>
+    --  band_5_gain =>
+ 
+	-- 	y => temp_eq_out
 	-- );
+
+
+(clk         : in  std_logic;
+        reset       : in  std_logic;
+        x           : in  std_logic_vector(INPUT_WIDTH-1 downto 0);
+
+        config_bus  : in configurableRegisterBus;
+        
+        band_1_gain : in  natural range 0 to 4;
+        band_2_gain : in  natural range 0 to 4;
+        band_3_gain : in  natural range 0 to 4;
+        band_4_gain : in  natural range 0 to 4;
+        band_5_gain : in  natural range 0 to 4;
+
+        y           : out std_logic_vector(OUTPUT_WIDTH-1 downto 0));
+
 
    toPWM <= temp_eq_out(15 downto 7);
  
