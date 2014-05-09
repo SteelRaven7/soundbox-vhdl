@@ -138,14 +138,15 @@ begin
   for i in 0 to 484 generate
     config_register_lower : entity work.ConfigRegister
       generic map(wordLength => 16,
-                  address    => 2*i+12)
+--                  address    => 2*i+12)
+				  address    => std_logic_vector(to_unsigned((2*i+12), 16)))
       port map(input  => config_bus,
                output => s_coeff_array_low(i),
                reset  => reset);
         
     config_register_upper : entity work.ConfigRegister
       generic map(wordLength => 4,
-                  address    => 2*i+13)
+                  address    => std_logic_vector(to_unsigned((2*i+13), 16)))
       port map(input  => config_bus,
                output => s_coeff_array_high(i),
                reset  => reset);
@@ -156,103 +157,103 @@ begin
   -- Choose coefficients (Offset + amplification * amplification_memory_size)
   gen_choice:
   for i in 0 to NO_SECTIONS generate
-    scale <= s_coeff_array(0  + 194 * band_1_gain) &
-             s_coeff_array(1  + 194 * band_1_gain) &
-             s_coeff_array(2  + 194 * band_2_gain) &
-             s_coeff_array(3  + 194 * band_2_gain) &
-             s_coeff_array(4  + 194 * band_2_gain) &
-             s_coeff_array(5  + 194 * band_2_gain) &
-             s_coeff_array(6  + 194 * band_3_gain) &
-             s_coeff_array(7  + 194 * band_3_gain) &
-             s_coeff_array(8  + 194 * band_3_gain) &
-             s_coeff_array(9  + 194 * band_3_gain) &
-             s_coeff_array(10 + 194 * band_4_gain) &
-             s_coeff_array(11 + 194 * band_4_gain) &
-             s_coeff_array(12 + 194 * band_4_gain) &
-             s_coeff_array(13 + 194 * band_4_gain) &
-             s_coeff_array(14 + 194 * band_5_gain) &
-             s_coeff_array(15 + 194 * band_5_gain) &
-             s_coeff_array(16 + 194 * band_5_gain);
-    b0 <= s_coeff_array(17 + 194 * band_1_gain) &
-          s_coeff_array(18 + 194 * band_1_gain) &
-          s_coeff_array(19 + 194 * band_2_gain) &
-          s_coeff_array(20 + 194 * band_2_gain) &
-          s_coeff_array(21 + 194 * band_2_gain) &
-          s_coeff_array(22 + 194 * band_2_gain) &
-          s_coeff_array(23 + 194 * band_3_gain) &
-          s_coeff_array(24 + 194 * band_3_gain) &
-          s_coeff_array(25 + 194 * band_3_gain) &
-          s_coeff_array(26 + 194 * band_3_gain) &
-          s_coeff_array(27 + 194 * band_4_gain) &
-          s_coeff_array(28 + 194 * band_4_gain) &
-          s_coeff_array(29 + 194 * band_4_gain) &
-          s_coeff_array(30 + 194 * band_4_gain) &
-          s_coeff_array(31 + 194 * band_5_gain) &
-          s_coeff_array(32 + 194 * band_5_gain);
-    b1 <= s_coeff_array(33 + 194 * band_1_gain) &
-          s_coeff_array(34 + 194 * band_1_gain) &
-          s_coeff_array(35 + 194 * band_2_gain) &
-          s_coeff_array(36 + 194 * band_2_gain) &
-          s_coeff_array(37 + 194 * band_2_gain) &
-          s_coeff_array(38 + 194 * band_2_gain) &
-          s_coeff_array(39 + 194 * band_3_gain) &
-          s_coeff_array(40 + 194 * band_3_gain) &
-          s_coeff_array(41 + 194 * band_3_gain) &
-          s_coeff_array(42 + 194 * band_3_gain) &
-          s_coeff_array(43 + 194 * band_4_gain) &
-          s_coeff_array(44 + 194 * band_4_gain) &
-          s_coeff_array(45 + 194 * band_4_gain) &
-          s_coeff_array(46 + 194 * band_4_gain) &
-          s_coeff_array(47 + 194 * band_5_gain) &
-          s_coeff_array(48 + 194 * band_5_gain);
-    b2 <= s_coeff_array(49 + 194 * band_1_gain) &
-          s_coeff_array(50 + 194 * band_1_gain) &
-          s_coeff_array(51 + 194 * band_2_gain) &
-          s_coeff_array(52 + 194 * band_2_gain) &
-          s_coeff_array(53 + 194 * band_2_gain) &
-          s_coeff_array(54 + 194 * band_2_gain) &
-          s_coeff_array(55 + 194 * band_3_gain) &
-          s_coeff_array(56 + 194 * band_3_gain) &
-          s_coeff_array(57 + 194 * band_3_gain) &
-          s_coeff_array(58 + 194 * band_3_gain) &
-          s_coeff_array(59 + 194 * band_4_gain) &
-          s_coeff_array(60 + 194 * band_4_gain) &
-          s_coeff_array(61 + 194 * band_4_gain) &
-          s_coeff_array(62 + 194 * band_4_gain) &
-          s_coeff_array(63 + 194 * band_5_gain) &
-          s_coeff_array(64 + 194 * band_5_gain);
-    a1 <= s_coeff_array(65 + 194 * band_1_gain) &
-          s_coeff_array(66 + 194 * band_1_gain) &
-          s_coeff_array(67 + 194 * band_2_gain) &
-          s_coeff_array(68 + 194 * band_2_gain) &
-          s_coeff_array(69 + 194 * band_2_gain) &
-          s_coeff_array(70 + 194 * band_2_gain) &
-          s_coeff_array(71 + 194 * band_3_gain) &
-          s_coeff_array(72 + 194 * band_3_gain) &
-          s_coeff_array(73 + 194 * band_3_gain) &
-          s_coeff_array(74 + 194 * band_3_gain) &
-          s_coeff_array(75 + 194 * band_4_gain) &
-          s_coeff_array(76 + 194 * band_4_gain) &
-          s_coeff_array(77 + 194 * band_4_gain) &
-          s_coeff_array(78 + 194 * band_4_gain) &
-          s_coeff_array(79 + 194 * band_5_gain) &
-          s_coeff_array(80 + 194 * band_5_gain);
-    a2 <= s_coeff_array(81 + 194 * band_1_gain) &
-          s_coeff_array(82 + 194 * band_1_gain) &
-          s_coeff_array(83 + 194 * band_2_gain) &
-          s_coeff_array(84 + 194 * band_2_gain) &
-          s_coeff_array(85 + 194 * band_2_gain) &
-          s_coeff_array(86 + 194 * band_2_gain) &
-          s_coeff_array(87 + 194 * band_3_gain) &
-          s_coeff_array(88 + 194 * band_3_gain) &
-          s_coeff_array(89 + 194 * band_3_gain) &
-          s_coeff_array(90 + 194 * band_3_gain) &
-          s_coeff_array(91 + 194 * band_4_gain) &
-          s_coeff_array(92 + 194 * band_4_gain) &
-          s_coeff_array(93 + 194 * band_4_gain) &
-          s_coeff_array(94 + 194 * band_4_gain) &
-          s_coeff_array(95 + 194 * band_5_gain) &
-          s_coeff_array(96 + 194 * band_5_gain);
+    scale <= s_coeff_array(0  + 97 * band_1_gain) &
+             s_coeff_array(1  + 97 * band_1_gain) &
+             s_coeff_array(2  + 97 * band_2_gain) &
+             s_coeff_array(3  + 97 * band_2_gain) &
+             s_coeff_array(4  + 97 * band_2_gain) &
+             s_coeff_array(5  + 97 * band_2_gain) &
+             s_coeff_array(6  + 97 * band_3_gain) &
+             s_coeff_array(7  + 97 * band_3_gain) &
+             s_coeff_array(8  + 97 * band_3_gain) &
+             s_coeff_array(9  + 97 * band_3_gain) &
+             s_coeff_array(10 + 97 * band_4_gain) &
+             s_coeff_array(11 + 97 * band_4_gain) &
+             s_coeff_array(12 + 97 * band_4_gain) &
+             s_coeff_array(13 + 97 * band_4_gain) &
+             s_coeff_array(14 + 97 * band_5_gain) &
+             s_coeff_array(15 + 97 * band_5_gain) &
+             s_coeff_array(16 + 97 * band_5_gain);
+    b0 <= s_coeff_array(17 + 97 * band_1_gain) &
+          s_coeff_array(18 + 97 * band_1_gain) &
+          s_coeff_array(19 + 97 * band_2_gain) &
+          s_coeff_array(20 + 97 * band_2_gain) &
+          s_coeff_array(21 + 97 * band_2_gain) &
+          s_coeff_array(22 + 97 * band_2_gain) &
+          s_coeff_array(23 + 97 * band_3_gain) &
+          s_coeff_array(24 + 97 * band_3_gain) &
+          s_coeff_array(25 + 97 * band_3_gain) &
+          s_coeff_array(26 + 97 * band_3_gain) &
+          s_coeff_array(27 + 97 * band_4_gain) &
+          s_coeff_array(28 + 97 * band_4_gain) &
+          s_coeff_array(29 + 97 * band_4_gain) &
+          s_coeff_array(30 + 97 * band_4_gain) &
+          s_coeff_array(31 + 97 * band_5_gain) &
+          s_coeff_array(32 + 97 * band_5_gain);
+    b1 <= s_coeff_array(33 + 97 * band_1_gain) &
+          s_coeff_array(34 + 97 * band_1_gain) &
+          s_coeff_array(35 + 97 * band_2_gain) &
+          s_coeff_array(36 + 97 * band_2_gain) &
+          s_coeff_array(37 + 97 * band_2_gain) &
+          s_coeff_array(38 + 97 * band_2_gain) &
+          s_coeff_array(39 + 97 * band_3_gain) &
+          s_coeff_array(40 + 97 * band_3_gain) &
+          s_coeff_array(41 + 97 * band_3_gain) &
+          s_coeff_array(42 + 97 * band_3_gain) &
+          s_coeff_array(43 + 97 * band_4_gain) &
+          s_coeff_array(44 + 97 * band_4_gain) &
+          s_coeff_array(45 + 97 * band_4_gain) &
+          s_coeff_array(46 + 97 * band_4_gain) &
+          s_coeff_array(47 + 97 * band_5_gain) &
+          s_coeff_array(48 + 97 * band_5_gain);
+    b2 <= s_coeff_array(49 + 97 * band_1_gain) &
+          s_coeff_array(50 + 97 * band_1_gain) &
+          s_coeff_array(51 + 97 * band_2_gain) &
+          s_coeff_array(52 + 97 * band_2_gain) &
+          s_coeff_array(53 + 97 * band_2_gain) &
+          s_coeff_array(54 + 97 * band_2_gain) &
+          s_coeff_array(55 + 97 * band_3_gain) &
+          s_coeff_array(56 + 97 * band_3_gain) &
+          s_coeff_array(57 + 97 * band_3_gain) &
+          s_coeff_array(58 + 97 * band_3_gain) &
+          s_coeff_array(59 + 97 * band_4_gain) &
+          s_coeff_array(60 + 97 * band_4_gain) &
+          s_coeff_array(61 + 97 * band_4_gain) &
+          s_coeff_array(62 + 97 * band_4_gain) &
+          s_coeff_array(63 + 97 * band_5_gain) &
+          s_coeff_array(64 + 97 * band_5_gain);
+    a1 <= s_coeff_array(65 + 97 * band_1_gain) &
+          s_coeff_array(66 + 97 * band_1_gain) &
+          s_coeff_array(67 + 97 * band_2_gain) &
+          s_coeff_array(68 + 97 * band_2_gain) &
+          s_coeff_array(69 + 97 * band_2_gain) &
+          s_coeff_array(70 + 97 * band_2_gain) &
+          s_coeff_array(71 + 97 * band_3_gain) &
+          s_coeff_array(72 + 97 * band_3_gain) &
+          s_coeff_array(73 + 97 * band_3_gain) &
+          s_coeff_array(74 + 97 * band_3_gain) &
+          s_coeff_array(75 + 97 * band_4_gain) &
+          s_coeff_array(76 + 97 * band_4_gain) &
+          s_coeff_array(77 + 97 * band_4_gain) &
+          s_coeff_array(78 + 97 * band_4_gain) &
+          s_coeff_array(79 + 97 * band_5_gain) &
+          s_coeff_array(80 + 97 * band_5_gain);
+    a2 <= s_coeff_array(81 + 97 * band_1_gain) &
+          s_coeff_array(82 + 97 * band_1_gain) &
+          s_coeff_array(83 + 97 * band_2_gain) &
+          s_coeff_array(84 + 97 * band_2_gain) &
+          s_coeff_array(85 + 97 * band_2_gain) &
+          s_coeff_array(86 + 97 * band_2_gain) &
+          s_coeff_array(87 + 97 * band_3_gain) &
+          s_coeff_array(88 + 97 * band_3_gain) &
+          s_coeff_array(89 + 97 * band_3_gain) &
+          s_coeff_array(90 + 97 * band_3_gain) &
+          s_coeff_array(91 + 97 * band_4_gain) &
+          s_coeff_array(92 + 97 * band_4_gain) &
+          s_coeff_array(93 + 97 * band_4_gain) &
+          s_coeff_array(94 + 97 * band_4_gain) &
+          s_coeff_array(95 + 97 * band_5_gain) &
+          s_coeff_array(96 + 97 * band_5_gain);
   end generate;
   
   -- Set coefficients
