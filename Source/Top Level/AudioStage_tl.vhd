@@ -445,13 +445,39 @@ buf_afterDist: entity work.VectorRegister
 
 	-- temp_eq_out <= temp_eq_in;
 
-	-- EQ: entity work.Generic_Equalizer_Low_Pass
-	-- port map(
-	-- 	clk => throughputClk,
-	-- 	reset => reset,
-	-- 	input  => temp_eq_in, 
-	-- 	output => temp_eq_out
-	-- );
+	-- EQ: entity work.Equalizer
+	-- generic map(NO_SECTIONS    := 16,
+    --  
+    --             INPUT_WIDTH    := 16,
+    --             INPUT_FRACT    := 15,
+    --             OUTPUT_WIDTH   := 16,
+    --             OUTPUT_FRACT   := 15,
+    --
+    --             SCALE_WIDTH    := 20,
+    --             SCALE_FRACT    := (16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16),
+    --
+    --             INTERNAL_WIDTH := 30,
+    --             INTERNAL_FRACT := 24,
+    --
+    --             COEFF_WIDTH_B  := 20,
+    --             COEFF_FRACT_B  := (16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16),
+    --             COEFF_WIDTH_A  := 20,
+    --             COEFF_FRACT_A  := (16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16))
+	-- port map(clk    => throughputClk,
+	-- 	        reset  => reset,
+	-- 	        x      => temp_eq_in, 
+    --
+    --          b_1_gain => 2,
+    --          b_2_gain => 2,
+    --          b_3_gain => 2,
+    --          b_4_gain => 2,
+    --          b_5_gain => 2,
+    --
+	--          y      => temp_eq_out);
+
+
+
+----------------------------PWM----------------------------------------------------
 
    toPWM <= temp_eq_out(15 downto 7);
  

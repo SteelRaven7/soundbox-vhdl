@@ -64,9 +64,9 @@ use work.filter_pkg.all;
 entity Generic_Equalizer is
    generic (NO_SECTIONS : natural         := 9;
 			
-			INPUT_WIDTH  : natural        := 8;
+			      INPUT_WIDTH  : natural        := 8;
             INPUT_FRACT  : natural        := 6;
-			OUTPUT_WIDTH : natural        := 8;
+			      OUTPUT_WIDTH : natural        := 8;
             OUTPUT_FRACT : natural        := 6;
 
             SCALE_WIDTH : natural         := 8;
