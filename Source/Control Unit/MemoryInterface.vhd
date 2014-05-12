@@ -66,8 +66,8 @@ architecture arch of MemoryInterface is
 	constant instructionRead : std_logic_vector(7 downto 0) := x"13";
 	constant instructionWrite : std_logic_vector(7 downto 0) := x"12";
 	constant instructionReadStatus1 : std_logic_vector(7 downto 0) := x"05";
-	constant instructionID : std_logic_vector(7 downto 0) := x"90";
-	constant instructionClearAll : std_logic_vector(7 downto 0) := x"C7";
+	--constant instructionID : std_logic_vector(7 downto 0) := x"90";
+	--constant instructionClearAll : std_logic_vector(7 downto 0) := x"C7";
 	constant instructionClearSector : std_logic_vector(7 downto 0) := x"DC";
 	
 	-- MSB constants for different instruction types

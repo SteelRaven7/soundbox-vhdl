@@ -1,6 +1,7 @@
 library ieee ;
 	use ieee.std_logic_1164.all;
 	use ieee.numeric_std.all;
+	use work.memory_pkg.all;
 
 
 entity EffectReverb is
@@ -9,10 +10,7 @@ entity EffectReverb is
 			addr_length : integer := 12); --Maximum delay is 0 to 4095 samples for all stages.
 	port(input : in std_logic_vector(IO_length-1 downto 0);
 			output : out std_logic_vector(IO_length-1 downto 0);
-			delay1conf : configurableRegisterBus;
-			delay2conf : configurableRegisterBus;
-			delay3conf : configurableRegisterBus;
-			delay4conf : configurableRegisterBus;
+			configBus : configurableRegisterBus;
 			CLK : in std_logic;
 			RESET : in std_logic);
 end EffectReverb;
@@ -31,13 +29,13 @@ architecture behav of EffectReverb is
 	constant dry_coeff : std_logic_vector(c_length-1 downto 0) := x"4000";
 	
 	signal addrMax1 : integer range 0 to 4095;
-	signal delay1par : std_logic_vector(c_length-1 down);
+	signal delay1par : std_logic_vector(11 downto 0);
 	signal addrMax2 : integer range 0 to 4095;
-	signal delay2par : std_logic_vector(c_length-1 down);
+	signal delay2par : std_logic_vector(11 downto 0);
 	signal addrMax3 : integer range 0 to 4095;
-	signal delay3par : std_logic_vector(c_length-1 down);
+	signal delay3par : std_logic_vector(11 downto 0);
 	signal addrMax4 : integer range 0 to 4095;
-	signal delay4par : std_logic_vector(c_length-1 down);
+	signal delay4par : std_logic_vector(11 downto 0);
 
 	signal gain_outputs : gain_array;
 	signal scalar : gain_array;
@@ -178,52 +176,52 @@ architecture behav of EffectReverb is
 	
 	begin
 		
-			delay1Reg: entity work.ConfigRegister
+	delay1Reg: entity work.ConfigRegister
 	generic map(
-		wordLength => 12;
-		address => std_logic_vector(to_unsigned(7,16));
+		wordLength => 12,
+		address => std_logic_vector(to_unsigned(7,16))
 	)
 	port map(
-		input => delay1conf;
-		output => delay1par;
+		input => configBus,
+		output => delay1par,
 
-		reset => reset;
+		reset => reset
 	);
 	
 	delay2Reg: entity work.ConfigRegister
 	generic map(
-		wordLength => 12;
-		address => std_logic_vector(to_unsigned(8,16));
+		wordLength => 12,
+		address => std_logic_vector(to_unsigned(8,16))
 	)
 	port map(
-		input => delay2conf;
-		output => delay2par;
+		input => configBus,
+		output => delay2par,
 
-		reset => reset;
+		reset => reset
 	);
 	
 	delay3Reg: entity work.ConfigRegister
 	generic map(
-		wordLength => 12;
-		address => std_logic_vector(to_unsigned(9,16));
+		wordLength => 12,
+		address => std_logic_vector(to_unsigned(9,16))
 	)
 	port map(
-		input => delay3conf;
-		output => delay3par;
+		input => configBus,
+		output => delay3par,
 
-		reset => reset;
+		reset => reset
 	);
 	
 	delay4Reg: entity work.ConfigRegister
 	generic map(
-		wordLength => 12;
-		address => std_logic_vector(to_unsigned(10,16));
+		wordLength => 12,
+		address => std_logic_vector(to_unsigned(10,16))
 	)
 	port map(
-		input => delay4conf;
-		output => delay4par;
+		input => configBus,
+		output => delay4par,
 
-		reset => reset;
+		reset => reset
 	);
 	
 		addrMax1 <= to_integer(unsigned(delay1par));

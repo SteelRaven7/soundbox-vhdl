@@ -11,17 +11,7 @@ entity AudioStage_tl is
 		pwm_out : out std_logic;
 		pwm_amp : out std_logic;
 		leds : out std_logic_vector(15 downto 0);
-
-		-- Switches
-		muteInput : in std_logic;
-		bypassLP : in std_logic;
-		bypassEcho : in std_logic;
-		bypassFlanger : in std_logic;
-		bypassReverb : in std_logic;
-		bypassDistortionSelect : in std_logic;
-		bypassDistortionEnable : in std_logic;
-		bypassEQ : in std_logic;
-		debugSwitch : in std_logic;
+		switches : in std_logic_vector(15 downto 0);
 
 		cs: out std_logic;
 		sclk: out std_logic;
@@ -48,11 +38,19 @@ architecture arch of AudioStage_tl is
 	constant clk9600HzDivider : natural := 10417;
 	constant clk705KHzDivider : natural := 142; -- 705.6 KHz
 
-	
-
 	--constant maxConfigRegisterAddress : natural := 1000;
-	constant maxConfigRegisterAddress : natural := 3;
+	constant maxConfigRegisterAddress : natural := 10;
 	constant uggabugga : std_logic_vector(15 downto 0) := "1000000000000000";
+
+	-- Switches
+	signal muteInput : std_logic;
+	signal bypassLP : std_logic;
+	signal bypassEcho : std_logic;
+	signal bypassFlanger : std_logic;
+	signal bypassReverb : std_logic;
+	signal bypassDistortionSelect : std_logic;
+	signal bypassDistortionEnable : std_logic;
+	signal bypassEQ : std_logic;
 
 	signal sampleInputClk : std_logic;
 	signal sampleOutput : std_logic_vector(11 downto 0);
@@ -112,6 +110,15 @@ architecture arch of AudioStage_tl is
 
 	signal debugAddress : std_logic_vector(15 downto 0);
 begin
+
+	muteInput <= switches(0);
+	bypassLP <= switches(1);
+	bypassEcho <= switches(2);
+	bypassFlanger <= switches(3);
+	bypassReverb <= switches(4);
+	bypassDistortionEnable <= switches(5);
+	bypassDistortionSelect <= switches(6);
+	--bypassEQ <= switches(7);
 
 	-- Control unit
 
@@ -189,7 +196,7 @@ begin
 		reset => reset
 	);
 
-	debugAddress <= x"000" & "001" & debugSwitch;
+	debugAddress <= x"00" & switches(15 downto 8);
 	
 	DebugConfig : entity work.DebugConfigRegister
 	port map (
@@ -349,23 +356,22 @@ effectInputFlanger <= effectOutputEcho when bypassEcho = '0' else
 
  			);
 
-	-- Reverb: entity work.EffectReverb
-	-- generic map(
-	-- 	IO_length => 16,
-	-- 	c_length => 16,
-	-- 	addr_length  => 12)
-	-- port map(
-	-- 	input => effectInputReverbb,
-	-- 	output => effectOutputReverb,
+	Reverb: entity work.EffectReverb
+	generic map(
+		IO_length => 16,
+		c_length => 16,
+		addr_length  => 12)
+	port map(
+		input => effectInputReverbb,
+		output => effectOutputReverb,
+		configBus => configRegisterBus,
 
-	-- 	clk =>echoClk,
-	-- 	reset =>reset
-	-- );
+		clk =>echoClk,
+		reset =>reset
+	);
 
-	-- effectInputDistortion <= effectOutputReverb when bypassReverb = '0' else
-	-- 					effectInputReverbb;
-effectInputDistortion <= effectInputReverbb when bypassReverb = '0' else
-						effectInputReverbb;
+	 effectInputDistortion <= effectOutputReverb when bypassReverb = '0' else
+	 					effectInputReverbb;
 
 ----------------------------DISTORTION-----------------------------------------------
 
@@ -382,16 +388,17 @@ buf_beforeDist: entity work.VectorRegister
 
  			);	
 
-	Distortion: entity work.EffectDistortion
-	generic map( DATA_WIDTH => 16,
-                 ADDR_WIDTH => 16
-               )
-	port map(
-		ADDR =>effectInputDistortionb,
-		output=>effectOutputDistortionSoft,
-		clk => throughputClk
-		-- reset =>reset
-	);		     
+--	Distortion: entity work.EffectDistortion
+--	generic map( DATA_WIDTH => 16,
+--                 ADDR_WIDTH => 16
+--               )
+--	port map(
+--		ADDR =>effectInputDistortionb,
+--		output=>effectOutputDistortionSoft,
+--		clk => throughputClk
+--		-- reset =>reset
+--	);		     
+effectOutputDistortionSoft <= effectInputDistortionb;
 DistortionSwitch <= effectOutputDistortionSoft when bypassDistortionSelect = '0' else
 			      effectOutputDistortionHard;
 
@@ -438,39 +445,12 @@ buf_afterDist: entity work.VectorRegister
 
 	-- temp_eq_out <= temp_eq_in;
 
-	-- EQ: entity work.Generic_Equalizer
-	-- generic map(
-    --  NO_SECTIONS => 16,
-   
-    --  INPUT_WIDTH  => 16,
-    --  INPUT_FRACT  => 15,
-    --  OUTPUT_WIDTH => 16,
-    --  OUTPUT_FRACT => 15,
-
-    --  SCALE_WIDTH => 20,
-    --  SCALE_FRACT => (16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16),
-
-    --  INTERNAL_WIDTH => 30,
-    --  INTERNAL_FRACT => 24,
-
-    --  COEFF_WIDTH_B => 20,
-    --  COEFF_FRACT_B => (16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16),
-    --  COEFF_WIDTH_A => 20,
-    --  COEFF_FRACT_A => (16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16)
-	-- )
+	-- EQ: entity work.Generic_Equalizer_Low_Pass
 	-- port map(
 	-- 	clk => throughputClk,
 	-- 	reset => reset,
-	-- 	x  => temp_eq_in,
-
-    --  config_bus => configRegisterBus,
-    --  band_1_gain =>
-    --  band_2_gain =>
-    --  band_3_gain =>
-    --  band_4_gain =>
-    --  band_5_gain =>
- 
-	-- 	y => temp_eq_out
+	-- 	input  => temp_eq_in, 
+	-- 	output => temp_eq_out
 	-- );
 
    toPWM <= temp_eq_out(15 downto 7);
