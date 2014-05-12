@@ -2,18 +2,19 @@ library ieee ;
 	use ieee.std_logic_1164.all ;
 	use ieee.numeric_std.all ;
 	use work.fixed_pkg.all;
---	use ieee.std_logic_arith.all;
+	use work.memory_pkg.all;
 
 entity EffectFlanger is
 	generic (
 		wordLength : natural := 16;
-		constantsWordLength : natural := 16;
-		Depth : natural := 440;
-		sweepLength : natural := 1000
+		constantsWordLength : natural := 16
+		-- Depth : natural := 440;
+		-- sweepLength : natural := 1000
 	);
 	port (
 		input : in std_logic_vector(wordLength-1 downto 0);
 		output : out std_logic_vector(wordLength-1 downto 0);
+		configBus : configurableRegisterBus;
 
 		clk : in std_logic;
 		reset : in std_logic
@@ -55,6 +56,12 @@ architecture arch of EffectFlanger is
 	signal memoryReadAddress : std_logic_vector(addressWidth-1 downto 0);
 	signal memoryWriteAddress : std_logic_vector(addressWidth-1 downto 0);
 
+	signal Depth : natural range 0 to 4000;
+	signal sweepLength : natural range 0 to 4000;
+	signal depthVector : std_logic_vector(wordLength-1 downto 0);
+	signal sweepLengthVector : std_logic_vector (wordLength-1 downto 0);
+
+
 	type state_type is (readStart, readWait, read, writeDone);
 
 	constant waitTime : natural := 4;
@@ -70,6 +77,29 @@ architecture arch of EffectFlanger is
 
 	signal r, rin : reg_type;
 begin
+	Depth <=  to_integer(unsigned(depthVector(wordLength-1 downto 0)));
+	sweepLength <=  to_integer(unsigned(sweepLengthVector(wordLength-1 downto 0)));
+
+	--Configuration
+	confRegDepth:entity work.configRegister
+	generic map(
+		address => x"0005"
+	)
+	PORT map (
+		input => configBus,
+		output => depthVector,
+		reset => reset
+		);
+
+confRegSweep:entity work.configRegister
+	generic map(
+		address => x"0006"
+	)
+	PORT map (
+		input => configBus,
+		output => sweepLengthVector,
+		reset => reset
+		);
 
 	-- Summation
 	feedbackSum : entity work.AdderSat
