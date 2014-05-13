@@ -1,7 +1,61 @@
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Description:                                                               --
+-- This file initiates a equalizer and sends i the correct coefficients       --
+-- depending on what bands the user currently want to enhance                 --
+--                                                                            --
+--                                                                            --
+-- Generic:                                                                   --
+-- NO_SECTIONS       - The number of second order sections that the equalizer --
+--                   - should be made up out of                               --
+--                                                                            --
+-- INPUT_WIDTH       - The width of the input data                            --
+-- INPUT_FRACT       - The fractional width of the input data                 --
+-- OUTPUT_WIDTH      - The width of the output data                           --
+-- OUTPUT_FRACT      - The fractional width of the output data                --
+--                                                                            --
+-- SCALE_WIDTH       - The width of the scaling coefficients                  --
+-- SCALE_FRACT       - An array of the fractional widths of the scaling       --
+--                     coefficients, starting with the first multiplier       --
+--                                                                            --
+-- INTERNAL_WIDTH    - The width of all internal registers                    --
+-- INTERNAL_FRACT    - The fractional width of all internal registers         --
+--                                                                            --
+-- COEFF_WIDTH_B     - The width of all B-coefficients in the IIR-filters     --
+-- COEFF_FRACT_B     - An array of the fractional widths of all the           --
+--                     B-coefficeints, starting with the first filter         --
+-- COEFF_WIDTH_A     - The width of all A-coefficients in the IIR-filters     --
+-- COEFF_FRACT_A     - An array of the fractional widths of all the           --
+--                     A-coefficeints, starting with the first filter         --
+--                                                                            --
+-- Input/Output:                                                              --
+-- clk               - System clock                                           --
+-- reset             - Resets component when high                             --
+-- write_mode        - Write new coefficients when high                       --
+-- x                 - Input                                                  --
+--                                                                            --
+-- b_1_gain          - A value between 0 and 4 indicating what gain the user  --
+--                     wants on the lowest band                               --
+-- b_2_gain          - A value between 0 and 4 indicating what gain the user  --
+--                     wants on the second to lowest band                     --
+-- b_3_gain          - A value between 0 and 4 indicating what gain the user  --
+--                     wants on the middle band                               --
+-- b_4_gain          - A value between 0 and 4 indicating what gain the user  --
+--                     wants on the second to highest band                    --
+-- b_5_gain          - A value between 0 and 4 indicating what gain the user  --
+--                     wants on the highest band                              --
+--                                                                            --
+-- y                 - Output                                                 --
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
 library ieee ;
 use ieee.std_logic_1164.all ;
 use ieee.numeric_std.all ;
 use work.filter_pkg.all;
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 entity Equalizer is
   generic (NO_SECTIONS    : natural       := 16;
@@ -34,10 +88,15 @@ entity Equalizer is
         y        : out std_logic_vector(OUTPUT_WIDTH-1 downto 0));
 end Equalizer;
 
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
 architecture arch of Equalizer is
 
+-- Type Declarations -----------------------------------------------------------
   type coeff_array is array(0 to 484) of std_logic_vector(19 downto 0);
 
+-- Constants -------------------------------------------------------------------
   constant s_coeff_array : coeff_array :=  -- -6db scale, Equalizer 1
                                           (x"10000" , x"10000" , x"3fb91" , x"10000" , x"10000" , x"10000" , x"3fb28" , x"10000" , x"10000" , x"10000" , x"3fb28" , x"10000" , x"10000" , x"10000" , x"3fb28" , x"10000" , x"3fb91" ,
                                            -- -6db B0
@@ -99,6 +158,7 @@ architecture arch of Equalizer is
                                            -- 6db A2
                                            x"0f869" , x"0e696" , x"0f8dd" , x"0fbe6" , x"0f10e" , x"0f433" , x"0f20d" , x"0f7c4" , x"0e310" , x"0e8cf" , x"0e51c" , x"0efc7" , x"0d384" , x"0c943" , x"0baa5" , x"05d25");
 
+-- Signals --------------------------------------------------------------------
   signal band_1_gain : natural range 0 to 4;
   signal band_2_gain : natural range 0 to 4;
   signal band_3_gain : natural range 0 to 4;
@@ -112,14 +172,19 @@ architecture arch of Equalizer is
   signal a1    : std_logic_vector(COEFF_WIDTH_A*(NO_SECTIONS  )-1 downto 0);
   signal a2    : std_logic_vector(COEFF_WIDTH_A*(NO_SECTIONS  )-1 downto 0);
 
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
 begin
 
+  -- Convert gains to naturals
   band_1_gain <= to_integer(unsigned(b_1_gain)) when to_integer(unsigned(b_1_gain)) <= 4 else 4;
   band_2_gain <= to_integer(unsigned(b_2_gain)) when to_integer(unsigned(b_2_gain)) <= 4 else 4;
   band_3_gain <= to_integer(unsigned(b_3_gain)) when to_integer(unsigned(b_3_gain)) <= 4 else 4;
   band_4_gain <= to_integer(unsigned(b_4_gain)) when to_integer(unsigned(b_4_gain)) <= 4 else 4;
   band_5_gain <= to_integer(unsigned(b_5_gain)) when to_integer(unsigned(b_5_gain)) <= 4 else 4;
 
+  -- Choose correct coefficients
   scale <= s_coeff_array(0  + 97 * band_1_gain) &
            s_coeff_array(1  + 97 * band_1_gain) &
            s_coeff_array(2  + 97 * band_2_gain) &
@@ -218,6 +283,7 @@ begin
         s_coeff_array(95 + 97 * band_5_gain) &
         s_coeff_array(96 + 97 * band_5_gain);
 
+  -- Initiate a equalizer
   eq: entity work.Generic_Equalizer
   generic map (NO_SECTIONS    => NO_SECTIONS,
 
