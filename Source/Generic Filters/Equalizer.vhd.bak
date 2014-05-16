@@ -68,8 +68,8 @@ entity Equalizer is
            SCALE_WIDTH    : natural       := 20;
            SCALE_FRACT    : natural_array := (16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16);
 
-           INTERNAL_WIDTH : natural       := 64;
-           INTERNAL_FRACT : natural       := 32;
+           INTERNAL_WIDTH : natural       := 32;
+           INTERNAL_FRACT : natural       := 24;
 
            COEFF_WIDTH_B  : natural       := 20;
            COEFF_FRACT_B  : natural_array := (16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16);

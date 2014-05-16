@@ -95,6 +95,7 @@ architecture behaviour of Generic_IIR is
   signal my_mults_out : array_internal_a := (others => (others => '0'));
   signal my_sum_in    : array_internal   := (others => (others => '0'));
   signal my_sum_out   : array_internal   := (others => (others => '0'));
+  signal my_sum_neg   : std_logic_vector(INTERNAL_WIDTH-1 downto 0);
   
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -178,11 +179,12 @@ begin
   
   -- Add the output multiplications together
   my_sum_out(N-1) <= my_mults_out(N-1);
+  my_sum_neg <= std_logic_vector(-signed(my_sum_out(1)));
 
   AdderSat_Out_0 : entity work.AdderSat
   generic map(wordLength => INTERNAL_WIDTH)
   port map(a => my_sum_in(0),
-  	       b => my_sum_out(1),
+  	       b => my_sum_neg,
 		   s => my_sum_out(0));
   gen_adds_out:
   for i in 1 to N-2 generate
