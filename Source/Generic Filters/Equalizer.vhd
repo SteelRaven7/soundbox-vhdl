@@ -61,14 +61,14 @@ entity Equalizer is
   generic (NO_SECTIONS    : natural       := 16;
       
            INPUT_WIDTH    : natural       := 16;
-           INPUT_FRACT    : natural       := 15;
+           INPUT_FRACT    : natural       := 16;
            OUTPUT_WIDTH   : natural       := 16;
-           OUTPUT_FRACT   : natural       := 15;
+           OUTPUT_FRACT   : natural       := 16;
 
            SCALE_WIDTH    : natural       := 20;
            SCALE_FRACT    : natural_array := (16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16);
 
-           INTERNAL_WIDTH : natural       := 30;
+           INTERNAL_WIDTH : natural       := 32;
            INTERNAL_FRACT : natural       := 24;
 
            COEFF_WIDTH_B  : natural       := 20;
@@ -187,19 +187,19 @@ begin
   -- Choose correct coefficients
   scale <= s_coeff_array(0  + 97 * band_1_gain) &
            s_coeff_array(1  + 97 * band_1_gain) &
-           s_coeff_array(2  + 97 * band_2_gain) &
+           s_coeff_array(2  + 97 * band_1_gain) &
            s_coeff_array(3  + 97 * band_2_gain) &
            s_coeff_array(4  + 97 * band_2_gain) &
            s_coeff_array(5  + 97 * band_2_gain) &
-           s_coeff_array(6  + 97 * band_3_gain) &
+           s_coeff_array(6  + 97 * band_2_gain) &
            s_coeff_array(7  + 97 * band_3_gain) &
            s_coeff_array(8  + 97 * band_3_gain) &
            s_coeff_array(9  + 97 * band_3_gain) &
-           s_coeff_array(10 + 97 * band_4_gain) &
+           s_coeff_array(10 + 97 * band_3_gain) &
            s_coeff_array(11 + 97 * band_4_gain) &
            s_coeff_array(12 + 97 * band_4_gain) &
            s_coeff_array(13 + 97 * band_4_gain) &
-           s_coeff_array(14 + 97 * band_5_gain) &
+           s_coeff_array(14 + 97 * band_4_gain) &
            s_coeff_array(15 + 97 * band_5_gain) &
            s_coeff_array(16 + 97 * band_5_gain);
   b0 <= s_coeff_array(17 + 97 * band_1_gain) &

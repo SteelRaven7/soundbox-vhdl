@@ -150,7 +150,7 @@ begin
   -- Multiply the input with coefficients
   gen_mults_in:
   for i in 0 to N-1 generate
-    Multiplier_in : entity work.Multiplier_Saturate
+    Multiplier_in : entity work.Multiplier
     generic map(X_WIDTH    => INTERNAL_WIDTH,
                 X_FRACTION => INTERNAL_FRACT,
                 Y_WIDTH    => B_WIDTH,
@@ -197,7 +197,7 @@ begin
   -- Multiply the output with coefficients
   gen_mults_out:
   for i in 1 to N-1 generate
-    Multiplier_out : entity work.Multiplier_Saturate
+    Multiplier_out : entity work.Multiplier
     generic map(X_WIDTH    => INTERNAL_WIDTH,
                 X_FRACTION => INTERNAL_FRACT,
                 Y_WIDTH    => A_WIDTH,

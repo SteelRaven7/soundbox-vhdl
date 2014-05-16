@@ -172,7 +172,7 @@ begin
   -- Multipliers ---------------------------------------------------------------
   gen_multipliers:
   for i in 1 to NO_SECTIONS-1 generate
-    Multiplier : entity work.Multiplier_Saturate
+    Multiplier : entity work.Multiplier
     generic map(X_WIDTH    => INTERNAL_WIDTH,
                 X_FRACTION => INTERNAL_FRACT,
                 Y_WIDTH    => SCALE_WIDTH,
@@ -185,7 +185,7 @@ begin
   end generate;
   
   -- Last multiplier -----------------------------------------------------------
-  Multiplier_out : entity work.Multiplier_Saturate
+  Multiplier_out : entity work.Multiplier
   generic map(X_WIDTH    => INTERNAL_WIDTH,
               X_FRACTION => INTERNAL_FRACT,
               Y_WIDTH    => SCALE_WIDTH,
