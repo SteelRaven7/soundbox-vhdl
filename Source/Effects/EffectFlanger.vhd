@@ -34,9 +34,9 @@ architecture arch of EffectFlanger is
 	);
 	END COMPONENT;
 
-	constant delayDuration : natural := 2;
+	--constant delayDuration : natural := 2;
 	constant decayGain : std_logic_vector(wordLength-1 downto 0) := real_to_fixed(0.5, constantsWordLength);
-	constant directGain : std_logic_vector(wordLength-1 downto 0) := real_to_fixed(1.0, constantsWordLength);
+	constant directGain : std_logic_vector(wordLength-1 downto 0) := real_to_fixed(0.8, constantsWordLength);
 	constant echoGain : std_logic_vector(wordLength-1 downto 0) := real_to_fixed(0.7, constantsWordLength);
 
 	-- 2 second max delay
@@ -77,11 +77,11 @@ architecture arch of EffectFlanger is
 
 	signal r, rin : reg_type;
 begin
-	Depth <=  to_integer(unsigned(depthVector(wordLength-1 downto 0)));
-	sweepLength <=  to_integer(unsigned(sweepLengthVector(wordLength-1 downto 0)));
+	Depth <=  to_integer(unsigned(depthVector));
+	sweepLength <=  to_integer(unsigned(sweepLengthVector));
 
 	--Configuration
-	confRegDepth:entity work.configRegister
+	confRegDepth:entity work.ConfigRegister
 	generic map(
 		address => x"0005"
 	)
@@ -91,7 +91,7 @@ begin
 		reset => reset
 		);
 
-confRegSweep:entity work.configRegister
+confRegSweep:entity work.ConfigRegister
 	generic map(
 		address => x"0006"
 	)

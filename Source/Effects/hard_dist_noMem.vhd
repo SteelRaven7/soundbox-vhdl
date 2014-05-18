@@ -3,27 +3,42 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
---use work.memory_pkg.all;
+use work.memory_pkg.all;
 
 entity hard_dist is
 	generic(wordlength : integer := 16;
 			coeff_address : integer := 13);
 	port(input : in std_logic_vector(wordlength-1 downto 0);
 		output : out std_logic_vector(wordlength-1 downto 0);
-		clk : in std_logic;
-		reset : in std_logic
-		);
+		config : in configurableRegisterBus;
+		reset : in std_logic;
+		clk : in std_logic);
 end hard_dist;
 
 architecture behav of hard_dist is
 	
-	constant cutoff_int : integer := 10000;
-	constant neg_cutoff : integer := -10000;
+	signal cutoff : std_logic_vector(wordlength-1 downto 0);
+	signal cutoff_int : integer := 20000;
+	signal neg_cutoff : integer := -20000;
 	signal outReg : std_logic_vector(wordlength-1 downto 0);
 	signal input_int : integer;
 	
 	begin
 	
+	confReg: entity work.ConfigRegister
+	generic map(
+		wordLength => 16,
+		address => std_logic_vector(to_unsigned(coeff_address,16))
+	)
+	port map(
+		input => config,
+		output => cutoff,
+
+		reset => reset
+	);
+	
+	cutoff_int <= to_integer(signed(cutoff));
+	neg_cutoff <= -cutoff_int;
 	input_int <= to_integer(signed(input));
 	output <= outReg;
 	

@@ -21,9 +21,7 @@ ARCHITECTURE arch_DA OF DA IS
   signal counter :natural RANGE 0 TO 31;
   
   BEGIN
-  PROCESS(clk,reset)
-  
-   
+  PROCESS(clk,reset)   
   BEGIN
     counter_temp <= std_logic_vector(to_unsigned(counter,5));
     IF(reset ='1') then

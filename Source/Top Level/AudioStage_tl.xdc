@@ -56,11 +56,11 @@ set_property PACKAGE_PIN T1 [get_ports switches[12]]
 set_property PACKAGE_PIN R3 [get_ports switches[13]]					
 	set_property IOSTANDARD LVCMOS33 [get_ports switches[13]]
 ##Bank = 34, Pin name = IO_L14N_T2_SRCC_34,					Sch name = SW14
-set_property PACKAGE_PIN P3 [get_ports switches[14]]					
-	set_property IOSTANDARD LVCMOS33 [get_ports switches[14]]
+set_property PACKAGE_PIN P3 [get_ports eq1]					
+	set_property IOSTANDARD LVCMOS33 [get_ports eq1]
 ##Bank = 34, Pin name = IO_L14P_T2_SRCC_34,					Sch name = SW15
-set_property PACKAGE_PIN P4 [get_ports switches[15]]					
-	set_property IOSTANDARD LVCMOS33 [get_ports switches[15]]
+set_property PACKAGE_PIN P4 [get_ports eq2]					
+	set_property IOSTANDARD LVCMOS33 [get_ports eq2]
  
 
 
@@ -213,11 +213,11 @@ set_property PACKAGE_PIN F15 [get_ports reset]
 
 ##Pmod Header JA
 ##Bank = 15, Pin name = IO_L1N_T0_AD0N_15,					Sch name = JA1
-#set_property PACKAGE_PIN B13 [get_ports tempclock]					
-	#set_property IOSTANDARD LVCMOS33 [get_ports tempclock]
+set_property PACKAGE_PIN B13 [get_ports tempclock]					
+	set_property IOSTANDARD LVCMOS33 [get_ports tempclock]
 ##Bank = 15, Pin name = IO_L5N_T0_AD9N_15,					Sch name = JA2
-#set_property PACKAGE_PIN F14 [get_ports sclk]					
-	#set_property IOSTANDARD LVCMOS33 [get_ports sclk]
+set_property PACKAGE_PIN F14 [get_ports sclk]					
+	set_property IOSTANDARD LVCMOS33 [get_ports sclk]
 ##Bank = 15, Pin name = IO_L16N_T2_A27_15,					Sch name = JA3
 #set_property PACKAGE_PIN D17 [get_ports {JA[2]}]					
 	#set_property IOSTANDARD LVCMOS33 [get_ports {JA[2]}]

@@ -26,7 +26,7 @@ architecture behav of EffectReverb is
 	constant coeff_neg : std_logic_vector(c_length-1 downto 0) := x"80A5";
 
 	constant wet_coeff : std_logic_vector(c_length-1 downto 0) := x"2000";
-	constant dry_coeff : std_logic_vector(c_length-1 downto 0) := x"4000";
+	constant dry_coeff : std_logic_vector(c_length-1 downto 0) := x"2ccd";
 	
 	signal addrMax1 : integer range 0 to 4095;
 	signal delay1par : std_logic_vector(11 downto 0);

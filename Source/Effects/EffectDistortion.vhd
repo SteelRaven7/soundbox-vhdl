@@ -34,8 +34,9 @@ signal shifted : signed(ADDR_WIDTH-1 downto 0);
 
   begin
 
-  shifted <= shift_left(signed(ADDR),2);
+ shifted <= shift_left(signed(ADDR),1);
   temp_ADDR <= std_logic_vector(shifted);
+  --temp_ADDR <= ADDR;
 
  memory: blk_mem_gen_1
  port map(
