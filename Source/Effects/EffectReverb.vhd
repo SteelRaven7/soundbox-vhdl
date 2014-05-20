@@ -1,32 +1,57 @@
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Description:                                                               --
+-- This file initiates a reverb and sends in the correct delay values         --
+-- depending on what settings the user has decided using the computer         --
+-- interface.                                                                 --
+--                                                                            --
+-- Generic:                                                                   --
+-- IO_length         - Wordlength of the input/output signals.				  --
+--                                                                            --
+-- addr_length       - Depth of the memory blocks.                            --
+--                                                                            --
+--                                                                            --
+-- Input/Output:                                                              --
+-- input             - Input signal                                           --
+-- output            - Output signal                                          --
+-- configBus         - Bus connected to the control unit. Stores the delay    --
+--                   - value from the flash memory.                           --
+--																			  --
+-- CLK               - The clock for the memories, same as the echoCLK, 8*fs. --
+-- RESET             - Resets the reverb.                                     --
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
 library ieee ;
 	use ieee.std_logic_1164.all;
 	use ieee.numeric_std.all;
-	use work.memory_pkg.all;
+	use work.memory_pkg.all; -- Package needed to use the configurable register.
 
 
 entity EffectReverb is
 	generic(IO_length : integer := 16;
-			c_length : integer := 16;
-			addr_length : integer := 12); --Maximum delay is 0 to 4095 samples for all stages.
+			addr_length : integer := 12); -- Maximum delay is 2^12 (0 to 4095) samples.
 	port(input : in std_logic_vector(IO_length-1 downto 0);
-			output : out std_logic_vector(IO_length-1 downto 0);
-			configBus : configurableRegisterBus;
-			CLK : in std_logic;
-			RESET : in std_logic);
+		output : out std_logic_vector(IO_length-1 downto 0);
+		configBus : configurableRegisterBus;
+		CLK : in std_logic; 
+		RESET : in std_logic);
 end EffectReverb;
 
 architecture behav of EffectReverb is
 	
-	type signal_array is array(3 downto 0) of std_logic_vector(c_length-1 downto 0);
-	type gain_array is array(3 downto 0) of signed(IO_length+c_length-1 downto 0);
-	type gain_array2 is array(3 downto 0) of signed(IO_length+c_length+3 downto 0);
-	type pad_array is array(3 downto 0) of std_logic_vector(2+c_length-1 downto 0);
+	-------- ARITHMETIC AND STRUCTURAL SIGNALS ---------------
 	
-	constant coeff_pos : std_logic_vector(c_length-1 downto 0) := x"7F5B";
-	constant coeff_neg : std_logic_vector(c_length-1 downto 0) := x"80A5";
+	type signal_array is array(3 downto 0) of std_logic_vector(IO_length-1 downto 0);
+	type gain_array is array(3 downto 0) of signed(2*IO_length-1 downto 0);
+	type gain_array2 is array(3 downto 0) of signed(2*IO_length+3 downto 0);
+	type pad_array is array(3 downto 0) of std_logic_vector(2+IO_length-1 downto 0);
+	
+	constant coeff_pos : std_logic_vector(IO_length-1 downto 0) := x"7F5B";
+	constant coeff_neg : std_logic_vector(IO_length-1 downto 0) := x"80A5";
 
-	constant wet_coeff : std_logic_vector(c_length-1 downto 0) := x"2000";
-	constant dry_coeff : std_logic_vector(c_length-1 downto 0) := x"2ccd";
+	constant wet_coeff : std_logic_vector(IO_length-1 downto 0) := x"1888";
+	constant dry_coeff : std_logic_vector(IO_length-1 downto 0) := x"2ccd";
 	
 	signal addrMax1 : integer range 0 to 4095;
 	signal delay1par : std_logic_vector(11 downto 0);
@@ -41,7 +66,8 @@ architecture behav of EffectReverb is
 	signal scalar : gain_array;
 	signal matrix_outputs : signal_array;
 	
-	signal dry_gain : std_logic_vector(c_length-1 downto 0);
+	signal dry_gain : signed(2*IO_length+3 downto 0);
+	signal dry_gain_out : std_logic_vector(IO_length-1 downto 0);
 	
 	signal wet_padded_sig : pad_array;
 	signal wet_padded_coe : std_logic_vector(2+IO_length-1 downto 0);
@@ -52,15 +78,13 @@ architecture behav of EffectReverb is
 	signal wet_gain : gain_array2;
 	signal wet_sum : signal_array;
 	signal wet_gain2 : signal_array;
-	signal wet_2_out : std_logic_vector(2*IO_length-1 downto 0);
 	signal input_sum : signal_array;
-
+	
+	------------- MEMORY I/O:s -------------------------
+	
 	type mem_signals is record
-		--writeEnable : std_logic;
 		addr : std_logic_vector(addr_length-1 downto 0);
-		--writeAddr : std_logic_vector(11 downto 0);
 		dataIn : std_logic_vector(IO_length-1 downto 0);
-		--readAddr : std_logic_vector(11 downto 0);
 		dataOut : std_logic_vector(IO_length-1 downto 0);
 		feedback : unsigned(addr_length-1 downto 0);
 	end record;
@@ -71,6 +95,8 @@ architecture behav of EffectReverb is
 	signal delay3 : mem_signals;
 	signal delay4 : mem_signals;
 
+	----------------- IP CORES --------------------------
+	
 	COMPONENT blk_mem_gen_delay1
 	PORT (
 		clka : IN STD_LOGIC;
@@ -119,15 +145,12 @@ architecture behav of EffectReverb is
 	);
 	END COMPONENT;
 	
+	-------------- FSM SIGNALS -----------------------
+	
 	type state_type is (readStart, readWait, read, writeDone);
 
 	constant waitTime : natural := 4;
 	
-	--constant addrMax1 : natural := 313;
-	--constant addrMax2 : natural := 449;
-	--constant addrMax3 : natural := 677;
-	--constant addrMax4 : natural := 829;
-
 	type reg_type is record
 		state : state_type;
 		waitCounter : natural range 0 to waitTime;
@@ -144,6 +167,9 @@ architecture behav of EffectReverb is
 
 	signal r, rin : reg_type;
 	
+	-------------- FUNCTIONS ---------------
+	
+	-- Addition with saturation
 	function addsat (a,b : std_logic_vector) return std_logic_vector is
 		constant MAX : std_logic_vector(a'length-1 downto 0) := '0' & (a'length-2 downto 0 => '1');
 		constant MIN : std_logic_vector(a'length-1 downto 0) := '1' & (a'length-2 downto 0 => '0');
@@ -175,7 +201,9 @@ architecture behav of EffectReverb is
 	end addsat;
 	
 	begin
-		
+	
+	----------- CONFIGURABILITY REGISTERS ----------------------
+	
 	delay1Reg: entity work.ConfigRegister
 	generic map(
 		wordLength => 12,
@@ -228,7 +256,10 @@ architecture behav of EffectReverb is
 		addrMax2 <= to_integer(unsigned(delay2par));
 		addrMax3 <= to_integer(unsigned(delay3par));
 		addrMax4 <= to_integer(unsigned(delay4par));
+	
+		------------------ ARITHMETICS ----------------------
 		
+		--Padding before multiplications
 		wet_padded_sig(0) <= "00" & delay_outputs(0) when delay_outputs(0)(IO_length-1) = '0' else
 							"11" & delay_outputs(0);
 		wet_padded_sig(1) <= "00" & delay_outputs(1) when delay_outputs(1)(IO_length-1) = '0' else
@@ -263,12 +294,12 @@ architecture behav of EffectReverb is
 		scalar(3) <= gain_outputs(1)-gain_outputs(2);
 		
 		--Result of the vector multiplications
-		matrix_outputs(0) <= std_logic_vector(scalar(0)(IO_length+c_length-1 downto IO_length));
-		matrix_outputs(1) <= std_logic_vector(scalar(1)(IO_length+c_length-1 downto IO_length));
-		matrix_outputs(2) <= std_logic_vector(scalar(2)(IO_length+c_length-1 downto IO_length));
-		matrix_outputs(3) <= std_logic_vector(scalar(3)(IO_length+c_length-1 downto IO_length));
+		matrix_outputs(0) <= std_logic_vector(scalar(0)(IO_length+IO_length-1 downto IO_length));
+		matrix_outputs(1) <= std_logic_vector(scalar(1)(IO_length+IO_length-1 downto IO_length));
+		matrix_outputs(2) <= std_logic_vector(scalar(2)(IO_length+IO_length-1 downto IO_length));
+		matrix_outputs(3) <= std_logic_vector(scalar(3)(IO_length+IO_length-1 downto IO_length));
 		
-		--Output gains of the delay net
+		--Output gains of the delay net, wet gains.
 		wet_gain(0) <= signed(wet_padded_sig(0))*signed(wet_padded_coe);
 		wet_gain(1) <= signed(wet_padded_sig(1))*signed(wet_padded_coe);
 		wet_gain(2) <= signed(wet_padded_sig(2))*signed(wet_padded_coe);
@@ -279,19 +310,25 @@ architecture behav of EffectReverb is
 		wet_gain2(2) <= std_logic_vector(wet_gain(2)(2*IO_length-1 downto IO_length));
 		wet_gain2(3) <= std_logic_vector(wet_gain(3)(2*IO_length-1 downto IO_length));
 		
-		dry_gain <= input;
-					
-		wet_sum(0) <= addsat(wet_gain2(0),dry_gain);
+		-- Dry gain
+		dry_gain <= signed(dry_padded_sig)*signed(dry_padded_coe);
+		dry_gain_out <= std_logic_vector(dry_gain(2*IO_length-1 downto IO_length));
+		
+		-- Output accumulator
+		wet_sum(0) <= addsat(wet_gain2(0),dry_gain_out);
 		wet_sum(1) <= addsat(wet_gain2(1),wet_sum(0));
 		wet_sum(2) <= addsat(wet_gain2(2),wet_sum(1));
 		wet_sum(3) <= addsat(wet_gain2(3),wet_sum(2));
 		
 		output <= wet_sum(3);
 		
+		-- Feedback accumulators
 		input_sum(0) <= addsat(input,matrix_outputs(0));
 		input_sum(1) <= addsat(input,matrix_outputs(1));
 		input_sum(2) <= addsat(input,matrix_outputs(2));
 		input_sum(3) <= addsat(input,matrix_outputs(3));
+		
+		------------------- MEMORIES ---------------------
 		
 		memory_1:blk_mem_gen_delay1
 		port map (
@@ -346,6 +383,8 @@ architecture behav of EffectReverb is
 		delay2.addr <= std_logic_vector(r.address2);
 		delay3.addr <= std_logic_vector(r.address3);
 		delay4.addr <= std_logic_vector(r.address4);
+		
+	--------------- MEMORY READ AND WRITE -------------------------	
 		
 	clk_proc : process( clk, reset )
 	begin

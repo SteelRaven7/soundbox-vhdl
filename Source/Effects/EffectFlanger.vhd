@@ -36,13 +36,12 @@ architecture arch of EffectFlanger is
 
 	--constant delayDuration : natural := 2;
 	constant decayGain : std_logic_vector(wordLength-1 downto 0) := real_to_fixed(0.5, constantsWordLength);
-	constant directGain : std_logic_vector(wordLength-1 downto 0) := real_to_fixed(0.8, constantsWordLength);
-	constant echoGain : std_logic_vector(wordLength-1 downto 0) := real_to_fixed(0.7, constantsWordLength);
+	constant directGain : std_logic_vector(wordLength-1 downto 0) := real_to_fixed(0.9, constantsWordLength);
+	constant echoGain : std_logic_vector(wordLength-1 downto 0) := real_to_fixed(0.5, constantsWordLength);
 
 	-- 2 second max delay
 	constant addressWidth : natural := 11;
 	-- constant Depth : natural := 440;
-	signal addressOffset : natural := 0;
 
 	signal feedback : std_logic_vector(wordLength-1 downto 0);
 	signal directGained : std_logic_vector(wordLength-1 downto 0);
@@ -55,7 +54,8 @@ architecture arch of EffectFlanger is
 	signal writeEnable : std_logic_vector(0 downto 0);
 	signal memoryReadAddress : std_logic_vector(addressWidth-1 downto 0);
 	signal memoryWriteAddress : std_logic_vector(addressWidth-1 downto 0);
-
+	--constant sweepLength : natural := 1000;
+	--constant Depth: natural := 440;
 	signal Depth : natural range 0 to 4000;
 	signal sweepLength : natural range 0 to 4000;
 	signal depthVector : std_logic_vector(wordLength-1 downto 0);
@@ -73,6 +73,9 @@ architecture arch of EffectFlanger is
 		readAddress : unsigned(addressWidth-1 downto 0);
 		writeEnable : std_logic;
 		delayedOutput : std_logic_vector(wordLength-1 downto 0);
+		initialValue : natural range 0 to 3000;
+		counter : natural range 0 to 4000;
+		countUp : std_logic;
 	end record;
 
 	signal r, rin : reg_type;
@@ -194,40 +197,39 @@ confRegSweep:entity work.ConfigRegister
 		addrb => memoryReadAddress
 	);
 	
-triangle_proc:process(clk)
-variable intialValue: integer := 0;
-constant  minValue  : integer := 0;
--- constant sweepLength : natural := 1000;
-variable  temp  	: integer := 0;
-variable counter    : integer  := 0;
-	begin
-		if rising_edge(clk) then
-		if intialValue <= Depth and temp = 0 then
-		   	counter := counter + 1 ;
-		   		if counter = sweepLength then   			  -- to get a low frequency 
-		   		intialValue := intialValue + 1;
-		   		counter := 0;
-		    	end if;
-				
-				if intialValue = Depth then 
-				temp := 1;
-				end if;
-		elsif intialValue >= minValue and temp = 1 then
-			counter := counter + 1 ;
-				if counter = sweepLength then 			   	
-		   		intialValue := intialValue - 1;
-		   		counter := 0;
-		   		end if ;
-		   		if intialValue = minValue then
-		   		temp := 0;
-		   		end if;			
-		end if;
-	end if;
-addressOffset <= intialValue;
-	end process;
-
-
-
+--triangle_proc:process(clk)
+--variable intialValue: integer := 0;
+--constant  minValue  : integer := 0;
+----constant sweepLength : natural := 1000;
+----constant Depth: natural := 440;
+--variable  temp  	: integer := 0;
+--variable counter    : integer  := 0;
+--	begin
+--		if rising_edge(clk) then
+--		if intialValue <= Depth and temp = 0 then
+--		   	counter := counter + 1 ;
+--		   		if counter = sweepLength then   			  -- to get a low frequency 
+--		   		intialValue := intialValue + 1;
+--		   		counter := 0;
+--		    	end if;
+--				
+--				if intialValue = Depth then 
+--				temp := 1;
+--				end if;
+--		elsif intialValue >= minValue and temp = 1 then
+--			counter := counter + 1 ;
+--				if counter = sweepLength then 			   	
+--		   		intialValue := intialValue - 1;
+--		   		counter := 0;
+--		   		end if ;
+--		   		if intialValue = minValue then
+--		   		temp := 0;
+--		   		end if;			
+--		end if;
+--	end if;
+--addressOffset <= intialValue;
+--	end process;
+--
 	clk_proc : process( clk, reset )
 	begin
 		if(reset = '1') then
@@ -236,20 +238,50 @@ addressOffset <= intialValue;
 			r.readAddress <= (others => '0');
 			r.writeEnable <= '0';
 			r.delayedOutput <= (others => '0');
+			r.countUp <= '1';
+			r.initialValue <= 0;
+			r.counter <= 0;
 		elsif(rising_edge(clk)) then
 			r <= rin;
 		end if;
 	end process ; -- clk_proc
 	
-	comb_proc : process( r, rin, readBus, addressOffset )
+	comb_proc : process( r, rin, readBus, sweepLength, Depth )
 		variable v : reg_type;
 		variable readAddressInteger : integer;
 	begin
 		v := r;
 
+		-- Triangle wave delay generation
+		if(r.counter >= sweepLength) then
+			if(r.countUp = '1') then
+				-- Increment the initial value
+				if(r.initialValue >= Depth) then
+					v.countUp := '0';
+					v.initialValue := r.initialValue-1;
+				else
+					v.initialValue := r.initialValue+1;
+				end if;
+			else
+				-- Decrement the initial value
+				if(r.initialValue = 0) then
+					v.countUp := '1';
+					v.initialValue := r.initialValue+1;
+				else
+					v.initialValue := r.initialValue-1;
+				end if;
+			end if;
+
+			v.counter := 0;
+		else
+			v.counter := r.counter+1;
+		end if;
+
+
+		-- Read/Write pointer offsets
 		v.writeEnable := '0';
 
-		readAddressInteger := to_integer(v.writeAddress)-addressOffset;
+		readAddressInteger := to_integer(v.writeAddress)-r.initialValue;
 
 		if(readAddressInteger > 0) then
 			v.readAddress := to_unsigned(readAddressInteger, addressWidth);
@@ -257,6 +289,7 @@ addressOffset <= intialValue;
 			v.readAddress := to_unsigned(Depth+readAddressInteger, addressWidth);
 		end if;
 
+		-- Memory state machine
 		case r.state is
 			when readStart =>
 

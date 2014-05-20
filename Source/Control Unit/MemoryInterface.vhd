@@ -53,7 +53,8 @@ architecture arch of MemoryInterface is
 
 	-- Offset the address to prevent overwriting FPGA configuration data.
 	-- Using 2 byte words yields an effective address space from 0x00000 to 0xFFFFF.
-	constant addressMask : std_logic_vector(flashAddressWidth-1 downto 0) := x"01000000";
+	--constant addressMask : std_logic_vector(flashAddressWidth-1 downto 0) := x"04000000";
+	constant addressMask : std_logic_vector(flashAddressWidth-1 downto 0) := x"0FFFFFE0";
 
 	constant maxInputWidth : natural := 8+dataWidth+flashAddressWidth;
 	constant maxOutputWidth : natural := dataWidth;

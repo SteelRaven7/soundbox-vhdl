@@ -38,7 +38,7 @@ begin
 	clk_1: entity work.ClockDivider
 	generic map(
 		-- divider => 128 -- 44100*2^11/(44100*2^4)=2^7
-		divider => 64
+		divider => 142
 	)
 	port map(
 		reset => reset,

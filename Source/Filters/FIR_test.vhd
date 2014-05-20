@@ -55,7 +55,7 @@ architecture behav of FIR_test is
         if RESET = '1' then
             delay <= (others => (others => '0'));
         elsif rising_edge(CLK) then
-          for i in 1 to order loop
+          for i in 1 to order-1 loop
             delay(order-i) <= delay(order-i-1);
           end loop;
 			delay(0) <= input;

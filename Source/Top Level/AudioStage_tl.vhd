@@ -351,16 +351,24 @@ bufferbeforeDA <= effectOutputReverb when bypassReverb = '0' else               
 		reset =>reset
 
  			);
+ 	decimator: entity work.StructuralDecimator
+ 		 		port map(
+ 			input =>decimatorInputbb,
+ 			output=>decimatorOutput,
+ 			clk =>clk,
+ 			reset=>reset
+
+ 			);
 
 	
-	decimator: entity work.Decimator_test
-	port map (
-		clk => sampleInputClk,
-		clkS => throughputClk,
-		reset=> reset,
-		input=> decimatorInputbb,
-		output=>decimatorOutput
-	);
+	--decimator: entity work.Decimator_test
+	--port map (
+	--	clk => sampleInputClk,
+	--	clkS => throughputClk,
+	--	reset=> reset,
+	--	input=> decimatorInputbb,
+	--	output=>decimatorOutput
+	--);
 
 
 	
@@ -459,8 +467,9 @@ buf_Dec2Echo: entity work.VectorRegister
 	Reverb: entity work.EffectReverb
 	generic map(
 		IO_length => 16,
-		c_length => 16,
-		addr_length  => 12)
+		--c_length => 16,
+		addr_length  => 12
+		)
 	port map(
 		input => effectInputReverbb,
 		output => effectOutputReverb,
@@ -487,8 +496,8 @@ buf_beforeDist: entity work.VectorRegister
  			);	
 
 	Distortion: entity work.EffectDistortion
-	generic map( DATA_WIDTH => 16,
-                 ADDR_WIDTH => 16
+	generic map( DATA_WIDTH => 16
+               --  ADDR_WIDTH => 16
                )
 	port map(
 		ADDR =>effectInputDistortionb,
@@ -499,8 +508,9 @@ buf_beforeDist: entity work.VectorRegister
 
 
 Distortion2: entity work.hard_dist
-	generic map(wordlength => 16,
-			coeff_address => 11)
+	generic map(wordlength => 16
+			--coeff_address => 11
+			)
 	port map(
 		input =>effectInputDistortionb,
 		output=>effectOutputDistortionHard,
